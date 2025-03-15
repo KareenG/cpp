@@ -1,8 +1,8 @@
 CXX = g++
 CC = $(CXX)
 
-INCLUDES_DIR = ../../../inc
-SOURCES_DIR = ../../../src
+INCLUDES_DIR = ../../inc
+SOURCES_DIR = ../../src
 
 CXXFLAGS = -pedantic -Wall -Werror -Wextra -g3 -std=c++17
 CPPFLAGS = -DDEBUG -I$(INCLUDES_DIR)
