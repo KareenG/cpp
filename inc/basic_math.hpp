@@ -52,7 +52,22 @@ long long fib(int n);
  */
 long long factorial(int n);
 
-
+/**
+ * Sorts an array of Ball objects by color according to a predefined priority (w - r - b).
+ * 
+ * The function assumes that the color values are mapped to integers from 0 to 2, 
+ * representing a specific order. Currently, the colors are expected to be mapped as:
+ * - 0: White
+ * - 1: Red
+ * - 2: Black
+ * 
+ * @param balls_arr Array of Ball objects to be sorted.
+ * @param size The number of elements in the balls_arr array.
+ * @return A sort_result enumeration value indicating the success or failure of the sorting operation.
+ *         - SORT_SUCCESS if the sorting was completed successfully.
+ *         - SORT_NULL_ARRAY if the input array is null.
+ *         - SORT_INVALID_SIZE if the size of the array is non-positive.
+ */
 sort_result sort_balls_by_color(Ball balls_arr[], int size);
 
 #endif // BASIC_MATH_H
