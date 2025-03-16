@@ -79,7 +79,7 @@ END_TEST
 
 /************* fibonacci tests *************/
 BEGIN_TEST(fib_negative_number)
-    ASSERT_EQUAL(basic::fib(-10), basic::overflow_error);
+    ASSERT_EQUAL(basic::fib(-10), -1);
 END_TEST
 
 BEGIN_TEST(fib_zero)
@@ -101,12 +101,12 @@ END_TEST
 
 // Testing beyond the safe limit to check overflow handling
 BEGIN_TEST(fib_overflow)
-    ASSERT_EQUAL(basic::fib(93), (basic::overflow_error));  // Assuming 93 is beyond the calculated safe limit for fib in long long
+    ASSERT_EQUAL(basic::fib(93), -1);  // Assuming 93 is beyond the calculated safe limit for fib in long long
 END_TEST
 
 /************* factorial tests *************/
 BEGIN_TEST(factorial_negative_number)
-    ASSERT_EQUAL(basic::factorial(-1), basic::overflow_error);
+    ASSERT_EQUAL(basic::factorial(-1), -1);
 END_TEST
 
 BEGIN_TEST(factorial_zero)
@@ -128,7 +128,7 @@ END_TEST
 
 // Testing for overflow detection
 BEGIN_TEST(factorial_overflow_number)
-    ASSERT_EQUAL(basic::factorial(21), basic::overflow_error);  // Assuming 21! exceeds the range of long long
+    ASSERT_EQUAL(basic::factorial(21), -1);  // Assuming 21! exceeds the range of long long
 END_TEST
 
 /************* sort_balls_by_color tests *************/

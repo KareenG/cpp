@@ -2,7 +2,6 @@
 #include <cstdlib>
 #include <climits>  // For LLONG_MAX
 
-
 static void check_is_prime(int n, bool* is_prime_arr);
 static int get_primes(int n, bool* is_prime_arr, int* primes);
 static bool find_three_primes_sums_to_n(int n, bool* is_prime_arr, int* primes, int prime_count, basic::Goldbach& g);
@@ -14,7 +13,9 @@ static long long wrapper_factorial_rec(unsigned int n, long long result); //resu
 static void swap_balls(basic::Ball& a, basic::Ball& b);
 static bool balls_sort(basic::Ball arr[], unsigned int size);
 
-bool basic::goldbach(unsigned int n, basic::Goldbach& g)//int& p1, int& p2, int& p3)
+namespace basic {
+
+bool goldbach(unsigned int n, Goldbach& g)//int& p1, int& p2, int& p3)
 {
     if(n <= 5 || n % 2 == 0) {
         return false;
@@ -36,7 +37,7 @@ bool basic::goldbach(unsigned int n, basic::Goldbach& g)//int& p1, int& p2, int&
     return find_three_primes_sums_to_n(n, is_prime_arr, primes, num_primes, g);
 }
 
-long long basic::fib(unsigned int n) {
+long long fib(unsigned int n) {
     if(n == 0) {
         return 0;
     }
@@ -55,7 +56,7 @@ long long basic::fib(unsigned int n) {
 }
 
 
-long long basic::factorial(unsigned int n) {
+long long factorial(unsigned int n) {
     if(n == 0)
     {
         return 1;
@@ -63,10 +64,12 @@ long long basic::factorial(unsigned int n) {
     return wrapper_factorial_rec(n, 1);
 }
 
-bool basic::sort_balls_by_color(basic::Ball balls_arr[], unsigned int size)
+bool sort_balls_by_color(Ball balls_arr[], unsigned int size)
 {
     return balls_sort(balls_arr, size);
 }
+
+}   // namespace basic
 
 /*-------------------------------HELPER FUNCTIONS-------------------------------*/
 
