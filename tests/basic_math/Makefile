@@ -1,32 +1,38 @@
-CXX = g++
+CXX= g++
 CC = $(CXX)
+
+CXXFLAGS  = -pedantic -Wall -Werror -Wextra
+CXXFLAGS += -g3
+CXXFLAGS += -std=c++17
+
+# CPPFLAGS = -DDEBUG
+CPPFLAGS = -I$(INCLUDES_DIR)
+
+# LDFLAGS =
+# LDLIBS = -lm    # link math library
 
 INCLUDES_DIR = ../../inc
 SOURCES_DIR = ../../src
 
-CXXFLAGS = -pedantic -Wall -Werror -Wextra -g3 -std=c++17
-CPPFLAGS = -DDEBUG -I$(INCLUDES_DIR)
+OBJS = $(SOURCES_DIR)/basic/math.o
 
-OBJS = utest.o basic_math.o
-TARGET = utest.out
+TARGET = utest
+
+
+$(TARGET) : $(OBJS)
 
 all: $(TARGET)
 
-$(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET)
-
-check: $(TARGET)
+check : $(TARGET)
 	@./$(TARGET) -v
 
+recheck: clean check
+
 clean:
-	@$(RM) ./$(TARGET) $(OBJS)
+	@$(RM) utest.o ./$(TARGET) $(OBJS)
 
-# Compile test file
-utest.o: utest.cpp $(INCLUDES_DIR)/mu_test.h $(INCLUDES_DIR)/basic_math.hpp
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c utest.cpp -o utest.o
+.PHONY : make clean check
 
-# Compile basic_math
-basic_math.o: $(SOURCES_DIR)/basic_math.cpp $(INCLUDES_DIR)/basic_math.hpp
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $(SOURCES_DIR)/basic_math.cpp -o basic_math.o
-
-.PHONY: all clean check
+make:
+	@echo 'Attend a maker faire next year! now back to coding...'
+	@${TRUE}

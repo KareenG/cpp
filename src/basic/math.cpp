@@ -1,20 +1,20 @@
-#include "basic_math.hpp" //../inc/
+#include "basic/math.hpp" //../inc/
 #include <cstdlib>
 #include <climits>  // For LLONG_MAX
 
 
 static void check_is_prime(int n, bool* is_prime_arr);
 static int get_primes(int n, bool* is_prime_arr, int* primes);
-static bool find_three_primes_sums_to_n(int n, bool* is_prime_arr, int* primes, int prime_count, Goldbach& g);
+static bool find_three_primes_sums_to_n(int n, bool* is_prime_arr, int* primes, int prime_count, basic::Goldbach& g);
 
 static unsigned long long wrapper_fib_rec(unsigned int n, long long lookup_table[]);
 
 static long long wrapper_factorial_rec(unsigned int n, long long result); //result = 1
 
-static void swap_balls(Ball& a, Ball& b);
-static bool balls_sort(Ball arr[], unsigned int size);
+static void swap_balls(basic::Ball& a, basic::Ball& b);
+static bool balls_sort(basic::Ball arr[], unsigned int size);
 
-bool goldbach(unsigned int n, Goldbach& g)//int& p1, int& p2, int& p3)
+bool basic::goldbach(unsigned int n, basic::Goldbach& g)//int& p1, int& p2, int& p3)
 {
     if(n <= 5 || n % 2 == 0) {
         return false;
@@ -36,7 +36,7 @@ bool goldbach(unsigned int n, Goldbach& g)//int& p1, int& p2, int& p3)
     return find_three_primes_sums_to_n(n, is_prime_arr, primes, num_primes, g);
 }
 
-unsigned long long fib(unsigned int n) {
+unsigned long long basic::fib(unsigned int n) {
     if(n == 0) {
         return 0;
     }
@@ -55,7 +55,7 @@ unsigned long long fib(unsigned int n) {
 }
 
 
-long long factorial(unsigned int n) {
+long long basic::factorial(unsigned int n) {
     if(n == 0)
     {
         return 1;
@@ -63,7 +63,7 @@ long long factorial(unsigned int n) {
     return wrapper_factorial_rec(n, 1);
 }
 
-bool sort_balls_by_color(Ball balls_arr[], unsigned int size)
+bool basic::sort_balls_by_color(basic::Ball balls_arr[], unsigned int size)
 {
     return balls_sort(balls_arr, size);
 }
@@ -98,7 +98,7 @@ static int get_primes(int n, bool* is_prime_arr, int* primes)
     return count;
 }
 
-static bool find_three_primes_sums_to_n(int n, bool* is_prime_arr, int* primes, int prime_count, Goldbach& g) 
+static bool find_three_primes_sums_to_n(int n, bool* is_prime_arr, int* primes, int prime_count, basic::Goldbach& g) 
 {
     for (int i = 0; i < prime_count; ++i) {
         for (int j = i; j < prime_count; ++j) {
@@ -132,11 +132,11 @@ static unsigned long long wrapper_fib_rec(unsigned int n, long long lookup_table
     }
     long long prev = (lookup_table[n - 1]) ? lookup_table[n - 1] : wrapper_fib_rec(n - 1, lookup_table);
     long long prev2 = (lookup_table[n - 2]) ? lookup_table[n - 2] : wrapper_fib_rec(n - 2, lookup_table);
-    if (prev == overflow_error || prev2 == overflow_error) {
-        return overflow_error;
+    if (prev == basic::overflow_error || prev2 == basic::overflow_error) {
+        return basic::overflow_error;
     }
     if (LLONG_MAX - prev2 < prev) {
-        return overflow_error;
+        return basic::overflow_error;
     }
     long long fib_result = prev + prev2;
     lookup_table[n] = prev + prev2;
@@ -151,19 +151,19 @@ static long long wrapper_factorial_rec(unsigned int n, long long result) { //__a
         return result;
     }
     if (LLONG_MAX / n < result) {
-        return overflow_error;
+        return basic::overflow_error;
     }
     return wrapper_factorial_rec(n - 1, n * result);
 }
 
-static void swap_balls(Ball& a, Ball& b) 
+static void swap_balls(basic::Ball& a, basic::Ball& b) 
 {
-    Ball temp = a;
+    basic::Ball temp = a;
     a = b;
     b = temp;
 }
 
-static bool balls_sort(Ball arr[], unsigned int size)
+static bool balls_sort(basic::Ball arr[], unsigned int size)
 {
     if (arr == nullptr) {
         return false;
@@ -172,15 +172,15 @@ static bool balls_sort(Ball arr[], unsigned int size)
 
     while (mid <= high) {
         switch (arr[mid].color) {
-            case White:
+            case basic::Color::White:
                 swap_balls(arr[low], arr[mid]);
                 ++low;
                 ++mid;
                 break;
-            case Red:
+            case basic::Color::Red:
                 ++mid;
                 break;
-            case Black:
+            case basic::Color::Black:
                 swap_balls(arr[mid], arr[high]);
                 --high;
                 break;
