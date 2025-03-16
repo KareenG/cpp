@@ -36,7 +36,7 @@ bool basic::goldbach(unsigned int n, basic::Goldbach& g)//int& p1, int& p2, int&
     return find_three_primes_sums_to_n(n, is_prime_arr, primes, num_primes, g);
 }
 
-unsigned long long basic::fib(unsigned int n) {
+long long basic::fib(unsigned int n) {
     if(n == 0) {
         return 0;
     }

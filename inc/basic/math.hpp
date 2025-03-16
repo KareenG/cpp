@@ -30,9 +30,9 @@ bool goldbach(unsigned int n, Goldbach& g);//int& p1, int& p2, int& p3);
  * Computes the Fibonacci number at a given index using memoization to improve performance.
  *
  * @param n The index in the Fibonacci sequence.
- * @return The Fibonacci number at index 'n'.
+ * @return The Fibonacci number at index 'n'. overflow_error(-1) in case of overflow.
  */
-unsigned long long fib(unsigned int n);
+long long fib(unsigned int n);
 
 /**
  * Calculates the factorial of a non-negative integer using tail recursion.
