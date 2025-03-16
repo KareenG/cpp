@@ -79,7 +79,7 @@ END_TEST
 
 /************* fibonacci tests *************/
 BEGIN_TEST(fib_negative_number)
-    ASSERT_EQUAL(basic::fib(-10), static_cast<long long unsigned int>(-1));
+    ASSERT_EQUAL(basic::fib(-10), basic::overflow_error);
 END_TEST
 
 BEGIN_TEST(fib_zero)
@@ -101,7 +101,7 @@ END_TEST
 
 // Testing beyond the safe limit to check overflow handling
 BEGIN_TEST(fib_overflow)
-    ASSERT_EQUAL(basic::fib(93), static_cast<long long unsigned int>(basic::overflow_error));  // Assuming 93 is beyond the calculated safe limit for fib in long long
+    ASSERT_EQUAL(basic::fib(93), (basic::overflow_error));  // Assuming 93 is beyond the calculated safe limit for fib in long long
 END_TEST
 
 /************* factorial tests *************/
