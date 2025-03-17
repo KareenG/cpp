@@ -101,7 +101,8 @@ END_TEST
 
 // Testing beyond the safe limit to check overflow handling
 BEGIN_TEST(fib_overflow)
-    ASSERT_EQUAL(basic::fib(93), -1);  // Assuming 93 is beyond the calculated safe limit for fib in long long
+    // Assuming 93 is beyond the calculated safe limit for fib in long long
+    ASSERT_EQUAL(basic::fib(93), -1);
 END_TEST
 
 /************* factorial tests *************/
@@ -123,17 +124,19 @@ END_TEST
 
 // Testing the largest factorial number possible without overflow in long long
 BEGIN_TEST(factorial_largest_possible_number)
-    ASSERT_EQUAL(basic::factorial(20), 2432902008176640000);  // Factorial of 20
+    ASSERT_EQUAL(basic::factorial(20), 2432902008176640000);
 END_TEST
 
 // Testing for overflow detection
 BEGIN_TEST(factorial_overflow_number)
-    ASSERT_EQUAL(basic::factorial(21), -1);  // Assuming 21! exceeds the range of long long
+    // Assuming 21! exceeds the range of long long
+    ASSERT_EQUAL(basic::factorial(21), -1);
 END_TEST
 
 /************* sort_balls_by_color tests *************/
 BEGIN_TEST(sort_balls_empty_array)
-    std::vector<basic::Ball> balls;  // Creates an empty vector of Ball
+    // Creates an empty vector of Ball
+    std::vector<basic::Ball> balls;
     ASSERT_THAT(sort_balls_by_color(balls.data(), balls.size()) == false);
 END_TEST
 

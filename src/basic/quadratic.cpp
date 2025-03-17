@@ -7,7 +7,7 @@ namespace basic {
 
     Quadratic::Quadratic()
     : a{0}
-    , b{}  // also to zero
+    , b{}
     , c{}
     {        
     }
@@ -19,7 +19,6 @@ namespace basic {
     {        
     }  
     
-    // cctor
     Quadratic::Quadratic(Quadratic const& other)
     : a{other.a}
     , b{other.b}
@@ -27,36 +26,9 @@ namespace basic {
     {
     }
 
-    Quadratic& Quadratic::operator=(Quadratic const& other) {
-        if (this != &other) {
-            a = other.a;
-            b = other.b;
-            c = other.c;
-        }
-        return *this;
-    }
-
-    Quadratic& Quadratic::operator+=(Quadratic const& other) {
-        a += other.a;
-        b += other.b;
-        c += other.c;
-        return *this;
-    }
-
-    Quadratic& Quadratic::operator-=(Quadratic const& other) {
-        a -= other.a;
-        b -= other.b;
-        c -= other.c;
-        return *this;
-    }
-    
-    Quadratic Quadratic::operator*(double scalar) const {
-        return Quadratic(a * scalar, b * scalar, c * scalar);
-    }
-
-    int find_roots(Quadratic const& q, Roots& roots) {
-        double discriminant = q.b * q.b - 4 * q.a * q.c;
-        if(q.a == 0)
+    int Quadratic::find_roots(Roots& roots) const {
+        double discriminant = b * b - 4 * a * c;
+        if(a == 0)
         {
             roots.first = -1;
             roots.second = -1;
@@ -70,38 +42,86 @@ namespace basic {
         }
         else if(discriminant == 0.0)
         {
-            roots.first = -q.b / (2 * q.a);
+            roots.first = -b / (2 * a);
             roots.second = -1;
             return 1;
         }
-        roots.first = (-q.b + sqrt(discriminant)) / (2 * q.a);
-        roots.second = (-q.b - sqrt(discriminant)) / (2 * q.a);
+        roots.first = (-b + sqrt(discriminant)) / (2 * a);
+        roots.second = (-b - sqrt(discriminant)) / (2 * a);
         return 2;
     }
 
-    double value(Quadratic const& q, double x) {
-        return q.a * (x * x) + q.b * x + q.c;
+    double Quadratic::value(double x) const { 
+        return a * (x * x) + b * x + c;
     }
 
-    void print (Quadratic const& q) {
-        std::cout << std::fixed << std::setprecision(2); // Set the decimal precision
-        std::cout << q.a << " X^2 ";
-        if (q.b < 0)
-            std::cout << "- " << std::fabs(q.b) << " X ";
+    void Quadratic::print() const {
+        // Set the decimal precision
+        std::cout << std::fixed << std::setprecision(2);
+        std::cout << a << " X^2 ";
+        if (b < 0)
+            std::cout << "- " << std::fabs(b) << " X ";
         else
-            std::cout << "+ " << std::fabs(q.b) << " X ";
+            std::cout << "+ " << std::fabs(b) << " X ";
         
-        if (q.c < 0)
-            std::cout << "- " << std::fabs(q.c);
+        if (c < 0)
+            std::cout << "- " << std::fabs(c);
         else
-            std::cout << "+ " << std::fabs(q.c);
+            std::cout << "+ " << std::fabs(c);
         
         std::cout << std::endl;
     }
 
-    Quadratic multiply_by_scalar(const Quadratic& q, double scalar) {
-        return q * scalar;
+    Quadratic Quadratic::add(Quadratic const& other) {
+        a += other.a;
+        b += other.b;
+        c += other.c;
+        return *this;
+    }
+
+    Quadratic Quadratic::subtract(Quadratic const& other) {
+        a -= other.a;
+        b -= other.b;
+        c -= other.c;
+        return *this;
+    }
+
+    Quadratic Quadratic::multiply_by_scalar(double scalar) {
+        a *= scalar;
+        b *= scalar;
+        c *= scalar;
+        return *this;
     }
     
 } // namespace basic
 
+
+
+
+
+// Quadratic& Quadratic::operator=(Quadratic const& other) {
+    //     if (this != &other) {
+    //         a = other.a;
+    //         b = other.b;
+    //         c = other.c;
+    //     }
+    //     return *this;
+    // }
+
+    // Quadratic& Quadratic::operator+=(Quadratic const& other) {
+    //     a += other.a;
+    //     b += other.b;
+    //     c += other.c;
+    //     return *this;
+    // }
+
+    // Quadratic& Quadratic::operator-=(Quadratic const& other) {
+    //     a -= other.a;
+    //     b -= other.b;
+    //     c -= other.c;
+    //     return *this;
+    // }
+    
+    // Quadratic Quadratic::operator*(double scalar) const {
+    //     return Quadratic(a * scalar, b * scalar, c * scalar);
+    // }
