@@ -15,59 +15,71 @@ static bool balls_sort(basic::Ball arr[], unsigned int size);
 
 namespace basic {
 
-bool goldbach(unsigned int n, Goldbach& g)//int& p1, int& p2, int& p3)
-{
-    if(n <= 5 || n % 2 == 0) {
-        return false;
-    }
-    bool* is_prime_arr = (bool*)malloc((n + 1) * sizeof(bool));
-    int* primes = (int*)malloc((n + 1) * sizeof(int));
-    if(is_prime_arr == NULL)
+    bool goldbach(unsigned int n, Goldbach& g)//int& p1, int& p2, int& p3)
     {
-        return false;
+        if(n <= 5 || n % 2 == 0) {
+            return false;
+        }
+        bool* is_prime_arr = (bool*)malloc((n + 1) * sizeof(bool));
+        int* primes = (int*)malloc((n + 1) * sizeof(int));
+        if(is_prime_arr == NULL)
+        {
+            return false;
+        }
+        if(primes == NULL)
+        {
+            free(is_prime_arr);
+            return false;
+        }
+        check_is_prime(n, is_prime_arr);
+        int num_primes = get_primes(n, is_prime_arr, primes);
+
+        return find_three_primes_sums_to_n(n, is_prime_arr, primes, num_primes, g);
     }
-    if(primes == NULL)
+
+    long long fib(unsigned int n) {
+        if(n == 0) {
+            return 0;
+        }
+        if(n == 1 || n == 2) {
+            return 1;
+        }
+        unsigned int const lookup_table_size = 1024;
+        if(n >= lookup_table_size) {
+            return -1;
+        }
+        static long long lookup_table[lookup_table_size] = {0, 1, 1};
+        if(n < lookup_table_size && lookup_table[n]) {
+            return lookup_table[n];
+        }
+        return wrapper_fib_rec(n, lookup_table);
+    }
+
+
+    long long factorial(unsigned int n) {
+        if(n == 0)
+        {
+            return 1;
+        }
+        return wrapper_factorial_rec(n, 1);
+    }
+
+    bool sort_balls_by_color(Ball balls_arr[], unsigned int size)
     {
-        free(is_prime_arr);
-        return false;
+        return balls_sort(balls_arr, size);
     }
-    check_is_prime(n, is_prime_arr);
-    int num_primes = get_primes(n, is_prime_arr, primes);
 
-    return find_three_primes_sums_to_n(n, is_prime_arr, primes, num_primes, g);
-}
-
-long long fib(unsigned int n) {
-    if(n == 0) {
-        return 0;
-    }
-    if(n == 1 || n == 2) {
-        return 1;
-    }
-    unsigned int const lookup_table_size = 1024;
-    if(n >= lookup_table_size) {
-        return -1;
-    }
-    static long long lookup_table[lookup_table_size] = {0, 1, 1};
-    if(n < lookup_table_size && lookup_table[n]) {
-        return lookup_table[n];
-    }
-    return wrapper_fib_rec(n, lookup_table);
-}
-
-
-long long factorial(unsigned int n) {
-    if(n == 0)
+    int gcd(int a, int b) // move to math     Rational::
     {
-        return 1;
+        a = std::abs(a);
+        b = std::abs(b);
+        while (b != 0) {
+            int temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
     }
-    return wrapper_factorial_rec(n, 1);
-}
-
-bool sort_balls_by_color(Ball balls_arr[], unsigned int size)
-{
-    return balls_sort(balls_arr, size);
-}
 
 }   // namespace basic
 

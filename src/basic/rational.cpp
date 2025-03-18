@@ -1,4 +1,5 @@
 #include "basic/rational.hpp"
+#include "basic/math.hpp"
 #include <cassert>
 #include <stdlib.h>
 
@@ -9,21 +10,6 @@ namespace basic {
     {  
         assert(denominator);
         build_fraction(numerator_, denominator_);
-    }
-
-    Rational::Rational(Rational const& other)
-    : numerator_{other.numerator_}
-    , denominator_{other.denominator_}
-    {
-    }
-
-    Rational& Rational::operator=(Rational const& other) 
-    {
-        if (this != &other) {
-            numerator_ = other.numerator_;
-            denominator_ = other.denominator_;
-        }
-        return *this;
     }
 
     Rational& Rational::operator+=(Rational const& other) 
@@ -49,14 +35,17 @@ namespace basic {
 
     Rational& Rational::operator/=(Rational const& other) 
     {
-        if(numerator_ * other.numerator_ >= 0) {
-            numerator_ = std::abs(numerator_ * other.denominator_);
-        }
-        else {
-            numerator_ = -std::abs(numerator_ * other.denominator_);
-        }
+        assert(other.numerator_);
+        int sign = (numerator_ * other.numerator_ < 0) ? -1 : 1;
+        numerator_ = std::abs(numerator_ * other.denominator_);
         denominator_ *= std::abs(other.numerator_);
+        *this *= sign;
         return *this;
+    }
+
+    void Rational::operator*=(int scalar)
+    {
+        numerator_ *= scalar;
     }
 
     void Rational::reduce()
@@ -86,9 +75,9 @@ namespace basic {
 
     Rational operator-(Rational const& lhs, Rational const& rhs)
     {
-        Rational r = lhs;
-        r -= rhs;
-        return r;
+        Rational r = rhs;
+        r *= -1;
+        return lhs + r;
     }
 
     Rational operator*(Rational const& lhs, Rational const& rhs)
@@ -119,24 +108,20 @@ namespace basic {
         }
     }
 
-    int Rational::gcd(int a, int b) 
+    std::ostream& Rational::print(std::ostream& os) const
     {
-        a = std::abs(a);
-        b = std::abs(b);
-        while (b != 0) {
-            int temp = b;
-            b = a % b;
-            a = temp;
-        }
-        return a;
+        os << numerator_ << '/' << denominator_ << '\n';
+        return os;
     }
 
-    int Rational::operator[](unsigned int index) const 
+    bool Rational::is_equal_or_smaller(Rational const& other) const
     {
-        if(index == 0) {
-            return numerator_;
-        }
-        return denominator_;
+        return numerator_ * other.denominator_ <= denominator_ * other.numerator_;
+    }
+
+    bool Rational::is_equal_or_bigger(Rational const& other) const
+    {
+        return numerator_ * other.denominator_ >= denominator_ * other.numerator_;
     }
 
     Rational::operator double() const 
@@ -146,44 +131,37 @@ namespace basic {
 
     bool operator==(Rational const& lhs, Rational const& rhs)
     {
-        Rational sub = lhs - rhs;
-        return !(sub[0]);
+        return ((lhs <= rhs) && (lhs >= rhs));
     }
 
     bool operator!=(Rational const& lhs, Rational const& rhs)
     {
-        Rational sub = lhs - rhs;
-        return (sub[0]);
+        return !(lhs == rhs);
     }
 
     bool operator<(Rational const& lhs, Rational const& rhs)
     {
-        Rational sub = lhs - rhs;
-        return (sub[0] < 0);
+        return !(lhs >= rhs);
     }
 
     bool operator<=(Rational const& lhs, Rational const& rhs)
     {
-        Rational sub = lhs - rhs;
-        return (sub[0] <= 0);
+        return lhs.is_equal_or_smaller(rhs);
     }
     
     bool operator>(Rational const& lhs, Rational const& rhs)
     {
-        Rational sub = lhs - rhs;
-        return !(sub[0] <= 0);
+        return !(lhs <= rhs);
     }
 
     bool operator>=(Rational const& lhs, Rational const& rhs)
     {
-        Rational sub = lhs - rhs;
-        return !(sub[0] < 0);
+        return lhs.is_equal_or_bigger(rhs);
     }
 
     std::ostream& operator<<(std::ostream& os, const Rational& r)
     {
-        os << r[0] << '/' << r[1] << '\n';
-        return os;
+        return r.print(os);
     }
 
 }   // namespace basic

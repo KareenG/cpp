@@ -14,7 +14,7 @@ CPPFLAGS = -I$(INCLUDES_DIR)
 INCLUDES_DIR = ../../inc
 SOURCES_DIR = ../../src
 
-OBJS = $(SOURCES_DIR)/basic/rational.o
+OBJS = $(SOURCES_DIR)/basic/rational.o $(SOURCES_DIR)/basic/math.o
 
 TARGET = utest
 

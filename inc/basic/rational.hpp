@@ -4,14 +4,14 @@
 
 namespace basic {
     /**
-    * Represents a rational number defined by a numerator and a denominator.
+    * Represents a rational number (fraction).
     */
     class Rational {
         public:
             /**
-            * Default constructor. Initializes the rational number to 0/1 if no parameters are provided.
-            * @param numerator The numerator of the rational number, defaulting to 0.
-            * @param denominator The denominator of the rational number, defaulting to 1.
+            * Default constructor. Initializes the rational number to 0 if no parameters are provided.
+            * @param numerator The numerator of the rational number.
+            * @param denominator The denominator of the rational number.
             *                      It cannot be zero, and the constructor will assert if zero is provided.
             */
             Rational(int numerator = 0, int denominator = 1);
@@ -20,14 +20,14 @@ namespace basic {
             * Copy constructor. Creates a new Rational object as a copy of an existing one.
             * @param other A reference to the Rational object to copy.
             */
-            Rational(Rational const& other);
+            Rational(Rational const& other) = default;
 
             /**
             * Copy assignment operator. Assigns the value of one Rational object to another.
             * @param other A reference to the Rational object to assign from.
             * @return A reference to the updated current object.
             */
-            Rational& operator=(Rational const& other);
+            Rational& operator=(Rational const& other) = default;
 
             /**
             * Default destructor. Destroys the Rational object.
@@ -63,13 +63,6 @@ namespace basic {
             Rational& operator/=(Rational const& other);
 
             /**
-            * Accesses the numerator or denominator of this Rational object based on the provided index.
-            * @param index The index of the element to access: 0 for numerator, and 1 for denominator.
-            * @return The numerator if index is 0, or the denominator if index > 0. 
-            */
-            int operator[](unsigned int index) const;
-
-            /**
             * Reduces the rational number to its simplest form.
             */
             void reduce();
@@ -87,10 +80,42 @@ namespace basic {
             double value() const;
 
             /**
+            * Outputs a textual representation of the Rational object to the provided output stream.
+            * This function formats the rational number as `numerator/denominator`.
+            *
+            * @param os The output stream to which the textual representation is written.
+            * @return Returns the output stream for chaining output operations.
+            */
+            std::ostream& print(std::ostream& os) const;
+
+            /**
             * Explicit conversion operator to double. Converts the rational number to a double.
             * @return The double representation of the rational number.
             */
             explicit operator double() const;
+
+            /**
+            * Multiplies this Rational object by a scalar integer. This operation modifies the Rational object in-place,
+            *
+            * @param scalar The integer value to multiply by.
+            */
+            void operator*=(int scalar);
+
+            /**
+            * Checks if this Rational object is less than or equal to another Rational object.
+            *
+            * @param other The Rational object to compare against.
+            * @return Returns true if this object is less than or equal to the other object, false otherwise.
+            */
+            bool is_equal_or_smaller(Rational const& other) const;
+
+            /**
+            * Checks if this Rational object is greater than or equal to another Rational object.
+            *
+            * @param other The Rational object to compare against.
+            * @return Returns true if this object is greater than or equal to the other object, false otherwise.
+            */
+            bool is_equal_or_bigger(Rational const& other) const;
 
         private:
             /**
@@ -100,14 +125,6 @@ namespace basic {
             * @param denominator A reference to the denominator to adjust.
             */
             void build_fraction(int& numerator, int& denominator);
-
-            /**
-            * Helper function to calculate the greatest common divisor of two integers.
-            * @param a The first integer.
-            * @param b The second integer.
-            * @return The greatest common divisor of a and b.
-            */
-            int gcd(int a, int b);
 
         private:
             int numerator_;     // The numerator of the rational number.

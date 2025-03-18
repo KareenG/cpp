@@ -5,60 +5,55 @@
 
 BEGIN_TEST(test_rational_default_constructor)
     basic::Rational r{};
-    ASSERT_EQUAL(r[0], 0);
-    ASSERT_EQUAL(r[1], 1);
+    ASSERT_EQUAL(r.value(), 0);
 END_TEST
 
 BEGIN_TEST(test_rational_parameterized_constructor)
     basic::Rational r(4, 3);
-    ASSERT_EQUAL(r[0], 4);
-    ASSERT_EQUAL(r[1], 3);
+    ASSERT_EQUAL(r.value(), 4.0/3);
 END_TEST
 
 BEGIN_TEST(test_rational_inverse)
     basic::Rational r(4, 3);
+    ASSERT_EQUAL(r.value(), 4.0/3);
     basic::Rational inv = r.inverse();
-    ASSERT_EQUAL(inv[0], 3);
-    ASSERT_EQUAL(inv[1], 4);
+    ASSERT_EQUAL(inv.value(), 3.0/4);
 END_TEST
 
 BEGIN_TEST(test_rational_addition)
     basic::Rational r1(3, 7);
     basic::Rational r2(1, 2);
     basic::Rational result = r1 + r2;
-    ASSERT_EQUAL(result[0], 13);
-    ASSERT_EQUAL(result[1], 14);
+    ASSERT_EQUAL(result.value(), 13.0/14);
 END_TEST
 
 BEGIN_TEST(test_rational_subtraction)
     basic::Rational r1(3, 7);
     basic::Rational r2(1, 2);
     basic::Rational result = r1 - r2;
-    ASSERT_EQUAL(result[0], -1);
-    ASSERT_EQUAL(result[1], 14);
+    ASSERT_EQUAL(result.value(), -1.0/14);
 END_TEST
 
 BEGIN_TEST(test_rational_multiplication)
     basic::Rational r1(1, 2);
     basic::Rational r2(2, 3);
     basic::Rational result = r1 * r2;
-    ASSERT_EQUAL(result[0], 2);
-    ASSERT_EQUAL(result[1], 6);
+    ASSERT_EQUAL(result.value(), 2.0/6);
 END_TEST
 
 BEGIN_TEST(test_rational_division)
     basic::Rational r1(1, 2);
-    basic::Rational r2(2, -3);
+    basic::Rational r2(2, -6);
     basic::Rational result = r1 / r2;
-    ASSERT_EQUAL(result[0], -3);
-    ASSERT_EQUAL(result[1], 4);
+    ASSERT_EQUAL(r1.value(), 0.5);
+    ASSERT_EQUAL(r2.value(), -2.0/6);
+    ASSERT_EQUAL(result.value(), -3.0/2);
 END_TEST
 
 BEGIN_TEST(test_rational_reduce)
     basic::Rational r(100, 200);
     r.reduce();
-    ASSERT_EQUAL(r[0], 1);
-    ASSERT_EQUAL(r[1], 2);
+    ASSERT_EQUAL(r.value(), 1.0/2);
 END_TEST
 
 BEGIN_TEST(test_rational_value)
@@ -95,7 +90,16 @@ END_TEST
 BEGIN_TEST(test_rational_comparison_operators)
     basic::Rational g(3, 7);
     basic::Rational f(1, 2);
+    ASSERT_THAT(!(g == f));
     ASSERT_THAT((g <= f));
+    ASSERT_THAT(!(g >= f));
+    basic::Rational z(1, 2);
+    ASSERT_THAT((z == f));
+    ASSERT_THAT((z >= f));
+    ASSERT_THAT(!(z > f));
+    ASSERT_THAT((z <= f));
+    ASSERT_THAT(!(z < f));
+    
 END_TEST
 
 
