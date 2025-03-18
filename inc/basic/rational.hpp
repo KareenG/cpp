@@ -63,16 +63,11 @@ namespace basic {
             Rational& operator/=(Rational const& other);
 
             /**
-            * Accessor for the numerator of the rational number.
-            * @return The numerator of the rational number.
+            * Accesses the numerator or denominator of this Rational object based on the provided index.
+            * @param index The index of the element to access: 0 for numerator, and 1 for denominator.
+            * @return The numerator if index is 0, or the denominator if index > 0. 
             */
-            int numerator() const;
-
-            /**
-            * Accessor for the denominator of the rational number.
-            * @return The denominator of the rational number.
-            */
-            int denominator() const;
+            int operator[](unsigned int index) const;
 
             /**
             * Reduces the rational number to its simplest form.
@@ -92,11 +87,11 @@ namespace basic {
             double value() const;
 
             /**
-            * Explicit conversion operator to float. Converts the rational number to a float.
-            * @return The float representation of the rational number.
+            * Explicit conversion operator to double. Converts the rational number to a double.
+            * @return The double representation of the rational number.
             */
-            explicit operator float() const;
-            
+            explicit operator double() const;
+
         private:
             /**
             * Helper function for handling sign. the '-' if present will be the sign of the numerator,

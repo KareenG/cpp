@@ -26,16 +26,6 @@ namespace basic {
         return *this;
     }
 
-    int Rational::numerator() const
-    {
-        return numerator_;
-    }
-
-    int Rational::denominator() const
-    {
-        return denominator_;
-    }
-
     Rational& Rational::operator+=(Rational const& other) 
     {
         numerator_ = numerator_ * other.denominator_ + denominator_ * other.numerator_;
@@ -59,8 +49,13 @@ namespace basic {
 
     Rational& Rational::operator/=(Rational const& other) 
     {
-        numerator_ = numerator_ * other.denominator_;
-        denominator_ = denominator_ * other.numerator_;
+        if(numerator_ * other.numerator_ >= 0) {
+            numerator_ = std::abs(numerator_ * other.denominator_);
+        }
+        else {
+            numerator_ = -std::abs(numerator_ * other.denominator_);
+        }
+        denominator_ *= std::abs(other.numerator_);
         return *this;
     }
 
@@ -84,30 +79,30 @@ namespace basic {
 
     Rational operator+(Rational const& lhs, Rational const& rhs)
     {
-        int new_numerator = lhs.numerator() * rhs.denominator() + lhs.denominator() * rhs.numerator();
-        int new_denominator = lhs.denominator() * rhs.denominator();
-        return Rational(new_numerator, new_denominator);
+        Rational r = lhs;
+        r += rhs;
+        return r;
     }
 
     Rational operator-(Rational const& lhs, Rational const& rhs)
     {
-        int new_numerator = lhs.numerator() * rhs.denominator() - lhs.denominator() * rhs.numerator();
-        int new_denominator = lhs.denominator() * rhs.denominator();
-        return Rational(new_numerator, new_denominator);
+        Rational r = lhs;
+        r -= rhs;
+        return r;
     }
 
     Rational operator*(Rational const& lhs, Rational const& rhs)
     {
-        int new_numerator = lhs.numerator() * rhs.numerator();
-        int new_denominator = lhs.denominator() * rhs.denominator();
-        return Rational(new_numerator, new_denominator);
+        Rational r = lhs;
+        r *= rhs;
+        return r;
     }
 
     Rational operator/(Rational const& lhs, Rational const& rhs)
     {
-        int new_numerator = lhs.numerator() * rhs.denominator();
-        int new_denominator = lhs.denominator() * rhs.numerator();
-        return Rational(new_numerator, new_denominator);
+        Rational r = lhs;
+        r /= rhs;
+        return r;
     }
 
     void Rational::build_fraction(int& numerator, int& denominator) 
@@ -136,56 +131,58 @@ namespace basic {
         return a;
     }
 
-    Rational::operator float() const 
+    int Rational::operator[](unsigned int index) const 
     {
-        return static_cast<float>(numerator_) / denominator_;
+        if(index == 0) {
+            return numerator_;
+        }
+        return denominator_;
+    }
+
+    Rational::operator double() const 
+    {
+        return static_cast<double>(numerator_) / denominator_;
     }
 
     bool operator==(Rational const& lhs, Rational const& rhs)
     {
-        int first = lhs.numerator() * rhs.denominator();
-        int second = lhs.denominator() * rhs.numerator();
-        return (first == second);
+        Rational sub = lhs - rhs;
+        return !(sub[0]);
     }
 
     bool operator!=(Rational const& lhs, Rational const& rhs)
     {
-        int first = lhs.numerator() * rhs.denominator();
-        int second = lhs.denominator() * rhs.numerator();
-        return !(first == second);
+        Rational sub = lhs - rhs;
+        return (sub[0]);
     }
 
     bool operator<(Rational const& lhs, Rational const& rhs)
     {
-        int first = lhs.numerator() * rhs.denominator();
-        int second = lhs.denominator() * rhs.numerator();
-        return (first < second);
+        Rational sub = lhs - rhs;
+        return (sub[0] < 0);
     }
 
     bool operator<=(Rational const& lhs, Rational const& rhs)
     {
-        int first = lhs.numerator() * rhs.denominator();
-        int second = lhs.denominator() * rhs.numerator();
-        return !(first < second);
+        Rational sub = lhs - rhs;
+        return (sub[0] <= 0);
     }
     
     bool operator>(Rational const& lhs, Rational const& rhs)
     {
-        int first = lhs.numerator() * rhs.denominator();
-        int second = lhs.denominator() * rhs.numerator();
-        return (first > second);
+        Rational sub = lhs - rhs;
+        return !(sub[0] <= 0);
     }
 
     bool operator>=(Rational const& lhs, Rational const& rhs)
     {
-        int first = lhs.numerator() * rhs.denominator();
-        int second = lhs.denominator() * rhs.numerator();
-        return !(first > second);
+        Rational sub = lhs - rhs;
+        return !(sub[0] < 0);
     }
 
     std::ostream& operator<<(std::ostream& os, const Rational& r)
     {
-        os << r.numerator() << '/' << r.denominator() << '\n';
+        os << r[0] << '/' << r[1] << '\n';
         return os;
     }
 
