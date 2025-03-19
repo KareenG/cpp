@@ -206,7 +206,10 @@ Polynomial derive(Polynomial const& p)
 
 double integrate(Polynomial const& p, double start, double end) 
 {
-    assert(end >= start);
+    //assert(end >= start);
+    if (end < start) {
+        return -integrate(p, end, start);
+    }
     unsigned int degree = static_cast<unsigned int>(p.degree());
     double result_end{};
     double result_start{};
