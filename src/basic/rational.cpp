@@ -48,6 +48,26 @@ namespace basic {
         numerator_ *= scalar;
     }
 
+    Rational Rational::operator^(int exp) const 
+    {
+        if (exp == 0) {
+            return Rational(1, 1); 
+        }
+        Rational result(1, 1);
+        Rational base = *this;
+        for (int i = 0; i < exp; ++i) {
+            result *= base;
+        }
+        return result;
+    }
+
+    Rational Rational::operator-() const
+    {
+        Rational r{-1};
+        r *= -1;
+        return r;
+    }
+
     void Rational::reduce()
     {
         int divider = gcd(numerator_, denominator_);
@@ -64,6 +84,11 @@ namespace basic {
     {
         double val = static_cast<double>(numerator_)/denominator_;
         return val;
+    }
+
+    bool Rational::operator<(Rational const& other) const
+    {
+        return (numerator_ * other.denominator_ < other.numerator_ * denominator_);
     }
 
     Rational operator+(Rational const& lhs, Rational const& rhs)
@@ -110,18 +135,8 @@ namespace basic {
 
     std::ostream& Rational::print(std::ostream& os) const
     {
-        os << numerator_ << '/' << denominator_ << '\n';
+        os << numerator_ << '/' << denominator_;// << '\n'
         return os;
-    }
-
-    bool Rational::is_equal_or_smaller(Rational const& other) const
-    {
-        return numerator_ * other.denominator_ <= denominator_ * other.numerator_;
-    }
-
-    bool Rational::is_equal_or_bigger(Rational const& other) const
-    {
-        return numerator_ * other.denominator_ >= denominator_ * other.numerator_;
     }
 
     Rational::operator double() const 
@@ -131,7 +146,7 @@ namespace basic {
 
     bool operator==(Rational const& lhs, Rational const& rhs)
     {
-        return ((lhs <= rhs) && (lhs >= rhs));
+        return (!(lhs < rhs) && !(rhs < lhs ));
     }
 
     bool operator!=(Rational const& lhs, Rational const& rhs)
@@ -139,14 +154,9 @@ namespace basic {
         return !(lhs == rhs);
     }
 
-    bool operator<(Rational const& lhs, Rational const& rhs)
-    {
-        return !(lhs >= rhs);
-    }
-
     bool operator<=(Rational const& lhs, Rational const& rhs)
     {
-        return lhs.is_equal_or_smaller(rhs);
+        return (lhs < rhs) || (lhs == rhs);
     }
     
     bool operator>(Rational const& lhs, Rational const& rhs)
@@ -156,12 +166,12 @@ namespace basic {
 
     bool operator>=(Rational const& lhs, Rational const& rhs)
     {
-        return lhs.is_equal_or_bigger(rhs);
+        return !(lhs < rhs);
     }
 
     std::ostream& operator<<(std::ostream& os, const Rational& r)
     {
-        return r.print(os);
+        return r.print(os) << '\n';
     }
 
 }   // namespace basic

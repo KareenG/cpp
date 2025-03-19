@@ -102,20 +102,15 @@ namespace basic {
             void operator*=(int scalar);
 
             /**
-            * Checks if this Rational object is less than or equal to another Rational object.
-            *
-            * @param other The Rational object to compare against.
-            * @return Returns true if this object is less than or equal to the other object, false otherwise.
+            * Compares this Rational object by another.
+            * @param other The Rational object to campare this one by.
+            * @return True if this Rational is less than the 'other' Rational object.
             */
-            bool is_equal_or_smaller(Rational const& other) const;
+            bool operator<(Rational const& other) const;
 
-            /**
-            * Checks if this Rational object is greater than or equal to another Rational object.
-            *
-            * @param other The Rational object to compare against.
-            * @return Returns true if this object is greater than or equal to the other object, false otherwise.
-            */
-            bool is_equal_or_bigger(Rational const& other) const;
+            Rational operator^(int exp) const;
+
+            Rational operator-() const;
 
         private:
             /**
@@ -178,14 +173,6 @@ namespace basic {
     * @return True if the two Rational objects are not equivalent, false otherwise.
     */
     bool operator!=(Rational const& lhs, Rational const& rhs);
-
-    /**
-    * Determines if the left-hand side Rational object is less than the right-hand side object.
-    * @param lhs The left-hand side operand of the comparison.
-    * @param rhs The right-hand side operand of the comparison.
-    * @return True if lhs is less than rhs, false otherwise.
-    */
-    bool operator<(Rational const& lhs, Rational const& rhs);
 
     /**
     * Determines if the left-hand side Rational object is less than or equal to the right-hand side object.

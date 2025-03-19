@@ -84,6 +84,7 @@ BEGIN_TEST(test_rational_output_stream)
     basic::Rational r(3, 7);
     std::ostringstream os;
     os << r;
+    std::cout << os.str();
     ASSERT_EQUAL(os.str(), "3/7\n");
 END_TEST
 
