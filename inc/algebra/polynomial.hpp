@@ -43,21 +43,6 @@ public:
     Polynomial(basic::Rational* start, basic::Rational* end);
 
     /**
-     * @brief Swaps the contents of this polynomial with another polynomial.
-     *
-     * @param p A reference to another Polynomial object with which to swap this object's state.
-     */
-    void swap(Polynomial& p);    
-    
-    /**
-     * @brief Outputs the polynomial to a stream.
-     *
-     * @param os A reference to an std::ostream object where the polynomial will be output.
-     * @return Returns a reference to the std::ostream object to allow for chaining of output operations.
-     */
-    std::ostream& print(std::ostream& os) const;
-
-    /**
      * @brief Accesses a coefficient of the polynomial by index.
      *
      * @param index The zero-based index of the coefficient in the polynomial.
@@ -79,7 +64,7 @@ public:
      * @param r A constant reference to a Rational representing the rational number at which to evaluate the polynomial.
      * @return Returns a Rational representing the evaluated result of the polynomial at the given point.
      */
-    basic::Rational operator()(basic::Rational const& r);
+    basic::Rational operator()(basic::Rational r);
 
     /**
      * @brief Multiplies this polynomial by a scalar integer.
@@ -95,7 +80,7 @@ public:
      * @param other A constant reference to a Rational number used as the scalar by which to multiply all coefficients of the polynomial.
      * @return A reference to this polynomial after scaling.
      */
-    Polynomial& operator*=(basic::Rational const& other);
+    Polynomial& operator*=(basic::Rational other);
 
     /** @brief Adds another polynomial to this polynomial and updates the current instance.
      *
@@ -121,15 +106,6 @@ public:
      *         each coefficient has been negated.
      */
     Polynomial operator-() const;
-
-    /**
-     * @brief Multiplies this polynomial by another polynomial.
-     *
-     * @param other A constant reference to another Polynomial to be multiplied with this polynomial.
-     * @return A new Polynomial instance that is the result of the multiplication of this polynomial with
-     *         the 'other' polynomial.
-     */
-    Polynomial operator*(Polynomial const& other) const;
     
     /**
      * @brief Returns the degree of the polynomial.
@@ -139,6 +115,24 @@ public:
      */
     int degree() const;
 
+    /**
+     * @brief Swaps the contents of this polynomial with another polynomial.
+     *
+     * @param p A reference to another Polynomial object with which to swap this object's state.
+     */
+    void swap(Polynomial& p);    
+    
+    /**
+     * @brief Outputs the polynomial to a stream.
+     *
+     * @param os A reference to an std::ostream object where the polynomial will be output.
+     * @return Returns a reference to the std::ostream object to allow for chaining of output operations.
+     */
+    std::ostream& print(std::ostream& os) const;
+
+private:
+    void allocate_and_copy(Polynomial& polynom, basic::Rational* start, basic::Rational* end);
+
 private:
     int degree_;
     basic::Rational* coefficients_;
@@ -147,38 +141,47 @@ private:
 /**
  * @brief Multiplies a polynomial by a scalar integer.
  *
- * @param p A constant reference to a Polynomial to be multiplied.
+ * @param polynom A constant reference to a Polynomial to be multiplied.
  * @param scalar An integer by which the polynomial is to be multiplied.
  * @return A new Polynomial instance that is the result of multiplying each coefficient of the polynomial 'p'
  *         by the integer 'scalar'.
  */
-Polynomial operator*(Polynomial const& p, int scalar);
+Polynomial operator*(Polynomial const& polynom, int scalar);
 
 /**
  * @brief Adds two polynomials together.
  *
- * @param lhp A constant reference to the left-hand Polynomial to be added.
- * @param rhp A constant reference to the right-hand Polynomial to be added.
+ * @param lhs A constant reference to the left-hand_side Polynomial to be added.
+ * @param rhs A constant reference to the right-hand_side Polynomial to be added.
  * @return A new Polynomial instance that is the result of the addition of polynomial 'lhp' and 'rhp'.
  */
-Polynomial operator+(Polynomial const& lhp, Polynomial const& rhp);
+Polynomial operator+(Polynomial const& lhs, Polynomial const& rhs);
 
 /**
  * @brief Subtracts one polynomial from another.
  *
- * @param lhp A constant reference to the left-hand Polynomial from which the right-hand Polynomial will be subtracted.
- * @param rhp A constant reference to the right-hand Polynomial to be subtracted from the left-hand Polynomial.
+ * @param lhs A constant reference to the left-hand_side Polynomial from which the right-hand Polynomial will be subtracted.
+ * @param rhs A constant reference to the right-hand_side Polynomial to be subtracted from the left-hand Polynomial.
  * @return A new Polynomial instance that is the result of the subtraction of polynomial 'rhp' from 'lhp'.
  */
-Polynomial operator-(Polynomial const& lhp, Polynomial const& rhp);
+Polynomial operator-(Polynomial const& lhs, Polynomial const& rhs);
+
+ /**
+ * @brief Multiplies one polynomial by another.
+ *
+ * @param lhs A constant reference to the left-hand_side Polynomial.
+ * @param rhs A constant reference to the right-hand_side Polynomial.
+ * @return A new Polynomial instance that is the result of the multiplication of polynomial 'rhp' with 'lhp'
+ */
+Polynomial operator*(Polynomial const& lhs, Polynomial const& rhs); // TODO: make global
 
 /**
  * @brief Calculates the derivative of a given polynomial.
  *
- * @param p A constant reference to the Polynomial whose derivative is to be calculated.
+ * @param polynom A constant reference to the Polynomial whose derivative is to be calculated.
  * @return Polynomial A new Polynomial instance representing the derivative of 'p'.
  */
-Polynomial derive(Polynomial const& p);
+Polynomial derive(Polynomial const& polynom);
 
 /**
  * @brief Computes the definite integral of a polynomial between two bounds.
@@ -188,14 +191,14 @@ Polynomial derive(Polynomial const& p);
  * the integral is computed as if the bounds were swapped and then multiplied by -1. If 'start' is equal to 'end',
  * the result is zero, reflecting the mathematical principle that the integral over a zero-width interval is zero.
  *
- * @param p A constant reference to the Polynomial to be integrated.
+ * @param polynom A constant reference to the Polynomial to be integrated.
  * @param start The lower bound of the integration interval as a double.
  * @param end The upper bound of the integration interval as a double.
  * @return double The result of the integration, representing the area under the curve from 'start' to 'end'.
  *                Returns zero if 'start' equals 'end', or the integral with reversed bounds multiplied by -1
  *                if 'start' is greater than 'end'.
  */
-double integrate(Polynomial const& p, double start, double end);
+double integrate(Polynomial const& polynom, double start, double end);
 
 /**
  * @brief Inserts a textual representation of a polynomial into an output stream.
@@ -204,9 +207,9 @@ double integrate(Polynomial const& p, double start, double end);
  * and powers of x (e.g., 3x^2 + 2x + 1).
  *
  * @param os A reference to the std::ostream object where the polynomial will be inserted.
- * @param p A constant reference to the Polynomial object to be inserted into the stream.
+ * @param polynom A constant reference to the Polynomial object to be inserted into the stream.
  * @return A reference to the modified std::ostream object, allowing for chaining of insertion operations.
  */
-std::ostream& operator<<(std::ostream& os, const Polynomial& p);
+std::ostream& operator<<(std::ostream& os, const Polynomial& polynom);
 
 }   // namespace algebra

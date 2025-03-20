@@ -2,7 +2,6 @@
 #include "algebra/polynomial.hpp"
 #include "basic/rational.hpp"
 
-// Test initialization with a specific degree
 BEGIN_TEST(test_polynomial_specific_degree)
     int degree = 5;
     algebra::Polynomial p{degree};
@@ -17,14 +16,12 @@ BEGIN_TEST(test_polynomial_specific_degree)
     ASSERT_THAT(allCoefficientsZero);
 END_TEST
 
-// Test initialization with zero degree
 BEGIN_TEST(test_polynomial_zero_degree)
     algebra::Polynomial p{};
     ASSERT_EQUAL(p.degree(), 0);
     ASSERT_EQUAL(p[0].value(), 0.0);
 END_TEST
 
-// Test initialization with negative degree
 BEGIN_TEST(test_polynomial_negative_degree)
     //algebra::Polynomial p{-1};
     ASSERT_THAT(1);
@@ -52,7 +49,23 @@ BEGIN_TEST(test_polynomial_from_single_element_range)
     ASSERT_EQUAL(p[0].value(), 1.0/2);
 END_TEST
 
-// Test that the original and the copy are independent
+BEGIN_TEST(test_copy_constructor_basic)
+    algebra::Polynomial original(2);
+    original[0] = basic::Rational(1, 2);
+    original[1] = basic::Rational(3, 4);
+    original[2] = basic::Rational(5, 6);
+
+    algebra::Polynomial copy = original;
+
+    ASSERT_EQUAL(copy.degree(), 2);
+    ASSERT_EQUAL(copy[0].value(), 0.5);
+    ASSERT_EQUAL(copy[1].value(), 0.75);
+    ASSERT_EQUAL(copy[2].value(), 5.0 / 6);
+    for (int i = 0; i <= original.degree(); ++i) {
+        ASSERT_EQUAL(copy[i].value(), original[i].value());
+    }
+END_TEST
+
 BEGIN_TEST(test_copy_independence)
     algebra::Polynomial original(1);
     original[0] = basic::Rational(1, 3);
@@ -65,7 +78,6 @@ BEGIN_TEST(test_copy_independence)
     ASSERT_EQUAL(original[0].value(), 1.0 / 3);
 END_TEST
 
-// Test copying an empty polynomial
 BEGIN_TEST(test_copy_empty_polynomial)
     algebra::Polynomial original(0);
     algebra::Polynomial copy = original;
@@ -74,7 +86,6 @@ BEGIN_TEST(test_copy_empty_polynomial)
     ASSERT_EQUAL(copy[0].value(), 0.0);
 END_TEST
 
-// Test copying a polynomial with a single coefficient
 BEGIN_TEST(test_copy_single_coefficient)
     algebra::Polynomial original(0);
     original[0] = basic::Rational(1, 4);
@@ -130,10 +141,21 @@ BEGIN_TEST(test_polynomial_operator_index_valid_access)
     p[1] = basic::Rational(1, 2);
     p[2] = basic::Rational(3, 4);
     p[3] = basic::Rational(1, 1);
-    double expected[]{0.25, 0.5, 0.75, 1.0};
-    for(int i = 0; i < 4; ++i) {
-        ASSERT_EQUAL(p[i].value(), expected[i]);
-    }
+
+    ASSERT_EQUAL(p[0].value(), 0.25);
+    ASSERT_EQUAL(p[1].value(), 0.5);
+    ASSERT_EQUAL(p[2].value(), 0.75);
+    ASSERT_EQUAL(p[3].value(), 1.0);
+END_TEST
+
+BEGIN_TEST(test_polynomial_operator_index_boundary_conditions)
+    algebra::Polynomial p(1);
+    p[0] = basic::Rational(2, 3);
+    p[1] = basic::Rational(3, 5);
+
+    ASSERT_EQUAL(p[0].value(), 2.0 / 3);
+    ASSERT_EQUAL(p[1].value(), 0.6);
+
     p[1] = {4, 5};
     ASSERT_EQUAL(p[1].value(), 0.8);
 END_TEST
@@ -143,11 +165,26 @@ BEGIN_TEST(test_polynomial_operator_index_out_of_bounds)
     ASSERT_THAT(1);
 END_TEST
 
+BEGIN_TEST(test_polynomial_evaluation_zero)
+    algebra::Polynomial p(0);
+    p[0] = basic::Rational(0, 1);
+    basic::Rational r(1, 2);
+    ASSERT_EQUAL(p(r).value(), 0.0);
+END_TEST
+
 BEGIN_TEST(test_polynomial_evaluation_constant)
     algebra::Polynomial p(1);
     p[0] = basic::Rational(5, 1);
     basic::Rational r(1, 2);
     ASSERT_EQUAL(p(r).value(), 5.0);
+END_TEST
+
+BEGIN_TEST(test_polynomial_evaluation_linear)
+    algebra::Polynomial p(1);
+    p[0] = basic::Rational(1, 1);
+    p[1] = basic::Rational(2, 1);
+    basic::Rational r(1, 1);
+    ASSERT_EQUAL(p(r).value(), 3.0);
 END_TEST
 
 BEGIN_TEST(test_polynomial_evaluation_quadratic)
@@ -164,11 +201,24 @@ BEGIN_TEST(test_degree_zero_polynomial)
     ASSERT_EQUAL(p.degree(), 0);
 END_TEST
 
+BEGIN_TEST(test_degree_constant_polynomial)
+    algebra::Polynomial p(3);
+    p[0] = basic::Rational(1, 3);
+    ASSERT_EQUAL(p.degree(), 0);
+END_TEST
+
 BEGIN_TEST(test_degree_higher_polynomial)
     algebra::Polynomial p(3);
     p[0] = basic::Rational(1, 3);
     p[3] = basic::Rational(2, 3);
     ASSERT_EQUAL(p.degree(), 3);
+END_TEST
+
+BEGIN_TEST(test_degree_polynomial_with_zero_tail)
+    algebra::Polynomial p(5);
+    p[0] = basic::Rational(1, 3);
+    p[1] = basic::Rational(2, 3);
+    ASSERT_EQUAL(p.degree(), 1);
 END_TEST
 
 BEGIN_TEST(test_polynomial_multiply_by_zero)
@@ -178,11 +228,23 @@ BEGIN_TEST(test_polynomial_multiply_by_zero)
     p[2] = basic::Rational(5, 6);
     p[3] = basic::Rational(7, 8);
 
-    p *= 0; // Multiply by zero
+    p *= 0;
     ASSERT_EQUAL(p[0].value(), 0.0);
     ASSERT_EQUAL(p[1].value(), 0.0);
     ASSERT_EQUAL(p[2].value(), 0.0);
     ASSERT_EQUAL(p[3].value(), 0.0);
+END_TEST
+
+BEGIN_TEST(test_polynomial_multiply_by_one)
+    algebra::Polynomial p(2);
+    p[0] = basic::Rational(1, 3);
+    p[1] = basic::Rational(2, 3);
+    p[2] = basic::Rational(3, 4);
+
+    p *= 1;
+    ASSERT_EQUAL(p[0].value(), 1.0 / 3);
+    ASSERT_EQUAL(p[1].value(), 2.0 / 3);
+    ASSERT_EQUAL(p[2].value(), 0.75);
 END_TEST
 
 BEGIN_TEST(test_polynomial_multiply_by_positive_integer)
@@ -195,6 +257,60 @@ BEGIN_TEST(test_polynomial_multiply_by_positive_integer)
     ASSERT_EQUAL(p[1].value(), 1.5);
 END_TEST
 
+BEGIN_TEST(test_polynomial_multiply_by_negative_integer)
+    algebra::Polynomial p(1);
+    p[0] = basic::Rational(1, 4);
+    p[1] = basic::Rational(3, 4);
+
+    p *= -1;
+    ASSERT_EQUAL(p[0].value(), -0.25);
+    ASSERT_EQUAL(p[1].value(), -0.75);
+END_TEST
+
+BEGIN_TEST(test_polynomial_multiply_empty_polynomial)
+    algebra::Polynomial p(0);
+    p[0] = basic::Rational(0, 1);
+
+    p *= 10;
+    ASSERT_EQUAL(p[0].value(), 0.0);
+END_TEST
+
+BEGIN_TEST(test_polynomial_multiply_by_rational_zero)
+    algebra::Polynomial p(3);
+    p[0] = basic::Rational(1, 2);
+    p[1] = basic::Rational(3, 4);
+    p[2] = basic::Rational(5, 6);
+    p[3] = basic::Rational(7, 8);
+
+    p *= basic::Rational(0, 1);
+    ASSERT_EQUAL(p[0].value(), 0.0);
+    ASSERT_EQUAL(p[1].value(), 0.0);
+    ASSERT_EQUAL(p[2].value(), 0.0);
+    ASSERT_EQUAL(p[3].value(), 0.0);
+END_TEST
+
+BEGIN_TEST(test_polynomial_multiply_by_rational_one)
+    algebra::Polynomial p(2);
+    p[0] = basic::Rational(1, 3);
+    p[1] = basic::Rational(2, 3);
+    p[2] = basic::Rational(3, 4);
+
+    p *= basic::Rational(1, 1);
+    ASSERT_EQUAL(p[0].value(), 1.0 / 3);
+    ASSERT_EQUAL(p[1].value(), 2.0 / 3);
+    ASSERT_EQUAL(p[2].value(), 0.75);
+END_TEST
+
+BEGIN_TEST(test_polynomial_multiply_by_positive_rational)
+    algebra::Polynomial p(1);
+    p[0] = basic::Rational(1, 4);
+    p[1] = basic::Rational(3, 4);
+
+    p *= basic::Rational(2, 1);
+    ASSERT_EQUAL(p[0].value(), 0.5);
+    ASSERT_EQUAL(p[1].value(), 1.5);
+END_TEST
+
 BEGIN_TEST(test_polynomial_multiply_by_negative_rational)
     algebra::Polynomial p(1);
     p[0] = basic::Rational(1, 4);
@@ -203,6 +319,34 @@ BEGIN_TEST(test_polynomial_multiply_by_negative_rational)
     p *= basic::Rational(-1, 1);
     ASSERT_EQUAL(p[0].value(), -0.25);
     ASSERT_EQUAL(p[1].value(), -0.75);
+END_TEST
+
+BEGIN_TEST(test_polynomial_addition_zero)
+    algebra::Polynomial p1(2);
+    p1[0] = basic::Rational(1, 2);
+    p1[1] = basic::Rational(3, 4);
+    p1[2] = basic::Rational(5, 6);
+
+    algebra::Polynomial p2(2);
+
+    p1 += p2;
+    ASSERT_EQUAL(p1[0].value(), 0.5);
+    ASSERT_EQUAL(p1[1].value(), 0.75);
+    ASSERT_EQUAL(p1[2].value(), 5.0 / 6);
+END_TEST
+
+BEGIN_TEST(test_polynomial_addition_same_degree)
+    algebra::Polynomial p1(1);
+    p1[0] = basic::Rational(1, 4);
+    p1[1] = basic::Rational(3, 4);
+
+    algebra::Polynomial p2(1);
+    p2[0] = basic::Rational(1, 2);
+    p2[1] = basic::Rational(1, 4);
+
+    p1 += p2;
+    ASSERT_EQUAL(p1[0].value(), 0.75);
+    ASSERT_EQUAL(p1[1].value(), 1.0);
 END_TEST
 
 BEGIN_TEST(test_polynomial_addition_higher_degree)
@@ -237,6 +381,30 @@ BEGIN_TEST(test_polynomial_addition_lower_degree)
     ASSERT_EQUAL(p1[2].value(), 1.0 / 6);
 END_TEST
 
+BEGIN_TEST(test_polynomial_subtraction_self)
+    algebra::Polynomial p(2);
+    p[0] = basic::Rational(1, 3);
+    p[1] = basic::Rational(1, 2);
+    p[2] = basic::Rational(2, 3);
+
+    p -= p;
+    ASSERT_EQUAL(p[0].value(), 0.0);
+    ASSERT_EQUAL(p[1].value(), 0.0);
+    ASSERT_EQUAL(p[2].value(), 0.0);
+END_TEST
+
+BEGIN_TEST(test_polynomial_subtraction_zero)
+    algebra::Polynomial p(1);
+    p[0] = basic::Rational(1, 4);
+    p[1] = basic::Rational(1, 2);
+
+    algebra::Polynomial zero(1);
+
+    p -= zero;
+    ASSERT_EQUAL(p[0].value(), 0.25);
+    ASSERT_EQUAL(p[1].value(), 0.5);
+END_TEST
+
 BEGIN_TEST(test_polynomial_subtraction_higher_degree)
     algebra::Polynomial p1(1);
     p1[0] = basic::Rational(2, 3);
@@ -269,6 +437,28 @@ BEGIN_TEST(test_polynomial_subtraction_lower_degree)
     ASSERT_EQUAL(p1[2].value(), 1.0 / 6);
 END_TEST
 
+BEGIN_TEST(test_negate_zero_polynomial)
+    algebra::Polynomial zero(2);
+    algebra::Polynomial negated = -zero;
+
+    ASSERT_EQUAL(negated[0].value(), 0.0);
+    ASSERT_EQUAL(negated[1].value(), 0.0);
+    ASSERT_EQUAL(negated[2].value(), 0.0);
+END_TEST
+
+BEGIN_TEST(test_negate_non_zero_polynomial)
+    algebra::Polynomial p(2);
+    p[0] = basic::Rational(1, 2);
+    p[1] = basic::Rational(-3, 4);
+    p[2] = basic::Rational(5, 6);
+
+    algebra::Polynomial negated = -p;
+
+    ASSERT_EQUAL(negated[0].value(), -0.5);
+    ASSERT_EQUAL(negated[1].value(), 0.75);
+    ASSERT_EQUAL(negated[2].value(), -5.0 / 6);
+END_TEST
+
 BEGIN_TEST(test_negate_negate_polynomial)
     algebra::Polynomial p(1);
     p[0] = basic::Rational(3, 7);
@@ -278,6 +468,33 @@ BEGIN_TEST(test_negate_negate_polynomial)
 
     ASSERT_EQUAL(negated[0].value(), 3.0 / 7);
     ASSERT_EQUAL(negated[1].value(), -2.0 / 5);
+END_TEST
+
+BEGIN_TEST(test_polynomial_multiplication_by_zero)
+    algebra::Polynomial p1(2);
+    p1[0] = basic::Rational(1, 2);
+    p1[1] = basic::Rational(3, 4);
+    p1[2] = basic::Rational(5, 6);
+
+    algebra::Polynomial zero(0);
+
+    algebra::Polynomial result = p1 * zero;
+    ASSERT_EQUAL(result.degree(), 0);
+    ASSERT_EQUAL(result[0].value(), 0.0);
+END_TEST
+
+BEGIN_TEST(test_polynomial_multiplication_by_constant)
+    algebra::Polynomial p1(1);
+    p1[0] = basic::Rational(1, 4);
+    p1[1] = basic::Rational(3, 4);
+
+    algebra::Polynomial constant(0);
+    constant[0] = basic::Rational(2, 1);
+
+    algebra::Polynomial result = p1 * constant;
+    ASSERT_EQUAL(result.degree(), 1);
+    ASSERT_EQUAL(result[0].value(), 0.5);
+    ASSERT_EQUAL(result[1].value(), 1.5);
 END_TEST
 
 BEGIN_TEST(test_polynomial_multiplication_general_case)
@@ -330,6 +547,21 @@ BEGIN_TEST(test_polynomial_subtraction)
     ASSERT_EQUAL(difference[0].value(), 2.0);
     ASSERT_EQUAL(difference[1].value(), 3.0);
     ASSERT_EQUAL(difference[2].value(), 4.0);
+END_TEST
+
+BEGIN_TEST(test_print_empty_polynomial)
+    algebra::Polynomial empty(0);
+    std::ostringstream oss;
+    oss << empty;
+    ASSERT_EQUAL(oss.str(), "0");
+END_TEST
+
+BEGIN_TEST(test_print_single_term_polynomial)
+    algebra::Polynomial singleTerm(0);
+    singleTerm[0] = basic::Rational(1, 3);
+    std::ostringstream oss;
+    oss << singleTerm;
+    ASSERT_EQUAL(oss.str(), "1/3");
 END_TEST
 
 BEGIN_TEST(test_print_multi_term_polynomial)
@@ -465,6 +697,7 @@ TEST_SUITE()
     TEST(test_polynomial_from_empty_range)
     TEST(test_polynomial_from_single_element_range)
 
+    TEST(test_copy_constructor_basic)
     TEST(test_copy_independence)
     TEST(test_copy_empty_polynomial)
     TEST(test_copy_single_coefficient)
@@ -474,32 +707,57 @@ TEST_SUITE()
     TEST(test_copy_assignment_independence)
 
     TEST(test_polynomial_operator_index_valid_access)
+    TEST(test_polynomial_operator_index_boundary_conditions)
     TEST(test_polynomial_operator_index_out_of_bounds)
 
+    TEST(test_polynomial_evaluation_zero)
     TEST(test_polynomial_evaluation_constant)
+    TEST(test_polynomial_evaluation_linear)
     TEST(test_polynomial_evaluation_quadratic)
 
     TEST(test_degree_zero_polynomial)
+    TEST(test_degree_constant_polynomial)
     TEST(test_degree_higher_polynomial)
+    TEST(test_degree_polynomial_with_zero_tail)
 
     TEST(test_polynomial_multiply_by_zero)
+    TEST(test_polynomial_multiply_by_one)
     TEST(test_polynomial_multiply_by_positive_integer)
+    TEST(test_polynomial_multiply_by_negative_integer)
+    TEST(test_polynomial_multiply_empty_polynomial)
 
+    TEST(test_polynomial_multiply_by_rational_zero)
+    TEST(test_polynomial_multiply_by_rational_one)
+    TEST(test_polynomial_multiply_by_positive_rational)
     TEST(test_polynomial_multiply_by_negative_rational)
 
+    TEST(test_polynomial_addition_zero)
+    TEST(test_polynomial_addition_same_degree)
     TEST(test_polynomial_addition_higher_degree)
     TEST(test_polynomial_addition_lower_degree)
 
+    TEST(test_polynomial_subtraction_self)
+    TEST(test_polynomial_subtraction_zero)
     TEST(test_polynomial_subtraction_higher_degree)
     TEST(test_polynomial_subtraction_lower_degree)
 
+    TEST(test_negate_zero_polynomial)
+    TEST(test_negate_non_zero_polynomial)
     TEST(test_negate_negate_polynomial)
 
+    TEST(test_negate_zero_polynomial)
+    TEST(test_negate_non_zero_polynomial)
+    TEST(test_negate_negate_polynomial)
+
+    TEST(test_polynomial_multiplication_by_zero)
+    TEST(test_polynomial_multiplication_by_constant)
     TEST(test_polynomial_multiplication_general_case)
 
     TEST(test_polynomial_addition)
     TEST(test_polynomial_subtraction)
 
+    TEST(test_print_empty_polynomial)
+    TEST(test_print_single_term_polynomial)
     TEST(test_print_multi_term_polynomial)
 
     TEST(test_derive_constant_polynomial)

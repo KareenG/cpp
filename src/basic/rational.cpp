@@ -48,19 +48,6 @@ namespace basic {
         numerator_ *= scalar;
     }
 
-    Rational Rational::operator^(int exp) const 
-    {
-        if (exp == 0) {
-            return Rational(1, 1); 
-        }
-        Rational result(1, 1);
-        Rational base = *this;
-        for (int i = 0; i < exp; ++i) {
-            result *= base;
-        }
-        return result;
-    }
-
     Rational Rational::operator-() const
     {
         Rational r{-1};
