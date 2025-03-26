@@ -50,6 +50,10 @@
         "typeinfo": "cpp",
         "ctime": "cpp",
         "iomanip": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "map": "cpp",
+        "fstream": "cpp",
+        "stack": "cpp",
+        "set": "cpp"
     }
 }

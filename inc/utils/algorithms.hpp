@@ -169,9 +169,9 @@ void partition(Iter begin, Iter end, T const& pivot)
  *       swappable.
  */
 template<typename Iter, typename Predicate>
-void partition(Iter begin, Iter end, Predicate predicate, int predicate_f)
+void partition(Iter begin, Iter end, Predicate predicate, bool should_use_callable)
 {
-    if(!predicate_f) {
+    if(!should_use_callable) {
         return;
     }
     if(std::distance(begin, end) < 0) {
@@ -198,16 +198,17 @@ void partition(Iter begin, Iter end, Predicate predicate, int predicate_f)
  * @param begin Iterator to the beginning of the range.
  * @param end Iterator past the end of the range.
  *
- * @note If the range [begin, end) is invalid (end precedes begin), the function 
- * performs no action.
+ * @note require that the range [begin, end) is valid (end precedes begin).
  * @note Elements are assumed to be of a type that supports streaming via std::ostream. 
  *       If the element type does not support std::ostream operations, compilation 
  *       will fail.
  */
 template<typename Iter>
+// require: Iter is forward iterator
 void print(Iter begin, Iter end)
 {
-    if(std::distance(begin, end) < 0) {
+    if(begin == end) {
+        std::cout << "[]";
         return;
     }
     std::cout << '[';
@@ -240,12 +241,10 @@ void print(Iter begin, Iter end)
  *       such, the elements of the container must support streaming via std::ostream. 
  *       If the element type does not support this, compilation will fail.
  */
-template<typename T>
-void print(const T& container) 
+template<typename Container>
+void print(Container const& container) 
 {
-    typename T::const_iterator it_begin = container.cbegin();
-    typename T::const_iterator it_end = container.cend();
-    print(it_begin, it_end);
+    print(container.cbegin(), container.cend());
 }
 
 /**
@@ -266,14 +265,11 @@ void print(const T& container)
  *         element is found.
  *
  * @note The function assumes that the range [begin, end) is valid and that begin can be 
- *       incremented to reach end. If the range is invalid (begin is further than end), it immediately returns end.
+ *       incremented to reach end.
  */
 template<typename Iter, typename Predicate>
-Iter find_first(Iter begin, Iter const& end, Predicate predicate) 
+Iter find_first(Iter begin, Iter end, Predicate predicate) 
 {
-    if(std::distance(begin, end) < 0) {
-        return end;
-    }
     while(begin != end) {
         if(predicate(*begin)) {
             return begin;
@@ -303,9 +299,10 @@ Iter find_first(Iter begin, Iter const& end, Predicate predicate)
  *       can be dereferenced.
  */
 template<typename Iter>
-void print(std::ostream& os, Iter begin, Iter end) 
+void print(std::ostream& os, Iter begin, Iter end)
 {
-    if(std::distance(begin, end) < 0) {
+    if(begin == end) {
+        os << "[]";
         return;
     }
     os << '[';
@@ -336,12 +333,10 @@ void print(std::ostream& os, Iter begin, Iter end)
  * operator.
  * @note If the container is empty, it prints `[]`.
  */
-template<typename T>
-void print(std::ostream& os, const T& container) 
+template<typename Container>
+void print(std::ostream& os, Container const& container) 
 {
-    typename T::const_iterator it_begin = container.cbegin();
-    typename T::const_iterator it_end = container.cend();
-    print(os, it_begin, it_end);
+    print(os, container.cbegin(), container.cend());
 }
 
 }   // namespace utils
