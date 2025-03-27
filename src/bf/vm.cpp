@@ -2,25 +2,9 @@
 
 namespace bf {
 
-// VM::VM(Program& code)
-// : memory_{}
-// , program_{code}
-// , console_{}
-// , microcode_{memory_, program_, console_}
-// {
-// }
-
-VM::VM(const std::vector<OpCode>& opcodes)
-: memory_{}
-, program_{opcodes}
-, console_{}
-, microcode_{memory_, program_, console_}
-{
-}
-
-VM::VM(const std::vector<OpCode>& opcodes, Console& console)
-: memory_{}
-, program_{opcodes}
+VM::VM(Memory& memory ,Program& program, Console& console)
+: memory_{memory}
+, program_{program}
 , console_{console}
 , microcode_{memory_, program_, console_}
 {

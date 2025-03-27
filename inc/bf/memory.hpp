@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <cstdint>
 
+#include "bf/mem_arg_types.hpp"
+
 namespace bf {
 
 /**
@@ -15,6 +17,7 @@ namespace bf {
  */
 class Memory {
 public:
+
     /**
      * @brief Constructs a Memory object with a specified tape size.
      *
@@ -25,18 +28,33 @@ public:
     Memory(size_t size = 30000);
 
     /**
+     * @brief Default destructor.
+     */
+    ~Memory() = default;
+
+    /**
+     * @brief Default copy constructor.
+     */
+    Memory(Memory const& other) = default;
+
+    /**
+     * @brief Default copy assignment operator.
+     */
+    Memory& operator=(Memory const& other) = default;
+
+    /**
      * @brief Reads the byte at the current pointer position.
      * 
      * @return int The value at the current pointer position.
      */
-    int read();
+    CellType read();
 
     /**
      * @brief Writes a byte to the current pointer position.
      *
      * @param c The byte to write to the memory tape.
      */
-    void write(uint8_t c);
+    void write(CellType c);
 
     /**
      * @brief Moves the data pointer one position to the left.
@@ -52,9 +70,13 @@ public:
      */
     void move_right();
 
+// #ifdef BF_DEBUG
+//     CellType operator[](Index index) const;
+// #endif
+    CellType operator[](Index index) const;
 private:
-    std::vector<uint8_t> tape_;
-    size_t pointer_;
+    std::vector<CellType> tape_;
+    Index pointer_;
 };
 
 } // namespace bf

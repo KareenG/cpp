@@ -8,17 +8,19 @@
 namespace bf {
 
 /**
- * @brief Represents the program logic for a Brainfudg-like language interpreter.
+ * @brief Manages the execution logic for a Brainfuck-like language interpreter.
  *
- * This class manages a program's instructions, handling instruction pointers and jump operations
- * for loops (i.e., '[' and ']' commands). It supports fetching and executing instructions,
- * navigating the instruction sequence, and determining when the program execution is complete.
+ * This class encapsulates a program's instructions, handling the instruction pointer,
+ * managing jump operations for loops ('[' and ']'), and executing the instructions.
+ * It provides mechanisms to navigate the instruction sequence and determine when
+ * the program execution is complete.
  *
+ * @details
  * Members:
- * - std::vector<OpCode> instructions: Holds all the operation codes to be executed.
- * - size_t ip: Tracks the current position of the instruction pointer within the instruction list.
- * - std::unordered_map<size_t, size_t> jump_table: Maps starting indices of loops ('[') to their
- *   corresponding ending indices (']') to facilitate quick jumps within the program.
+ * - std::vector<OpCode> instructions_: Holds all operation codes that the program will execute.
+ * - size_t ip_: Tracks the current position of the instruction pointer within the instruction list.
+ * - std::unordered_map<size_t, size_t> jump_table_: Maps loop start indices ('[') to their
+ *   corresponding loop end indices (']') for efficient navigation within loops.
  */
 class Program {
 public:
@@ -27,7 +29,32 @@ public:
      * 
      * @param source A vector of OpCode representing the program's source code.
      */
-    explicit Program(std::vector<OpCode> source);
+    Program(std::vector<OpCode> source); 
+
+    /**
+     * @brief Constructs a Program object with a list of opcodes and an existing jump table.
+     *
+     * This constructor can be used when the jump table is already known, avoiding redundant calculations.
+     * 
+     * @param source A vector of OpCode representing the program's instructions.
+     * @param jump_t An existing jump table mapping loop start and end indices.
+     */
+    Program(std::vector<OpCode> source, std::unordered_map<size_t, size_t> jump_t);
+
+    /**
+     * @brief Default copy constructor.
+     */
+    Program(Program const& other) = default;
+
+    /**
+     * @brief Default destructor.
+     */
+    ~Program() = default;
+
+    /**
+     * @brief Default copy assignment operator.
+     */
+    Program& operator=(Program const& other) = default;
 
     /**
      * @brief Fetches the next opcode in the program sequence and increments the instruction pointer.
@@ -71,6 +98,10 @@ public:
      */
     bool is_done() const;
 
+    //for debug mode
+    const std::vector<OpCode>& get_instructions() const;
+    const std::unordered_map<size_t, size_t>& get_jump_table() const;
+
 private:
     /**
      * @brief Builds a jump table to map loop starts ('[') to their corresponding loop ends (']') and vice versa.
@@ -80,9 +111,9 @@ private:
     void build_jump_table();
 
 private:
-    std::vector<OpCode> instructions;
-    size_t ip;
-    std::unordered_map<size_t, size_t> jump_table;
+    std::vector<OpCode> instructions_;
+    size_t ip_;
+    std::unordered_map<size_t, size_t> jump_table_;
 };
 
 }

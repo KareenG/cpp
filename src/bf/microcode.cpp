@@ -19,16 +19,16 @@ int Microcode::index(OpCode op)
 }
 
 void Microcode::build_commands() {
-    commands_[index(OpCode::Increment)] = [this](){ memory_.write(static_cast<uint8_t>(memory_.read() + 1)); };
-    commands_[index(OpCode::Decrement)] = [this](){ memory_.write(static_cast<uint8_t>(memory_.read() - 1)); };
+    commands_[index(OpCode::Increment)] = [this](){ memory_.write(memory_.read() + 1); };
+    commands_[index(OpCode::Decrement)] = [this](){ memory_.write(memory_.read() - 1); };
     commands_[index(OpCode::MoveLeft)] = [this](){ memory_.move_left(); };
     commands_[index(OpCode::MoveRight)] = [this](){ memory_.move_right(); };
     
     commands_[index(OpCode::Output)] = [this](){ 
-        console_.write(memory_.read());
+        console_.print_char(memory_.read());
     };
     commands_[index(OpCode::Input)] = [this]() {
-        unsigned char c = console_.read();
+        CellType c = console_.input_char();
         memory_.write(c);
     };
 
@@ -43,6 +43,8 @@ void Microcode::build_commands() {
             program_.jump_backward_to_matching_start();
         }
     };
+
+    commands_[index(OpCode::HALT)] = [this](){ };
 }
 
 void Microcode::execute(OpCode op) 

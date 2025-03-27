@@ -1,99 +1,76 @@
 #pragma once
 
 #include <iostream>
-#include <sstream>
-#include <string>
 
-namespace bf {
+#include "bf/mem_arg_types.hpp"
+
+namespace bf
+{
 
 /**
- * @brief Represents an I/O console.
+ * @brief Handles input and output operations for Brainfuck execution.
  *
- * The Console class manages I/O differently depending on its mode:
- * - In Runtime mode, it interfaces with standard I/O streams, providing real-time interaction.
- * - In DEBUG mode, it uses internal string streams to simulate I/O, which is particularly useful for automated testing 
- *   and debugging, as it avoids side effects and allows inspection and manipulation of I/O data.
- *
- * @member mode Mode The operational mode of the console, which determines how I/O is handled.
- * @member test_output_buffer std::ostringstream An output buffer used in DEBUG mode to capture output data for testing.
- * @member test_input_buffer std::istringstream An input buffer used in DEBUG mode to supply predefined input data for tests.
+ * The Console class is designed to abstract the input and output operations
+ * used in the Brainfuck interpreter. It allows reading from and writing to
+ * character streams, which can be directed to or from different sources such
+ * as standard input/output or file streams.
+ * 
+ * @details
+ * Members:
+ * - std::ostream& os_: Output stream used for writing characters. Default is std::cout.
+ * - std::istream& is_: Input stream used for reading characters. Default is std::cin.
  */
 class Console {
 public:
     /**
-     * @brief Enum to distinguish between operational modes of the Console.
+     * @brief Construct a new Console object.
+     * 
+     * Initializes the console with output and input streams. Default parameters
+     * are standard output (std::cout) and standard input (std::cin).
+     * 
+     * @param os_ Reference to the output stream.
+     * @param is_ Reference to the input stream.
      */
-    enum class Mode {
-        Runtime,
-        DEBUG
-    };
-    /**
-     * @brief Constructs a Console with optional mode settings and initial test data.
-     *
-     * @param mode The mode in which the console operates, default is Runtime.
-     * @param testData Initial data to load into the input buffer in DEBUG mode.
-     */
-    explicit Console(Mode mode = Mode::Runtime, const std::string& test_data = "");
+    Console(std::ostream& os = std::cout, std::istream& is = std::cin);
 
     /**
-     * @brief Copy constructor.
-     *
-     * Creates a new console by copying the state of another console, including the contents
-     * of its input and output buffers.
-     *
-     * @param other The console to copy.
+     * @brief Default copy constructor.
      */
-    Console(const Console& other);
+    Console(Console const& other) = default;
 
     /**
-     * @brief Sets new test data for the console's input buffer when in DEBUG mode.
-     *
-     * This method only affects the console if it is in DEBUG mode. It resets the input buffer
-     * with new test data provided.
-     *
-     * @param test_data The new test data to load into the input buffer.
+     * @brief Default destructor.
      */
-    void set_test_data(const std::string& test_data);
+    ~Console() = default;
 
     /**
-     * @brief Writes a character based on the console's current mode.
-     *
-     * In Runtime mode, outputs directly to std::cout. In DEBUG mode, writes to an internal test output buffer.
-     *
-     * @param c The character to output, represented as an int.
+     * @brief Default copy assignment operator.
      */
-    void write(int c);
+    Console& operator=(Console const& other) = default;
 
     /**
-     * @brief Reads a character based on the console's current mode.
-     *
-     * In Runtime mode, reads from std::cin. In DEBUG mode, reads from an internal test input buffer.
-     * This method handles EOF by clearing EOF flags to allow further read operations.
-     *
-     * @return The character read, returned as an unsigned char.
+     * @brief Read a single character from the input stream.
+     * 
+     * Reads a character from the input stream and returns it as a CellType value.
+     * This function is typically used to fetch user input during Brainfuck execution.
+     * 
+     * @return CellType The character read from the input stream, converted to CellType.
      */
-    unsigned char read();
+    CellType input_char();
 
-    /**
-     * @brief Retrieves the contents of the test output buffer.
-     *
-     * This method is useful in DEBUG mode to inspect what has been written to the output buffer.
-     *
-     * @return A string containing the contents of the test output buffer.
+     /**
+     * @brief Write a single character to the output stream.
+     * 
+     * Outputs a character to the configured output stream. The character is provided
+     * as a CellType and converted to char before writing.
+     * 
+     * @param c The character to print, specified as a CellType.
      */
-    std::string get_test_output() const;
-
-    /**
-     * @brief Clears the contents of the test output buffer.
-     *
-     * This method is used in DEBUG mode to reset the output buffer, typically between tests.
-     */
-    void clear_test_output();
+    void print_char(CellType c);
 
 private:
-    Mode mode;
-    std::ostringstream test_output_buffer;
-    std::istringstream test_input_buffer;
+    std::ostream& os_;
+    std::istream& is_;
 };
 
-}
+} // namespace bf

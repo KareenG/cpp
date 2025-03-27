@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "bf/operations.hpp"
+#include "bf/program.hpp"
 
 namespace bf {
 
@@ -14,6 +15,17 @@ namespace bf {
  */
 class Compiler {
 public:
+    /**
+     * @brief Compiles the given source string into a Program.
+     * 
+     * This method involves parsing the source code into opcodes, building a jump table for loop control,
+     * and creating a Program instance with these components.
+     * 
+     * @param source The Brainfuck source code to be compiled.
+     * @return Program The compiled program.
+     */
+    Program compile(const std::string& source);
+
     /**
      * @brief Parses the given source string into a vector of opcodes.
      * 
@@ -27,6 +39,17 @@ public:
      * @note If validation fails, logs an error to standard error output and returns an empty vector.
      */
     std::vector<OpCode> parse(const std::string& source);
+
+    /**
+     * @brief Builds a jump table for matching loop start and end points.
+     * 
+     * This function generates mappings from loop start indices to their corresponding loop end indices
+     * and vice versa, facilitating efficient control flow during program execution.
+     * 
+     * @param instructions The vector of opcodes previously parsed from the source.
+     * @param jump_table Reference to an unordered_map to store the loop start and end mappings.
+     */
+    void build_jump_table(std::vector<OpCode> instructions, std::unordered_map<size_t, size_t>& jump_table);
 
 private:
     /**

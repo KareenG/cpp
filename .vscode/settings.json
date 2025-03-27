@@ -54,6 +54,7 @@
         "map": "cpp",
         "fstream": "cpp",
         "stack": "cpp",
-        "set": "cpp"
+        "set": "cpp",
+        "cstring": "cpp"
     }
 }

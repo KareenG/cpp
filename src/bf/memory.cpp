@@ -9,17 +9,18 @@ Memory::Memory(size_t size)
 {
 }
 
-int Memory::read() 
+CellType Memory::read() 
 {
-    return static_cast<int>(tape_[pointer_]);
+    return (tape_[pointer_]);
 }
 
-void Memory::write(uint8_t c) 
+void Memory::write(CellType c) 
 {
     tape_[pointer_] = c;
 }
 
-void Memory::move_left() {
+void Memory::move_left() 
+{
     if (pointer_ > 0) {
         --pointer_;
     }
@@ -28,13 +29,26 @@ void Memory::move_left() {
     }
 }
 
-void Memory::move_right() {
+void Memory::move_right() 
+{
     if (pointer_ < tape_.size() - 1) {
         ++pointer_;
     }
     else {
         pointer_ = 0;
     }
+}
+
+// #ifdef BF_DEBUG
+// CellType Memory::operator[](Index index) const 
+// {
+//     return tape_[index];
+// }
+// #endif
+
+CellType Memory::operator[](Index index) const 
+{
+    return tape_[index];
 }
 
 } // namespace bf

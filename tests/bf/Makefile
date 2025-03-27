@@ -6,7 +6,7 @@ CXXFLAGS += -g3
 CXXFLAGS += -std=c++17
 
 # CPPFLAGS = -DDEBUG
-CPPFLAGS = -I$(INCLUDES_DIR)
+CPPFLAGS = -I$(INCLUDES_DIR)#-DBF_DEBUG
 
 # LDFLAGS =
 # LDLIBS = -lm    # link math library
@@ -14,22 +14,29 @@ CPPFLAGS = -I$(INCLUDES_DIR)
 INCLUDES_DIR = ../../inc
 SOURCES_DIR = ../../src
 
-OBJS = $(SOURCES_DIR)/bf/memory.o $(SOURCES_DIR)/bf/vm.o $(SOURCES_DIR)/bf/compiler.o $(SOURCES_DIR)/bf/console.o $(SOURCES_DIR)/bf/program.o $(SOURCES_DIR)/bf/microcode.o#$(SOURCES_DIR)/bf/operations.o $(SOURCES_DIR)/bf/validator.o $(SOURCES_DIR)/bf/CLI.o $(SOURCES_DIR)/bf/code_parser.o $(SOURCES_DIR)/bf/IO_manager.o
+OBJS = $(SOURCES_DIR)/bf/memory.o $(SOURCES_DIR)/bf/vm.o $(SOURCES_DIR)/bf/compiler.o $(SOURCES_DIR)/bf/console.o $(SOURCES_DIR)/bf/program.o $(SOURCES_DIR)/bf/microcode.o
 
-TARGET = utest
+APP_OBJS = $(OBJS) $(SOURCES_DIR)/bf/command_line_args.o
+APP = $(SOURCES_DIR)/bf/run_bf
 
+UTEST = utest
 
-$(TARGET) : $(OBJS)
+all : $(APP) $(UTEST)
 
-all: $(TARGET)
+$(APP) : CPPFLAGS += -DNDEBUG
+$(APP) : $(APP_OBJS)
 
-check : $(TARGET)
-	@./$(TARGET) -v
+$(UTEST) : CPPFLAGS += -DBF_DEBUG
+$(UTEST) : $(OBJS)
 
-recheck: clean check
+# check : CPPFLAGS += -DBF_DEBUG
+# check: $(UTEST)
+# 	./$(UTEST)
+
+#recheck: clean check
 
 clean:
-	@$(RM) utest.o ./$(TARGET) $(OBJS)
+	$(RM) $(UTEST) $(OBJS) $(APP) $(APP_OBJS)
 
 .PHONY : make clean check
 
@@ -37,5 +44,5 @@ make:
 	@echo 'Attend a maker faire next year! now back to coding...'
 	@${TRUE}
 
-leak-check:
-	valgrind ./$(TARGET)
+leak-check : $(UTEST)
+	valgrind ./$(UTEST)
