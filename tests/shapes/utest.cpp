@@ -2,13 +2,17 @@
 #include <vector>
 #include <iostream>
 
-class Shape {
+class AbstractShape {
 public:
-    virtual ~Shape() = default;
+    AbstractShape() = default;
+    virtual ~AbstractShape() = default;
     virtual double area() const = 0;
+protected:      // hide the fact that we wont allow assignment
+    AbstractShape(AbstractShape const&) = default;
+    AbstractShape& operator=(AbstractShape const&) = default;
 };
 
-class Rectangle : public Shape {
+class Rectangle : public AbstractShape {
     double length;
     double width;
 public:
@@ -23,7 +27,7 @@ public:
     }
 };
 
-class Circle : public Shape {
+class Circle : public AbstractShape {
     double radius;
 public:
     Circle(double radius)
@@ -36,7 +40,7 @@ public:
     }
 };
 
-class Square : public Shape {
+class Square : public AbstractShape {
     double side;
 public:
     Square(double side)
@@ -49,19 +53,18 @@ public:
     }
 };
 
-double paint_needed(std::vector<Shape*> shapes, double thickness)
+double paint_needed(std::vector<AbstractShape*>& shapes, double thickness)
 {
-    int size = static_cast<int>(shapes.size());
-    double sum_areas{0.0};
-    for(int i = 0; i < size; ++i) {
-        sum_areas += shapes[i]->area();
+    double total_area{0.0};
+    for(AbstractShape* shape : shapes) {
+        total_area += shape->area();
     }
-    return sum_areas * thickness;
+    return total_area * thickness;
 }
 
 int main()
 {
-    std::vector<Shape*> shapes;
+    std::vector<AbstractShape*> shapes;
     shapes.emplace_back(new Rectangle{5.0, 2.0});
     shapes.emplace_back(new Circle{4.0});
     shapes.emplace_back(new Square{6.0});

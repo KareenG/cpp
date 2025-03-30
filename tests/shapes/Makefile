@@ -36,3 +36,6 @@ clean:
 make:
 	@echo 'Attend a maker faire next year! now back to coding...'
 	@${TRUE}
+
+leak-check:
+	valgrind ./$(TARGET)
