@@ -70,10 +70,10 @@ public:
      */
     void move_right();
 
-// #ifdef BF_DEBUG
-//     CellType operator[](Index index) const;
-// #endif
+#ifdef BF_DEBUG
     CellType operator[](Index index) const;
+#endif
+    // CellType operator[](Index index) const;
 private:
     std::vector<CellType> tape_;
     Index pointer_;

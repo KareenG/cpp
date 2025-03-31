@@ -37,5 +37,5 @@ make:
 	@echo 'Attend a maker faire next year! now back to coding...'
 	@${TRUE}
 
-leak-check:
+leak-check:		# run: make leak-check
 	valgrind ./$(TARGET)

@@ -39,16 +39,16 @@ void Memory::move_right()
     }
 }
 
-// #ifdef BF_DEBUG
-// CellType Memory::operator[](Index index) const 
-// {
-//     return tape_[index];
-// }
-// #endif
-
+#ifdef BF_DEBUG
 CellType Memory::operator[](Index index) const 
 {
     return tape_[index];
 }
+#endif
+
+// CellType Memory::operator[](Index index) const 
+// {
+//     return tape_[index];
+// }
 
 } // namespace bf

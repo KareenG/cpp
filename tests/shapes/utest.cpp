@@ -7,9 +7,9 @@ public:
     AbstractShape() = default;
     virtual ~AbstractShape() = default;
     virtual double area() const = 0;
-protected:      // hide the fact that we wont allow assignment
-    AbstractShape(AbstractShape const&) = default;
-    AbstractShape& operator=(AbstractShape const&) = default;
+protected:      // hide the fact that we wont allow copy constructor and copy assignment
+    AbstractShape(AbstractShape const&) = delete;
+    AbstractShape& operator=(AbstractShape const&) = delete;
 };
 
 class Rectangle : public AbstractShape {
@@ -21,7 +21,11 @@ public:
     , width{width}
     {
     }
+    
+    Rectangle(Rectangle const&) = default; 
+    
     ~Rectangle() override = default;
+
     virtual double area() const override {
         return length * width;
     }
@@ -34,7 +38,9 @@ public:
     : radius{radius}
     {
     }
+
     ~Circle() override = default;
+
     virtual double area() const override {
         return M_PI * radius * radius;
     }
@@ -47,7 +53,9 @@ public:
     : side{side}
     {
     }
+
     ~Square() override = default;
+
     virtual double area() const override {
         return side * side;
     }
@@ -65,8 +73,19 @@ double paint_needed(std::vector<AbstractShape*>& shapes, double thickness)
 int main()
 {
     std::vector<AbstractShape*> shapes;
-    shapes.emplace_back(new Rectangle{5.0, 2.0});
-    shapes.emplace_back(new Circle{4.0});
-    shapes.emplace_back(new Square{6.0});
-    std::cout << paint_needed(shapes, 3) << '\n';
+    shapes.push_back(new Rectangle{5.0, 2.0});
+    shapes.push_back(new Circle{4.0});
+    shapes.push_back(new Square{6.0});
+
+    std::cout << paint_needed(shapes, 0.5) << '\n';
+
+    for (AbstractShape* p : shapes)
+    {
+        delete p;
+    }
+        
+    // Rectangle r1{3, 4};
+    // Rectangle r2 = r1;
+
+    // std::vector<Rectangle> c;
 }

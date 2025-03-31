@@ -55,6 +55,14 @@
         "fstream": "cpp",
         "stack": "cpp",
         "set": "cpp",
-        "cstring": "cpp"
+        "cstring": "cpp",
+        "locale": "cpp",
+        "codecvt": "cpp",
+        "cassert": "cpp",
+        "chrono": "cpp",
+        "ratio": "cpp",
+        "semaphore": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp"
     }
 }
