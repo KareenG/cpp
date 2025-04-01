@@ -1,30 +1,37 @@
-#include <codecvt>
-#include <locale>
-
 #include "palantir/encryption/atbash.hpp"
 
 namespace palantir {
 
-std::string Atbash::encode(std::string const& buffer) const
+Atbash::Atbash()
+: lookup_table{initialize_LUT()}
 {
-    std::string encoded_str;
-    for(char c : buffer) {
-        if(isalpha(c)) {
-            if(isupper(c)) {
-                encoded_str.push_back('Z' - (c - 'A'));
-            } else {
-                encoded_str.push_back('z' - (c - 'a'));
-            }
-        } else {
-            encoded_str.push_back(c);
-        }
-    }
-    return encoded_str;
 }
 
-std::string Atbash::decode(std::string const& buffer) const
+char Atbash::encode_char(char c) const 
 {
-    return encode(buffer);
+    return lookup_table.at(c);
+}
+
+char Atbash::decode_char(char c) const 
+{
+    return encode_char(c);
+}
+
+std::unordered_map<char, char> Atbash::initialize_LUT() 
+{
+    std::unordered_map<char, char> t;
+    for (int i = 0; i < 256; ++i) {
+        if (isalpha(i)) {
+            if (isupper(i)) {
+                t[i] = 'Z' - (i - 'A');
+            } else if (islower(i)) {
+                t[i] = 'z' - (i - 'a');
+            }
+        } else {
+            t[i] = i;
+        }
+    }
+    return t;
 }
 
 }       // namespace palantir

@@ -10,6 +10,9 @@
 #include "palantir/encryption/caesar.hpp"
 #include "palantir/encryption/vigenere.hpp"
 #include "palantir/encryption/null_encryption.hpp"
+#include "palantir/encryption/rotate.hpp"
+#include "palantir/encryption/xor.hpp"
+
 
 #include "palantir/message_source/console_in.hpp"
 #include "palantir/message_source/file_source.hpp"
@@ -19,7 +22,11 @@
 
 #include "palantir/message_destination/udp_destination.hpp"
 #include "palantir/message_source/udp_source.hpp"
-#include <thread>
+
+#include "palantir/udp/udp_client.hpp"
+#include "palantir/udp/udp_server.hpp"
+
+#include "palantir/messenger.hpp"
 
 BEGIN_TEST(test_rot13_text)
     palantir::Rot13 cipher{};
@@ -32,7 +39,7 @@ END_TEST
 
 /*-------------------------------------------------------------------------------*/
 
-BEGIN_TEST(test_atbash_hebrew_text)
+BEGIN_TEST(test_atbash_text)
     palantir::Atbash cipher{};
     std::string text = "THE QUICK1 BROWN FOX jumps OVER the #LAZY DOG";
     std::string encoded = cipher.encode(text);
@@ -74,7 +81,6 @@ END_TEST
 
 BEGIN_TEST(test_vigenere_key_same_len_as_text)
     palantir::EncryptionAbstract *cipher = new palantir::Vigenere("LEMON");
-    //palantir::Vigenere cipher("LEMON");
     std::string text = "HelLo";
     std::string encoded = cipher->encode(text);
     ASSERT_EQUAL(encoded, "SixZb");
@@ -96,31 +102,38 @@ END_TEST
 
 /*-------------------------------------------------------------------------------*/
 
-// BEGIN_TEST(test_console_input)
-//     std::string input = "Hello, World!\n";
-//     std::istringstream iss(input);
-//     std::streambuf* cinBackup = std::cin.rdbuf();  // backup cin's streambuf
-//     std::cin.rdbuf(iss.rdbuf());                  // assign streambuf to cin
+BEGIN_TEST(test_rotate_encryptor)
+    int shift = 5;
+    palantir::RotateEncryptor cipher(shift);
+    std::string text = "attackat dawn_*";
+    std::string expected_encoded = "fyyfhpfy ifbs_*";
 
-//     palantir::Console console;
-//     std::string message = console.get_message();
-//     //bool fullyProcessed = console.is_fully_processed();
+    std::string encoded = cipher.encode(text);
+    ASSERT_EQUAL(encoded, expected_encoded);
 
-//     std::cin.rdbuf(cinBackup);  // restore cin's original streambuf
+    std::string decoded = cipher.decode(encoded);
+    ASSERT_EQUAL(decoded, text);
+END_TEST
 
-//     palantir::Rot13 cipher{};
-//     std::string enctypted_mes = cipher.encode(message);
+/*-------------------------------------------------------------------------------*/
 
-//     ASSERT_EQUAL(message, "Hello, World!\n");
-//     //ASSERT_EQUAL(fullyProcessed, true);
-//     ASSERT_EQUAL(enctypted_mes, "Uryyb, Jbeyq!\n");
+BEGIN_TEST(test_xor_encryptor)
+    std::string key = "\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F";
+    palantir::XorEncryptor cipher{key};
+    std::string text = "attacking tonight";
 
-// END_TEST
+    std::string encoded = cipher.encode(text);
+    // Assuming the encoded string from your test setup
+    ASSERT_EQUAL(encoded, "~kk~|tvqx?kpqvxwk");
+
+    std::string decoded = cipher.decode(encoded);
+    ASSERT_EQUAL(decoded, text);
+END_TEST
 
 /*-------------------------------------------------------------------------------*/
 
 BEGIN_TEST(test_console_live_input)
-    palantir::Console console;
+    palantir::ConsoleInput console;
     std::string message;
 
     std::cout << "Enter some text (Ctrl+D to end): " << '\n';
@@ -173,45 +186,27 @@ BEGIN_TEST(test_file_source_get_message)
 END_TEST
 
 /*-------------------------------------------------------------------------------*/
-
-BEGIN_TEST(test_file_destination_send_message)
+// works at first time between every two consesetive tests
+// test_output.txt must exists and be empty
+BEGIN_TEST(test_file_destination_send_message)  
     const std::string test_file_name = "test_output.txt";
     palantir::FileDestination file_dest(test_file_name);
 
     std::string test_message = "Hello, File!";
     file_dest.send_message(test_message);
-
     std::ifstream in_file(test_file_name);
     std::string file_content;
+
     std::getline(in_file, file_content);
 
-    ASSERT_EQUAL(file_content, test_message);
-
     in_file.close();
+
+    ASSERT_EQUAL(file_content, test_message);
+    
     std::filesystem::remove(test_file_name);
 END_TEST
 
 /*-------------------------------------------------------------------------------*/
-
-// BEGIN_TEST(test_console_to_file)
-//     const std::string test_file_name = "test_output_from_console.txt";
-//     palantir::FileDestination file_dest(test_file_name);
-
-//     std::cout << "Enter text (Ctrl+D to end):" << '\n';
-//     std::string line;
-//     while (std::getline(std::cin, line)) {
-//         file_dest.send_message(line);
-//     }
-
-//     std::ifstream test_file(test_file_name);
-//     std::string content;
-//     std::cout << "\nContents of " << test_file_name << ":" << '\n';
-//     while (getline(test_file, content)) {
-//         std::cout << content << '\n';
-//     }
-//     test_file.close();
-
-// END_TEST
 
 BEGIN_TEST(test_console_to_file)
     const std::string test_file_name = "test_output_from_console.txt";
@@ -227,28 +222,29 @@ BEGIN_TEST(test_console_to_file)
 
     std::ifstream test_file(test_file_name);
     std::vector<std::string> fileLines;
-    while (getline(test_file, line)) {
+    while (std::getline(test_file, line)) {
         if (!line.empty()) {
             fileLines.push_back(line);
         }
     }
     test_file.close();
 
-    // Display the contents of the file for visual verification
     std::cout << "\nContents of " << test_file_name << ":" << '\n';
-    for (const auto& l : fileLines) {
-        std::cout << l << '\n';
+    for (std::vector<std::string>::const_iterator l = fileLines.begin(); l != fileLines.end(); ++l) {
+        std::cout << *l << '\n';
     }
 
-    // Verify that the last entries in the file match the input lines
     bool match = true;
-    auto it = fileLines.end() - inputLines.size();
-    for (const auto& inputLine : inputLines) {
-        if (*it != inputLine) {
-            match = false;
-            break;
+    if (fileLines.size() >= inputLines.size()) {
+        std::vector<std::string>::const_iterator it = fileLines.end() - inputLines.size();
+        for (std::vector<std::string>::const_iterator inputLine = inputLines.begin(); inputLine != inputLines.end(); ++inputLine, ++it) {
+            if (*it != *inputLine) {
+                match = false;
+                break;
+            }
         }
-        ++it;
+    } else {
+        match = false;
     }
 
     ASSERT_THAT(match);
@@ -257,55 +253,55 @@ END_TEST
 
 /*-------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------*/
+BEGIN_TEST(test_udp_source_receive_using_udp_client)
+    // Setup UdpSource to receive messages
+    palantir::UdpSource udpSource{1139};
+    std::string expected_result{"Hello"};
+    
+    // Setup UdpClient to send message to UdpSource
+    palantir::UdpClient udpClient("127.0.0.1", 1139);
+    udpClient.send_message(expected_result);
 
+    std::string result = udpSource.get_message();
 
-
-/*-------------------------------------------------------------------------------*/
-
-/*-------------------------------------------------------------------------------*/
-
-
-
-/*-------------------------------------------------------------------------------*/
-
-/*-------------------------------------------------------------------------------*/
-
-
+    ASSERT_EQUAL(result, expected_result);
+END_TEST
 
 /*-------------------------------------------------------------------------------*/
 
+BEGIN_TEST(udp_destination_send_message_using_udp_server)
+    // Setup UdpServer to receive messages
+    int listening_port = 1138;
+    palantir::UdpServer udpServer(listening_port);
+
+    // Setup UdpDestination to send messages to the UdpServer
+    palantir::UdpDestination udpDestination{"127.0.0.1", listening_port};
+    std::string expected_message = "Test message";
+    udpDestination.send_message(expected_message);
+
+    std::string received_message = udpServer.receive();
+
+    ASSERT_EQUAL(received_message, expected_message);
+END_TEST
+
 /*-------------------------------------------------------------------------------*/
 
+BEGIN_TEST(full_test_example)
+    palantir::Rot13* rot13 = new palantir::Rot13();
+    std::vector<palantir::EncryptionAbstract*> encryptions{rot13};
+    palantir::Messenger m(encryptions);
 
+    palantir::UdpSource us{1138};
+    palantir::FileSource fs("myfile.txt");
+    palantir::UdpDestination udp("127.0.0.1", 1138);
 
-/*-------------------------------------------------------------------------------*/
-BEGIN_TEST(test_udp_communication)
-    const std::string testMessage = "Hello UDP World!";
-    const int testPort = 12345; // Ensure this port is open and not used by other applications
-    const std::string localhost = "127.0.0.1";
+    // Simulate processing a message read from file, encrypted and sent over UDP
+    m.process(fs, udp);
 
-    palantir::UdpDestination destination(localhost, testPort);
+    std::string received = us.get_message();
 
-    palantir::UdpSource source(localhost, testPort);
-
-    // Run receiver in a separate thread to ensure it's ready to receive ????????????????
-    // std::string receivedMessage;
-    // std::thread receiver([&]() {
-    //     receivedMessage = destination.receive_message(); // Blocking receive
-    // });
-
-    // // Give the receiver a moment to start properly
-    // std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-    // // Simulate sending
-    // source.send_message(testMessage);
-
-    // // Wait for the receiver thread to finish
-    // receiver.join();
-
-    // // Test the received message
-    // ASSERT_EQUAL(receivedMessage, testMessage);
+    ASSERT_EQUAL(received, "URYYB uryyb\n");
+    delete rot13;
 END_TEST
 
 /*-------------------------------------------------------------------------------*/
@@ -314,7 +310,7 @@ BEGIN_SUITE()
 
     TEST(test_rot13_text)
 
-    TEST(test_atbash_hebrew_text)
+    TEST(test_atbash_text)
 
     TEST(test_caesar_text)
 
@@ -324,14 +320,21 @@ BEGIN_SUITE()
 
     TEST(test_null_encryption)
 
-    //TEST(test_console_live_input)
+    TEST(test_rotate_encryptor)
+
+    TEST(test_xor_encryptor)
+
     TEST(test_file_source_get_message)
 
 
     TEST(test_console_output_send_message)
     TEST(test_file_destination_send_message)
-    //TEST(test_udp_communication)
     
     TEST(test_console_to_file)
+
+    TEST(test_udp_source_receive_using_udp_client)
+    TEST(udp_destination_send_message_using_udp_server)
+
+    TEST(full_test_example)
 
 END_SUITE

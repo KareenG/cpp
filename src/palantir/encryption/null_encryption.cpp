@@ -1,23 +1,15 @@
-
-
 #include "palantir/encryption/null_encryption.hpp"
 
 namespace palantir {
-
-// Rot13::~Rot13()
-// {
-
-// }
-
-std::string NullEncryption::encode(std::string const& buffer) const
+    
+char NullEncryption::encode_char(char c) const 
 {
-    return buffer;
+    return c;
 }
 
-std::string NullEncryption::decode(std::string const& buffer) const
+char NullEncryption::decode_char(char c) const 
 {
-    return buffer;
+    return c;
 }
-
 
 }       // namespace palantir

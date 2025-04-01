@@ -11,7 +11,11 @@ ConsoleOutput::ConsoleOutput(std::ostream& output)
 
 void ConsoleOutput::send_message(const std::string& message)
 {
-    output_stream_ << message << '\n';
+    //output_stream_ << message << '\n';
+    output_stream_ << message;
+    if (!message.empty() && message.back() != '\n') {
+        output_stream_ << '\n';
+    }
 }
 
 } // namespace palantir

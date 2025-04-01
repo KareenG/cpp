@@ -1,44 +1,61 @@
-CXX= g++
-CC = $(CXX)
+CXX=g++
+CXXFLAGS=-pedantic -Wall -Werror -Wextra -g3 -std=c++17
+CPPFLAGS=-I$(INCLUDES_DIR)
 
-CXXFLAGS  = -pedantic -Wall -Werror -Wextra
-CXXFLAGS += -g3
-CXXFLAGS += -std=c++17
+INCLUDES_DIR=../../inc
+SOURCES_DIR=../../src
 
-# CPPFLAGS = -DDEBUG
-CPPFLAGS = -I$(INCLUDES_DIR)
+# List of objects
+OBJS = $(SOURCES_DIR)/palantir/encryption/atbash.o \
+       $(SOURCES_DIR)/palantir/encryption/caesar.o \
+       $(SOURCES_DIR)/palantir/encryption/rot13.o \
+       $(SOURCES_DIR)/palantir/encryption/vigenere.o \
+       $(SOURCES_DIR)/palantir/encryption/null_encryption.o \
+       $(SOURCES_DIR)/palantir/message_source/console_in.o \
+       $(SOURCES_DIR)/palantir/message_source/file_source.o \
+       $(SOURCES_DIR)/palantir/message_source/udp_source.o \
+       $(SOURCES_DIR)/palantir/udp/udp_client.o \
+       $(SOURCES_DIR)/palantir/message_destination/console_out.o \
+       $(SOURCES_DIR)/palantir/message_destination/file_destination.o \
+       $(SOURCES_DIR)/palantir/message_destination/udp_destination.o \
+       $(SOURCES_DIR)/palantir/udp/udp_server.o \
+       $(SOURCES_DIR)/palantir/messenger.o \
+       $(SOURCES_DIR)/palantir/encryption/char_encryption.o \
+       $(SOURCES_DIR)/palantir/encryption/rotate.o \
+       $(SOURCES_DIR)/palantir/encryption/xor.o
 
-# LDFLAGS =
-# LDLIBS = -lm    # link math library
+RUN_PALANTIR_OBJS = $(OBJS) $(SOURCES_DIR)/palantir/command_line_args.o
 
-INCLUDES_DIR = ../../inc
-SOURCES_DIR = ../../src
-
-OBJS = $(SOURCES_DIR)/palantir/encryption/atbash.o $(SOURCES_DIR)/palantir/encryption/caesar.o $(SOURCES_DIR)/palantir/encryption/rot13.o $(SOURCES_DIR)/palantir/encryption/vigenere.o \
-	   $(SOURCES_DIR)/palantir/encryption/null_encryption.o $(SOURCES_DIR)/palantir/message_source/console_in.o $(SOURCES_DIR)/palantir/message_source/file_source.o $(SOURCES_DIR)/palantir/message_source/udp_source.o \
-	   $(SOURCES_DIR)/palantir/udp/udp_client.o $(SOURCES_DIR)/palantir/message_destination/console_out.o $(SOURCES_DIR)/palantir/message_destination/file_destination.o $(SOURCES_DIR)/palantir/message_destination/udp_destination.o \
-	   $(SOURCES_DIR)/palantir/udp/udp_server.o $(SOURCES_DIR)/palantir/messenger.o
-
-TARGET = utest
+# Executables
+RUN_PALANTIR = $(SOURCES_DIR)/palantir/run_palantir
+UTEST=utest
+# UDP_SOURCE_MAIN=udp_source_main
+# UDP_DESTINATION_MAIN=udp_destination_main
 
 
-$(TARGET) : $(OBJS)
+all: $(UTEST) $(UDP_SOURCE_MAIN) $(UDP_DESTINATION_MAIN) $(RUN_PALANTIR)
 
-all: $(TARGET)
+$(RUN_PALANTIR) : CPPFLAGS += -DNDEBUG
+$(RUN_PALANTIR) : $(RUN_PALANTIR_OBJS)
 
-check : $(TARGET)
-	@./$(TARGET) -v
+$(UTEST) : CPPFLAGS += -DBF_DEBUG
+$(UTEST) : $(OBJS)
+
+# $(UDP_SOURCE_MAIN) : CPPFLAGS += -DBF_DEBUG
+# $(UDP_SOURCE_MAIN) : $(OBJS)
+
+# $(UDP_DESTINATION_MAIN) : CPPFLAGS += -DBF_DEBUG
+# $(UDP_DESTINATION_MAIN) : $(OBJS)
+
+clean:
+	$(RM) $(UTEST) $(OBJS) $(RUN_PALANTIR) $(RUN_PALANTIR_OBJS)
+
+check: all
+	./utest
 
 recheck: clean check
 
-clean:
-	@$(RM) utest.o ./$(TARGET) $(OBJS)
+leak-check:
+	valgrind --leak-check=full ./utest
 
-.PHONY : make clean check
-
-make:
-	@echo 'Attend a maker faire next year! now back to coding...'
-	@${TRUE}
-
-leak-check:		# run: make leak-check
-	valgrind ./$(TARGET)
+.PHONY: all clean check recheck leak-check

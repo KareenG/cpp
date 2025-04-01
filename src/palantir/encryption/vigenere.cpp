@@ -8,7 +8,7 @@
 namespace palantir {
 
 Vigenere::Vigenere(std::string key)
-: key_(std::move(key)) 
+: key_{key}
 {
     std::transform(key_.begin(), key_.end(), key_.begin(), [](unsigned char c) { 
         return std::tolower(c); 

@@ -4,12 +4,12 @@
 
 namespace palantir {
 
-Console::Console(std::istream& input)
+ConsoleInput::ConsoleInput(std::istream& input)
 : input_stream_(input) 
 {
 }
 
-std::string Console::get_message() 
+std::string ConsoleInput::get_message() 
 {
     std::string line;
     std::getline(input_stream_, line);
@@ -17,7 +17,7 @@ std::string Console::get_message()
     return line;
 }
 
-bool Console::is_fully_processed() const 
+bool ConsoleInput::is_fully_processed() const 
 {
     return input_stream_.eof();
 }

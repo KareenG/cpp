@@ -1,30 +1,25 @@
-
-
 #include "palantir/encryption/rot13.hpp"
 
 namespace palantir {
+
 Rot13::Rot13()
 : lookup_table{initialize_LUT()}
 {
 }
 
-std::string Rot13::encode(std::string const& buffer) const
+char Rot13::encode_char(char c) const 
 {
-    std::string encoded_str;
-    for(char c : buffer) {
-        encoded_str.push_back(lookup_table.at(c));
-    }
-    return encoded_str;
+    return lookup_table.at(c);
 }
 
-std::string Rot13::decode(std::string const& buffer) const
+char Rot13::decode_char(char c) const 
 {
-    return encode(buffer);
+    return encode_char(c);
 }
 
-std::unordered_map<u_int8_t, u_int8_t> Rot13::initialize_LUT() 
+std::unordered_map<char, char> Rot13::initialize_LUT() 
 {
-    std::unordered_map<u_int8_t, u_int8_t> t;
+    std::unordered_map<char, char> t;
     for (int i = 0; i < 256; ++i) {
         if (isalpha(i)) {
             if (isupper(i)) {

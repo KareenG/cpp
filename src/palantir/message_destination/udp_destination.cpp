@@ -1,4 +1,3 @@
-
 #include "palantir/message_destination/udp_destination.hpp"
 
 namespace palantir
@@ -18,6 +17,5 @@ void UdpDestination::send_message(const std::string& message)
 std::string UdpDestination::receive_message() {
     return udp_client_.receive_message();
 }
-
-    
+ 
 } // namespace palantir
