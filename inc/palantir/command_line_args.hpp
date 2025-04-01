@@ -15,7 +15,6 @@
 #include "palantir/encryption/caesar.hpp"
 #include "palantir/encryption/vigenere.hpp"
 #include "palantir/encryption/null_encryption.hpp"
-#include "palantir/encryption/rotate.hpp"
 #include "palantir/encryption/xor.hpp"
 
 #include "palantir/message_destination/message_destination_abstract.hpp"

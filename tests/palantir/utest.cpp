@@ -10,7 +10,6 @@
 #include "palantir/encryption/caesar.hpp"
 #include "palantir/encryption/vigenere.hpp"
 #include "palantir/encryption/null_encryption.hpp"
-#include "palantir/encryption/rotate.hpp"
 #include "palantir/encryption/xor.hpp"
 
 
@@ -96,21 +95,6 @@ BEGIN_TEST(test_null_encryption)
     std::string text = "attacking tonight";
     std::string encoded = cipher.encode(text);
     ASSERT_EQUAL(encoded, text);
-    std::string decoded = cipher.decode(encoded);
-    ASSERT_EQUAL(decoded, text);
-END_TEST
-
-/*-------------------------------------------------------------------------------*/
-
-BEGIN_TEST(test_rotate_encryptor)
-    int shift = 5;
-    palantir::RotateEncryptor cipher(shift);
-    std::string text = "attackat dawn_*";
-    std::string expected_encoded = "fyyfhpfy ifbs_*";
-
-    std::string encoded = cipher.encode(text);
-    ASSERT_EQUAL(encoded, expected_encoded);
-
     std::string decoded = cipher.decode(encoded);
     ASSERT_EQUAL(decoded, text);
 END_TEST
@@ -319,8 +303,6 @@ BEGIN_SUITE()
     TEST(test_vigenere_key_same_len_as_text)
 
     TEST(test_null_encryption)
-
-    TEST(test_rotate_encryptor)
 
     TEST(test_xor_encryptor)
 

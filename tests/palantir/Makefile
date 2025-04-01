@@ -21,7 +21,6 @@ OBJS = $(SOURCES_DIR)/palantir/encryption/atbash.o \
        $(SOURCES_DIR)/palantir/udp/udp_server.o \
        $(SOURCES_DIR)/palantir/messenger.o \
        $(SOURCES_DIR)/palantir/encryption/char_encryption.o \
-       $(SOURCES_DIR)/palantir/encryption/rotate.o \
        $(SOURCES_DIR)/palantir/encryption/xor.o
 
 RUN_PALANTIR_OBJS = $(OBJS) $(SOURCES_DIR)/palantir/command_line_args.o

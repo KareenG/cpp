@@ -32,16 +32,13 @@ void CommandLineArgs::parse_args(int argc, char* argv[], InputComponents& compon
             std::string key = prompt_for_input<std::string>("Enter key for Vigenere encryption: ");
             encryption = new Vigenere(key);
         } else if (encryptType == "xor") {
-            std::string key = prompt_for_input<std::string>("Enter single character key for XOR encryption: ");
+            std::string key = prompt_for_input<std::string>("Enter key for XOR encryption: ");
             encryption = new XorEncryptor(key);
         } else if (encryptType == "caesar") {
             int shift = prompt_for_input<int>("Enter shift value for Caesar encryption: ");
             encryption = new Caesar(shift);
         } else if (encryptType == "atbash") {
             encryption = new Atbash();
-        } else if (encryptType == "rotate") {
-            int rotation = prompt_for_input<int>("Enter rotation value for Rotate encryption: ");
-            encryption = new RotateEncryptor(rotation);
         } else if (encryptType == "null") {
             encryption = new NullEncryption();
         } else {
