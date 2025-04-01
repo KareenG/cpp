@@ -270,9 +270,14 @@ END_TEST
 
 /*-------------------------------------------------------------------------------*/
 
-BEGIN_TEST(full_test_example)
+BEGIN_TEST(full_test_example_udp_to_udp)
     palantir::Rot13* rot13 = new palantir::Rot13();
-    std::vector<palantir::EncryptionAbstract*> encryptions{rot13};
+    palantir::Vigenere* vigenere = new palantir::Vigenere("LEMON");
+    palantir::Caesar* caesar = new palantir::Caesar(-7);
+    palantir::NullEncryption* null_enc = new palantir::NullEncryption();
+    palantir::Atbash* atbash = new palantir::Atbash();
+    
+    std::vector<palantir::EncryptionAbstract*> encryptions{rot13, vigenere, caesar, null_enc, atbash};
     palantir::Messenger m(encryptions);
 
     palantir::UdpSource us{1138};
@@ -284,8 +289,28 @@ BEGIN_TEST(full_test_example)
 
     std::string received = us.get_message();
 
-    ASSERT_EQUAL(received, "URYYB uryyb\n");
+    ASSERT_EQUAL(received, "BLWUS blwus\n");
     delete rot13;
+    delete vigenere;
+    delete caesar;
+    delete null_enc;
+    delete atbash;
+
+END_TEST
+
+/*-------------------------------------------------------------------------------*/
+
+BEGIN_TEST(console_to_udp_vigenere_long_input)
+    palantir::Vigenere v{"key"};
+    palantir::Messenger m{v};
+    palantir::ConsoleInput consoleInput;
+    palantir::UdpDestination udp("127.0.0.1", 4321);
+    palantir::UdpSource udp_receiver(4321);
+    std::istringstream input("The passcode is: 12345! Please confirm.");
+    std::cin.rdbuf(input.rdbuf());
+    m.process(consoleInput, udp);
+    std::string result = udp_receiver.get_message();
+    ASSERT_EQUAL(result, "Dlc zeqcgmni gc: 12345! Tjoeqo gmxjgbq.\n");
 END_TEST
 
 /*-------------------------------------------------------------------------------*/
@@ -308,7 +333,6 @@ BEGIN_SUITE()
 
     TEST(test_file_source_get_message)
 
-
     TEST(test_console_output_send_message)
     TEST(test_file_destination_send_message)
     
@@ -317,6 +341,7 @@ BEGIN_SUITE()
     TEST(test_udp_source_receive_using_udp_client)
     TEST(udp_destination_send_message_using_udp_server)
 
-    TEST(full_test_example)
+    TEST(full_test_example_udp_to_udp)
+    TEST(console_to_udp_vigenere_long_input)
 
 END_SUITE

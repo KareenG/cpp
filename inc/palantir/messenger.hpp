@@ -20,6 +20,16 @@ namespace palantir {
 class Messenger {
 public:
     /**
+     * @brief Constructs a Messenger with a single encryption.
+     *
+     * This constructor initializes the messenger with a single EncryptionAbstract reference,
+     * and adds it to the list of encryptions.
+     *
+     * @param encryption A reference to an EncryptionAbstract representing the single encryption layer to apply to messages.
+     */
+    explicit Messenger(const EncryptionAbstract& encryption);
+
+    /**
      * @brief Constructs a Messenger with a list of encryptions.
      *
      * This constructor initializes the messenger with a vector of pointers to EncryptionAbstract,

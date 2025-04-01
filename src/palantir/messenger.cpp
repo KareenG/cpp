@@ -1,6 +1,12 @@
 #include "palantir/messenger.hpp"
+#include <iostream>
 
 namespace palantir {
+
+Messenger::Messenger(const EncryptionAbstract& encryption)
+: encryptions_{const_cast<EncryptionAbstract*>(&encryption)}
+{
+}
 
 Messenger::Messenger(const std::vector<EncryptionAbstract*>& encryptions)
 : encryptions_{encryptions}
@@ -11,11 +17,10 @@ void Messenger::process(MessageSourceAbstract& src, MessageDestinationAbstract& 
 {
     while(!src.is_fully_processed()) {
         std::string message = src.get_message();
-        std::string encrypted_message;
         for (EncryptionAbstract* encryption : encryptions_) {
-            encrypted_message = encryption->encode(message);
+            message = encryption->encode(message);
         }
-        des.send_message(encrypted_message);
+        des.send_message(message);
     }
 }
         
