@@ -23,7 +23,7 @@ UdpServer::UdpServer(int port)
     server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     server_addr.sin_port = htons(port_);
 
-    if (bind(socket_id_, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+    if (bind(socket_id_, reinterpret_cast<struct sockaddr *>(&server_addr), sizeof(server_addr)) < 0) {
         std::cerr << "Failed to bind socket.\n";
         close(socket_id_);
         socket_id_ = -1;
@@ -41,13 +41,13 @@ std::string UdpServer::receive()
 {
     if (socket_id_ == -1) return "";
 
-    char buffer[1024] = {0};
+    char buffer[65'535] = {0};
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
-    int len = recvfrom(socket_id_, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&client_addr, &client_addr_len);
+    int len = recvfrom(socket_id_, buffer, sizeof(buffer) - 1, 0, reinterpret_cast<struct sockaddr *>(&client_addr), &client_addr_len);
     if (len > 0) {
         buffer[len] = '\0';
-        return std::string(buffer, len);
+        return static_cast<std::string>(buffer); // std::string(buffer, len)
     }
 
     std::cerr << "Receive failed\n";
@@ -58,7 +58,7 @@ void UdpServer::send_message(const std::string& message)
 {
     struct sockaddr_in client_addr; // Assuming client_addr is defined elsewhere if needed
     ssize_t sent_bytes = sendto(socket_id_, message.c_str(), message.size(), 0,
-                                (const struct sockaddr *)&client_addr, sizeof(client_addr));
+    reinterpret_cast<const struct sockaddr *>(&client_addr), sizeof(client_addr));
     if (sent_bytes < 0) {
         std::cerr << "Send failed\n";
         exit(EXIT_FAILURE);

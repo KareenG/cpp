@@ -28,7 +28,7 @@ public:
      */
     explicit UdpSource(int port); 
     
-    virtual ~UdpSource() override = default;
+    ~UdpSource() override = default;
 
     /**
      * @brief Retrieves the next message received via UDP.
@@ -40,7 +40,7 @@ public:
      * @return A string containing the next message received. If no messages are available,
      * it may return an empty string or block until a message is received.
      */
-    virtual std::string get_message() override;
+    std::string get_message() override;
 
     /**
      * @brief Checks if the source has been fully processed.
@@ -71,6 +71,8 @@ private:
      * 
      */
     UdpServer udp_source_;
+
+    bool is_done_;
 };
 
 }       //  namespace palantir

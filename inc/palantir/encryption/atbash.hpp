@@ -25,11 +25,11 @@ public:
      *
      * Initializes the lookup table used for encoding and decoding.
      */
-    Atbash();
+    Atbash() = default;
     
     virtual ~Atbash() override = default;
 
-protected:
+private:
     /**
      * @brief Encodes a single character using the Atbash cipher.
      * 
@@ -39,7 +39,7 @@ protected:
      * @param c The character to encode.
      * @return The encoded character.
      */
-    virtual char encode_char(char c) const override;
+    char encode(char c) override;
 
     /**
      * @brief Decodes a single character using the Atbash cipher.
@@ -50,25 +50,7 @@ protected:
      * @param c The character to decode.
      * @return The decoded character.
      */
-    virtual char decode_char(char c) const override;
-
-private:
-    /**
-     * @brief Initializes the lookup table for the Atbash cipher.
-     * 
-     * This method constructs the mapping of each character to its reverse in the 
-     * alphabet to facilitate quick encoding and decoding operations.
-     * 
-     * @return An unordered map with character mappings for the Atbash cipher.
-     */
-    std::unordered_map<char, char> initialize_LUT();
-
-private:
-    /**
-     * @brief The lookup table for character substitution.
-     * 
-     */
-    std::unordered_map<char, char> const lookup_table;
+    char decode(char c) override;
 };
 
 }       //  namespace palantir

@@ -30,7 +30,7 @@ public:
      */
     explicit FileSource(std::string const& file_name);
     
-    virtual ~FileSource() override;
+    ~FileSource() override;
 
     /**
      * @brief Retrieves the next message from the file.
@@ -41,7 +41,7 @@ public:
      * @return A string containing the next message from the file. If the end of the file is reached,
      * an empty string is returned.
      */
-    virtual std::string get_message() override;
+    std::string get_message() override;
 
     /**
      * @brief Checks if all messages from the file have been read.
@@ -51,7 +51,7 @@ public:
      *
      * @return true if all messages have been read (i.e., end of file is reached), false otherwise.
      */
-    virtual bool is_fully_processed() const override;
+    bool is_fully_processed() const override;
 
 private:
     /**

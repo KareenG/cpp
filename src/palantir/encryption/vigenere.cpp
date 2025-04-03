@@ -10,59 +10,31 @@ namespace palantir {
 Vigenere::Vigenere(std::string key)
 : key_{key}
 {
-    std::transform(key_.begin(), key_.end(), key_.begin(), [](unsigned char c) { 
+    std::transform(key_.begin(), key_.end(), key_.begin(), [](char c) { 
         return std::tolower(c); 
     });
 }
 
-std::string Vigenere::encode(std::string const& buffer) const 
+char Vigenere::encode(char c) 
 {
-    return encode_text(buffer);
+    if (std::isalpha(c)) {
+        int key_shift = key_[key_index_ % key_.size()] - 'a';
+        char base = std::isupper(c) ? 'A' : 'a';
+        ++key_index_;
+        return base + (c - base + key_shift + 26) % 26;
+    }
+    return c;
 }
 
-std::string Vigenere::decode(std::string const& buffer) const 
+char Vigenere::decode(char c) 
 {
-    return decode_text(buffer);
-}
-
-std::string Vigenere::encode_text(const std::string& text) const {
-    std::string result = text;
-    size_t text_length = text.size();
-    size_t key_length = key_.size();
-    size_t key_index = 0;
-
-    for (size_t i = 0; i < text_length; ++i) {
-        char c = text[i];
-        if (std::isalpha(c)) {
-            int key_shift = key_[key_index % key_length] - 'a';
-            char base = std::isupper(c) ? 'A' : 'a';
-
-            result[i] = base + (c - base + key_shift + 26) % 26;
-
-            key_index++;
-        }
+    if (std::isalpha(c)) {
+        int key_shift = -(key_[key_index_ % key_.size()] - 'a');
+        char base = std::isupper(c) ? 'A' : 'a';
+        ++key_index_;
+        return base + (26 + c - base + key_shift) % 26;
     }
-    return result;
-}
-
-std::string Vigenere::decode_text(const std::string& text) const {
-    std::string result = text;
-    size_t text_length = text.size();
-    size_t key_length = key_.size();
-    size_t key_index = 0;
-
-    for (size_t i = 0; i < text_length; ++i) {
-        char c = text[i];
-        if (std::isalpha(c)) {
-            int key_shift = -(key_[key_index % key_length] - 'a');
-            char base = std::isupper(c) ? 'A' : 'a';
-
-            result[i] = base + (26 + c - base + key_shift) % 26;
-
-            key_index++;
-        }
-    }
-    return result;
+    return c;
 }
 
 }       // namespace palantir

@@ -25,7 +25,7 @@ public:
      * @param buffer The string to encode.
      * @return The encoded string.
      */
-    virtual std::string encode(std::string const& buffer) const = 0;
+    virtual std::string encode(std::string const& buffer) = 0;
 
     /**
      * @brief Decode a string using the implemented encryption algorithm.
@@ -33,9 +33,9 @@ public:
      * @param buffer The string to decode.
      * @return The decoded string.
      */
-    virtual std::string decode(std::string const& buffer) const = 0;
+    virtual std::string decode(std::string const& buffer) = 0;
 
-protected:
+private:
     /**
      * @brief Copy constructor.
      * 

@@ -28,7 +28,7 @@ public:
      */
     explicit UdpDestination(const std::string& ip, int port);
 
-    virtual ~UdpDestination() override {}
+    ~UdpDestination() override {}
 
     /**
      * @brief Sends a message over UDP to the configured destination.
@@ -39,7 +39,7 @@ public:
      *
      * @param message The message to send, formatted as a string.
      */
-    virtual void send_message(const std::string& message) override;
+    void send_message(const std::string& message) override;
 
     /**
      * @brief Receives a message from the network (for debugging purposes).

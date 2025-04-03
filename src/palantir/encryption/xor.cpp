@@ -7,27 +7,14 @@ XorEncryptor::XorEncryptor(std::string key)
 {
 }
 
-std::string XorEncryptor::encode(const std::string& text) const 
+char XorEncryptor::encode(char c) 
 {
-    if (key_.empty()) {
-        return text;
-    }
-    std::string result = text;
-    size_t text_length = text.size();
-    size_t key_length = key_.size();
-    size_t key_index = 0;
-
-    for (size_t i = 0; i < text_length; ++i) {
-        result[i] = text[i] ^ key_[key_index % key_length];
-        key_index++;
-    }
-
-    return result;
+    return c ^ key_[key_index_ % key_.size()];
 }
 
-std::string XorEncryptor::decode(const std::string& text) const 
+char XorEncryptor::decode(char c) 
 {
-    return encode(text);
+    return c ^ key_[key_index_ % key_.size()];
 }
 
 }  // namespace palantir

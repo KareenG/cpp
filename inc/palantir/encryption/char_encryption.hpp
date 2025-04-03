@@ -29,7 +29,7 @@ public:
      * @param buffer The string to encode.
      * @return The encoded string.
      */
-    virtual std::string encode(std::string const& buffer) const override;
+    std::string encode(std::string const& buffer) override;
 
     /**
      * @brief Decode a string using the implemented character-based encryption algorithm.
@@ -40,8 +40,9 @@ public:
      * @param buffer The string to decode.
      * @return The decoded string.
      */
-    virtual std::string decode(std::string const& buffer) const override;
-    
+    std::string decode(std::string const& buffer) override;
+
+
 protected:
     /**
      * @brief Encode a single character.
@@ -52,7 +53,7 @@ protected:
      * @param c The character to encode.
      * @return The encoded character.
      */
-    virtual char encode_char(char c) const = 0;
+    virtual char encode(char c) = 0;
     
     /**
      * @brief Decode a single character.
@@ -63,7 +64,18 @@ protected:
      * @param c The character to decode.
      * @return The decoded character.
      */
-    virtual char decode_char(char c) const = 0;
+    virtual char decode(char c) = 0;
+
+private:
+    /**
+     * @brief Resets the key index.
+     * 
+     * Must be called before altering a giving message.
+     */
+    void reset_index();
+
+protected:
+    size_t key_index_ = 0;
 };
 
 }

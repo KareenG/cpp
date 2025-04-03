@@ -30,21 +30,21 @@ void UdpClient::send_message(const std::string& message)
     server_addr.sin_addr.s_addr = inet_addr(ip_.c_str());
     server_addr.sin_port = htons(port_);
 
-    sendto(socket_id_, message.c_str(), message.length(), 0, (struct sockaddr *)&server_addr, sizeof(server_addr));
+    sendto(socket_id_, message.c_str(), message.length(), 0, reinterpret_cast<struct sockaddr *>(&server_addr), sizeof(server_addr));
 }
 
 std::string UdpClient::receive_message() 
 {
-    char buffer[1024];
+    char buffer[65'535];
     struct sockaddr_in server_addr;
     socklen_t len = sizeof(server_addr);
-    ssize_t n = recvfrom(socket_id_, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&server_addr, &len);
+    ssize_t n = recvfrom(socket_id_, buffer, sizeof(buffer) - 1, 0, reinterpret_cast<struct sockaddr *>(&server_addr), &len);
     if (n < 0) {
         std::cerr << "Receive failed\n";
         return "";
     }
     buffer[n] = '\0';
-    return std::string(buffer);
+    return static_cast<std::string>(buffer);
 }
 
 } // namespace palantir

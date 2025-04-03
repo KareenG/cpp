@@ -5,6 +5,7 @@
 #include "mu_test.h"
 
 #include "palantir/encryption/encryption_abstract.hpp"
+//#include "palantir/encryption/char_encryption.hpp"
 #include "palantir/encryption/rot13.hpp"
 #include "palantir/encryption/atbash.hpp"
 #include "palantir/encryption/caesar.hpp"
@@ -22,13 +23,22 @@
 #include "palantir/message_destination/udp_destination.hpp"
 #include "palantir/message_source/udp_source.hpp"
 
+#include "palantir/message_destination/tcp_destination.hpp"
+#include "palantir/message_source/tcp_source.hpp"
+
 #include "palantir/udp/udp_client.hpp"
 #include "palantir/udp/udp_server.hpp"
 
+#include "palantir/tcp/tcp_client.hpp"
+#include "palantir/tcp/tcp_server.hpp"
+
 #include "palantir/messenger.hpp"
 
+#include <thread>  // For threading to simulate simultaneous actions
+
 BEGIN_TEST(test_rot13_text)
-    palantir::Rot13 cipher{};
+    palantir::Rot13 rot13{};
+    palantir::EncryptionAbstract& cipher = rot13;
     std::string text = "The quick brown fox jumps over 13 lazy dogs.";
     std::string encoded = cipher.encode(text);
     ASSERT_EQUAL(encoded, "Gur dhvpx oebja sbk whzcf bire 13 ynml qbtf.");
@@ -39,7 +49,8 @@ END_TEST
 /*-------------------------------------------------------------------------------*/
 
 BEGIN_TEST(test_atbash_text)
-    palantir::Atbash cipher{};
+    palantir::Atbash atbash{};
+    palantir::EncryptionAbstract& cipher = atbash;
     std::string text = "THE QUICK1 BROWN FOX jumps OVER the #LAZY DOG";
     std::string encoded = cipher.encode(text);
     ASSERT_EQUAL(encoded, "GSV JFRXP1 YILDM ULC qfnkh LEVI gsv #OZAB WLT");
@@ -50,7 +61,8 @@ END_TEST
 /*-------------------------------------------------------------------------------*/
 
 BEGIN_TEST(test_caesar_text)
-    palantir::Caesar cipher{11};
+    palantir::Caesar caesar{11};
+    palantir::EncryptionAbstract& cipher = caesar;
     std::string text = "THE QUICK1 BROWN FOX jumps OVER the LAZY DOG";
     std::string encoded = cipher.encode(text);
     ASSERT_EQUAL(encoded, "ESP BFTNV1 MCZHY QZI ufxad ZGPC esp WLKJ OZR");
@@ -61,7 +73,8 @@ END_TEST
 /*-------------------------------------------------------------------------------*/
 
 BEGIN_TEST(test_vigenere_key_longer_than_text)
-    palantir::Vigenere cipher("oculorhinolaryngology");
+    palantir::Vigenere vigenere{"oculorhinolaryngology"};
+    palantir::EncryptionAbstract& cipher = vigenere;
     std::string text = "attacking tonight";
     std::string encoded = cipher.encode(text);
     ASSERT_EQUAL(encoded, "ovnlqbpvt hznzeuz");
@@ -70,7 +83,9 @@ BEGIN_TEST(test_vigenere_key_longer_than_text)
 END_TEST
 
 BEGIN_TEST(test_vigenere_key_shorter_than_text)
-    palantir::Vigenere cipher("LEMON");
+    
+    palantir::Vigenere vigenere{"LEMON"};
+    palantir::EncryptionAbstract& cipher = vigenere;
     std::string text = "attackatdawn";
     std::string encoded = cipher.encode(text);
     ASSERT_EQUAL(encoded, "lxfopvefrnhr");
@@ -79,7 +94,7 @@ BEGIN_TEST(test_vigenere_key_shorter_than_text)
 END_TEST
 
 BEGIN_TEST(test_vigenere_key_same_len_as_text)
-    palantir::EncryptionAbstract *cipher = new palantir::Vigenere("LEMON");
+    palantir::EncryptionAbstract *cipher = new palantir::Vigenere{"LEMON"};
     std::string text = "HelLo";
     std::string encoded = cipher->encode(text);
     ASSERT_EQUAL(encoded, "SixZb");
@@ -91,26 +106,26 @@ END_TEST
 /*-------------------------------------------------------------------------------*/
 
 BEGIN_TEST(test_null_encryption)
-    palantir::NullEncryption cipher{};
+    palantir::EncryptionAbstract *cipher = new palantir::NullEncryption{};
     std::string text = "attacking tonight";
-    std::string encoded = cipher.encode(text);
+    std::string encoded = cipher->encode(text);
     ASSERT_EQUAL(encoded, text);
-    std::string decoded = cipher.decode(encoded);
+    std::string decoded = cipher->decode(encoded);
     ASSERT_EQUAL(decoded, text);
 END_TEST
 
 /*-------------------------------------------------------------------------------*/
 
 BEGIN_TEST(test_xor_encryptor)
-    std::string key = "\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F";
-    palantir::XorEncryptor cipher{key};
+    std::string key = "\x1F"; // \x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F\x1F
+    palantir::EncryptionAbstract *cipher = new palantir::XorEncryptor{key};
     std::string text = "attacking tonight";
 
-    std::string encoded = cipher.encode(text);
+    std::string encoded = cipher->encode(text);
     // Assuming the encoded string from your test setup
     ASSERT_EQUAL(encoded, "~kk~|tvqx?kpqvxwk");
 
-    std::string decoded = cipher.decode(encoded);
+    std::string decoded = cipher->decode(encoded);
     ASSERT_EQUAL(decoded, text);
 END_TEST
 
@@ -271,11 +286,11 @@ END_TEST
 /*-------------------------------------------------------------------------------*/
 
 BEGIN_TEST(full_test_example_udp_to_udp)
-    palantir::Rot13* rot13 = new palantir::Rot13();
-    palantir::Vigenere* vigenere = new palantir::Vigenere("LEMON");
-    palantir::Caesar* caesar = new palantir::Caesar(-7);
-    palantir::NullEncryption* null_enc = new palantir::NullEncryption();
-    palantir::Atbash* atbash = new palantir::Atbash();
+    palantir::EncryptionAbstract* rot13 = new palantir::Rot13();
+    palantir::EncryptionAbstract* vigenere = new palantir::Vigenere("LEMON");
+    palantir::EncryptionAbstract* caesar = new palantir::Caesar(-7);
+    palantir::EncryptionAbstract* null_enc = new palantir::NullEncryption();
+    palantir::EncryptionAbstract* atbash = new palantir::Atbash();
     
     std::vector<palantir::EncryptionAbstract*> encryptions{rot13, vigenere, caesar, null_enc, atbash};
     palantir::Messenger m(encryptions);
@@ -315,7 +330,61 @@ END_TEST
 
 /*-------------------------------------------------------------------------------*/
 
-BEGIN_SUITE()
+// BEGIN_TEST(test_tcp_source_receive_using_tcp_client)
+//     // Setup UdpSource to receive messages
+//     palantir::TcpSource tcpSource{1144};
+//     std::string expected_result{"Hello"};
+    
+//     // Setup UdpClient to send message to UdpSource
+//     palantir::TcpClient tcpClient("127.0.0.1", 1144);
+
+//     ASSERT_THAT(tcpClient.connect_to_server());
+
+//     tcpClient.send_message(expected_result);
+    
+//     std::string result = tcpSource.get_message();
+//     tcpClient.close_connection();
+//     ASSERT_EQUAL(result, expected_result);
+// END_TEST
+
+// BEGIN_TEST(test_tcp_source_receive_using_tcp_client)
+//     // Setup TcpSource to receive messages
+//     palantir::TcpSource tcpSource(1144);  // Listen on port 1144
+//     std::string expected_result{"Hello"};
+//     sleep(1);
+//     // Create TcpClient and connect to the server (TcpSource)
+//     palantir::TcpClient tcpClient("127.0.0.1", 1144);
+
+//     // Ensure the client successfully connects before sending the message
+//     ASSERT_THAT(tcpClient.connect_to_server());
+
+//     // Send the message from TcpClient to TcpSource in a separate thread
+//     std::thread clientThread([&] {
+//         // Send message from TcpClient to TcpSource
+//         tcpClient.send_message(expected_result);
+        
+//         // Close the client connection immediately after sending the message
+//         tcpClient.close_connection();
+//     });
+
+//     // Retrieve the message from TcpSource
+//     std::string result = tcpSource.get_message();
+
+//     // Ensure that the message received matches the expected result
+//     ASSERT_EQUAL(result, expected_result);
+
+//     // Join the client thread to ensure it's completed
+//     clientThread.join();
+
+//     // Verify that the TcpSource handled the client's disconnection properly
+//     ASSERT_THAT(tcpSource.is_fully_processed());
+
+// END_TEST
+
+
+/*-------------------------------------------------------------------------------*/
+
+BEGIN_SUITE(palantir_tests)
 
     TEST(test_rot13_text)
 
@@ -343,5 +412,9 @@ BEGIN_SUITE()
 
     TEST(full_test_example_udp_to_udp)
     TEST(console_to_udp_vigenere_long_input)
+
+    //TEST(test_tcp_source_receive_using_tcp_client)
+
+    //TEST(test_tcp_source_receive_using_tcp_client)
 
 END_SUITE

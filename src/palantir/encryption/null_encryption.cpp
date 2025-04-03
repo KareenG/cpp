@@ -2,12 +2,12 @@
 
 namespace palantir {
     
-char NullEncryption::encode_char(char c) const 
+char NullEncryption::encode(char c) 
 {
     return c;
 }
 
-char NullEncryption::decode_char(char c) const 
+char NullEncryption::decode(char c) 
 {
     return c;
 }

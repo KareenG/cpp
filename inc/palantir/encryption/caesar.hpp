@@ -1,9 +1,6 @@
 #pragma once
 
-#include <string>
-#include <unordered_map>
-
-#include "palantir/encryption/char_encryption.hpp"
+#include "palantir/encryption/rotate.hpp"
 
 namespace palantir {
 
@@ -17,7 +14,7 @@ namespace palantir {
  * technique, characterized by shifting letters by a predefined number. The class
  * can handle both encoding and decoding, applying the inverse shift for decoding.
  */
-class Caesar : public CharEncryptor {
+class Caesar : public RotateCharEncryptor { //CharEncryptor
 public:
     /**
      * @brief Constructs a Caesar cipher object with a specific shift.
@@ -30,8 +27,37 @@ public:
     explicit Caesar(int shift = 3);
     
     virtual ~Caesar() override = default;
+};
 
-protected:
+}       //  namespace palantir
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//#include "palantir/encryption/char_encryption.hpp"
+//private:
     /**
      * @brief Encodes a single character using the Caesar cipher shift.
      * 
@@ -41,7 +67,7 @@ protected:
      * @param c The character to encode.
      * @return The encoded character.
      */
-    virtual char encode_char(char c) const override;
+    //char encode(char c) override;
 
     /**
      * @brief Decodes a single character that was encoded using the Caesar cipher shift.
@@ -52,9 +78,9 @@ protected:
      * @param c The character to decode.
      * @return The decoded character.
      */
-    virtual char decode_char(char c) const override;
+    //char decode(char c) override;
 
-private:
+//private:
     /**
      * @brief Shifts a single character by the specified shift value.
      *
@@ -65,11 +91,7 @@ private:
      * @param shift The amount to shift the character.
      * @return The shifted character.
      */
-    char shift_char(const char c, int shift) const;
+    //char shift_char(const char c, int shift);
 
-private:
-    int shift_;
-};
-
-}       //  namespace palantir
-
+// private:
+//     int shift_;

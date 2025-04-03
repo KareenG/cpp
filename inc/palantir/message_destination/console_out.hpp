@@ -29,7 +29,8 @@ public:
      *               output stream. Defaults to std::cout.
      */
     ConsoleOutput(std::ostream& output = std::cout);
-    virtual ~ConsoleOutput() override = default;
+    
+    ~ConsoleOutput() override = default;
 
     /**
      * @brief Sends a message to the designated output stream.
@@ -40,7 +41,7 @@ public:
      *
      * @param message The string message to be sent to the output stream.
      */
-    virtual void send_message(const std::string& message) override;
+    void send_message(const std::string& message) override;
 
 private:
     /**

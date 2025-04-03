@@ -30,7 +30,7 @@ public:
      */
     ConsoleInput(std::istream& input = std::cin);
 
-    virtual ~ConsoleInput() override = default;
+    ~ConsoleInput() override = default;
 
     /**
      * @brief Retrieves a message from the configured input stream.
@@ -41,7 +41,7 @@ public:
      *
      * @return A string containing the message read from the input stream.
      */
-    virtual std::string get_message() override;
+    std::string get_message() override;
 
     /**
      * @brief Checks if the input source has been fully processed.
@@ -51,7 +51,7 @@ public:
      *
      * @return true if the end of the stream has been reached, false otherwise.
      */
-    virtual bool is_fully_processed() const override;
+    bool is_fully_processed() const override;
 
 private:
     /**

@@ -20,6 +20,9 @@ void CommandLineArgs::parse_args(int argc, char* argv[], InputComponents& compon
         components.source_ = new UdpSource(port);
     } else if (sourceType == "console") {
         components.source_ = new ConsoleInput();
+    } else if (sourceType == "tcp") {
+        int port = prompt_for_input<int>("Enter port for TCP source: ");
+        components.source_ = new TcpSource(port);
     }
     
     // Parse encryption types
@@ -58,6 +61,10 @@ void CommandLineArgs::parse_args(int argc, char* argv[], InputComponents& compon
         components.destination_ = new UdpDestination(ip, port);
     } else if (destType == "console") {
         components.destination_ = new ConsoleOutput();
+    } else if (sourceType == "tcp") {
+        std::string ip = prompt_for_input<std::string>("Enter IP for TCP destination: ");
+        int port = prompt_for_input<int>("Enter port for TCP destination: ");
+        components.destination_ = new TcpDestination(ip, port);
     }
 
     if (!components.source_ || components.encryptions_.empty() || !components.destination_) {

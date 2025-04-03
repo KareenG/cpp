@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "palantir/encryption/char_encryption.hpp"
+#include "palantir/encryption/rotate.hpp"
 
 namespace palantir {
 
@@ -17,19 +17,36 @@ namespace palantir {
  * developed in ancient Rome. Since the cipher operates by using rotations, encoding and decoding
  * are performed by the same operation.
  */
-class Rot13 : public CharEncryptor {
+class Rot13 : public RotateCharEncryptor { //CharEncryptor
 public:
     /**
      * @brief Constructs a Rot13 cipher object.
-     *
-     * This constructor initializes the Rot13 cipher instance by setting up a lookup table
-     * for quick character transformation.
      */
     Rot13();
     
     virtual ~Rot13() override = default;
+};
 
-protected:
+}       //  namespace palantir
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//#include "palantir/encryption/char_encryption.hpp"
+//Rot13() = default;
+//private:
     /**
      * @brief Encodes a single character using the ROT13 cipher.
      * 
@@ -39,7 +56,7 @@ protected:
      * @param c The character to encode.
      * @return The encoded character, which is the same as the decoded character in ROT13.
      */
-    virtual char encode_char(char c) const override;
+    //char encode(char c) override;
 
     /**
      * @brief Decodes a single character using the ROT13 cipher.
@@ -50,26 +67,22 @@ protected:
      * @param c The character to decode.
      * @return The decoded character.
      */
-    virtual char decode_char(char c) const override;
+    //char decode(char c) override;
 
-private:
-    /**
-     * @brief Initializes the lookup table for the ROT13 cipher.
-     *
-     * Constructs the mapping for each character to its counterpart 13 characters away
-     * in the alphabet.
-     * 
-     * @return An unordered map with character mappings for the ROT13 cipher.
-     */
-    std::unordered_map<char, char> initialize_LUT();
+// private:
+//     /**
+//      * @brief Initializes the lookup table for the ROT13 cipher.
+//      *
+//      * Constructs the mapping for each character to its counterpart 13 characters away
+//      * in the alphabet.
+//      * 
+//      * @return An unordered map with character mappings for the ROT13 cipher.
+//      */
+//     std::unordered_map<char, char> initialize_LUT();
 
-private:
-    /**
-     * @brief Lookup table for quick ROT13 transformation.
-     * 
-     */
-    std::unordered_map<char, char> const lookup_table;
-};
-
-}       //  namespace palantir
-
+// private:
+//     /**
+//      * @brief Lookup table for quick ROT13 transformation.
+//      * 
+//      */
+//     std::unordered_map<char, char> const lookup_table;

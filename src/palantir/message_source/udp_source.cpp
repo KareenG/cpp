@@ -7,28 +7,22 @@ namespace palantir {
 
 UdpSource::UdpSource(int port) 
 : udp_source_{port}
+, is_done_{false}
 {
 }
 
 std::string UdpSource::get_message() 
 {
-    return udp_source_.receive();
+    std::string message = udp_source_.receive();
+    if(message.find("#EOT#") != std::string::npos) {
+        is_done_ = true;
+    }
+    return message;
 }
 
 bool UdpSource::is_fully_processed() const 
 {
-    std::cout << "Select an option:\n";
-    std::cout << "1. Wait for a message\n";
-    std::cout << "2. Stop\n";
-    int choice;
-    std::cin >> choice;
-
-    if (choice == 2) {
-        return true;
-    } else {
-        std::cout << "Continuing to wait for messages...\n";
-    }
-    return false;
+    return is_done_;
 }
 
 //DEBUG

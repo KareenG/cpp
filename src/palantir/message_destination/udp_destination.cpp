@@ -13,7 +13,7 @@ void UdpDestination::send_message(const std::string& message)
     udp_client_.send_message(message);
 }
 
-//DEBUG
+//D
 std::string UdpDestination::receive_message() {
     return udp_client_.receive_message();
 }

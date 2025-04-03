@@ -26,7 +26,8 @@ public:
      * @param file_name The name of the file to write messages to.
      */
     explicit FileDestination(const std::string& file_name);
-    virtual ~FileDestination() override;
+    
+    ~FileDestination() override;
 
     /**
      * @brief Sends a message to the associated file.
@@ -36,7 +37,7 @@ public:
      *
      * @param message The string message to be written to the file.
      */
-    virtual void send_message(const std::string& message) override;
+    void send_message(const std::string& message) override;
 
 private:
     /**

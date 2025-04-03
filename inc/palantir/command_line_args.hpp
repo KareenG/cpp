@@ -8,6 +8,7 @@
 #include "palantir/message_source/file_source.hpp"
 #include "palantir/message_source/console_in.hpp"
 #include "palantir/message_source/udp_source.hpp"
+#include "palantir/message_source/tcp_source.hpp"
 
 #include "palantir/encryption/encryption_abstract.hpp"
 #include "palantir/encryption/rot13.hpp"
@@ -21,6 +22,7 @@
 #include "palantir/message_destination/file_destination.hpp"
 #include "palantir/message_destination/console_out.hpp"
 #include "palantir/message_destination/udp_destination.hpp"
+#include "palantir/message_destination/tcp_destination.hpp"
 
 namespace palantir {
 

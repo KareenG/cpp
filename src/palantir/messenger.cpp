@@ -3,12 +3,12 @@
 
 namespace palantir {
 
-Messenger::Messenger(const EncryptionAbstract& encryption)
+Messenger::Messenger(EncryptionAbstract const& encryption)
 : encryptions_{const_cast<EncryptionAbstract*>(&encryption)}
 {
 }
 
-Messenger::Messenger(const std::vector<EncryptionAbstract*>& encryptions)
+Messenger::Messenger(std::vector<EncryptionAbstract*> const& encryptions)
 : encryptions_{encryptions}
 {
 }

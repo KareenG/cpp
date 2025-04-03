@@ -3,7 +3,7 @@
 #include <string>
 #include <array>
 
-#include "palantir/encryption/encryption_abstract.hpp"
+#include "palantir/encryption/char_encryption.hpp"
 
 namespace palantir {
 
@@ -18,7 +18,7 @@ namespace palantir {
  * the Vigenère cipher, which is based on the Caesar cipher but uses a series of shifts
  * determined by a keyword.
  */
-class Vigenere : public EncryptionAbstract { 
+class Vigenere : public CharEncryptor { 
 public:
      /**
      * @brief Constructs a Vigenere cipher object with a specific key.
@@ -31,54 +31,25 @@ public:
      */
     explicit Vigenere(std::string key);
     
-    virtual ~Vigenere() override = default;
-
-     /**
-     * @brief Encodes a string using the Vigenère cipher.
-     *
-     * Applies the Vigenère cipher to the input buffer using the initialized key,
-     * returning the encrypted text. Non-alphabetic characters in the buffer are not
-     * altered.
-     *
-     * @param buffer The string to encode.
-     * @return The encoded string.
-     */
-    virtual std::string encode(std::string const& buffer) const override;
-
-    /**
-     * @brief Decodes a string that was encrypted using the Vigenère cipher.
-     *
-     * Reverses the Vigenère cipher on the input buffer using the same key that was used for
-     * encoding, returning the original plaintext. Non-alphabetic characters in the buffer
-     * are not altered.
-     *
-     * @param buffer The string to decode.
-     * @return The decoded string.
-     */
-    virtual std::string decode(std::string const& buffer) const override;
+    ~Vigenere() override = default;
 
 private:
-     /**
-     * @brief Helper method to encode text using the Vigenère cipher.
+    /**
+     * @brief Encodes a character using the Vigenère cipher.
      *
-     * This method is a utility to handle the encoding process by applying the key
-     * to each character in the input text based on the Vigenère algorithm.
-     *
-     * @param text The plaintext to encode.
-     * @return The encoded text.
+     * @param c The character to encode.
+     * @return The encoded character.
      */
-    std::string encode_text(const std::string& text) const;
+    char encode(char c) override;
 
     /**
-     * @brief Helper method to decode text using the Vigenère cipher.
+     * @brief Decodes a character that was encoded using the Vigenère cipher.
      *
-     * This method is a utility to handle the decoding process by reversing the key
-     * application to each character in the input text based on the Vigenère algorithm.
-     *
-     * @param text The ciphertext to decode.
-     * @return The decoded text.
+     * @param c The character to decode.
+     * @return The decoded character.
      */
-    std::string decode_text(const std::string& text) const;
+    char decode(char c) override;
+    //void set_key_index();
 
 private:
     /**
@@ -90,3 +61,70 @@ private:
 
 }       //  namespace palantir
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//#include "palantir/encryption/encryption_abstract.hpp"
+
+/**
+     * @brief Encodes a string using the Vigenère cipher.
+     *
+     * Applies the Vigenère cipher to the input buffer using the initialized key,
+     * returning the encrypted text. Non-alphabetic characters in the buffer are not
+     * altered.
+     *
+     * @param buffer The string to encode.
+     * @return The encoded string.
+     */
+    //std::string encode(std::string const& buffer) override;
+
+    /**
+     * @brief Decodes a string that was encrypted using the Vigenère cipher.
+     *
+     * Reverses the Vigenère cipher on the input buffer using the same key that was used for
+     * encoding, returning the original plaintext. Non-alphabetic characters in the buffer
+     * are not altered.
+     *
+     * @param buffer The string to decode.
+     * @return The decoded string.
+     */
+    //std::string decode(std::string const& buffer) override;
+
+  /**
+     * @brief Helper method to encode text using the Vigenère cipher.
+     *
+     * This method is a utility to handle the encoding process by applying the key
+     * to each character in the input text based on the Vigenère algorithm.
+     *
+     * @param text The plaintext to encode.
+     * @return The encoded text.
+     */
+    //std::string encode_text(const std::string& text);
+
+    /**
+     * @brief Helper method to decode text using the Vigenère cipher.
+     *
+     * This method is a utility to handle the decoding process by reversing the key
+     * application to each character in the input text based on the Vigenère algorithm.
+     *
+     * @param text The ciphertext to decode.
+     * @return The decoded text.
+     */
+    //std::string decode_text(const std::string& text);

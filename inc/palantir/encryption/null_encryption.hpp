@@ -22,13 +22,14 @@ public:
     
     virtual ~NullEncryption() override = default;
 
+private:
     /**
      * @brief Encodes a character by returning it unchanged.
      *
      * @param c The character to encode.
      * @return The unchanged character.
      */
-    virtual char encode_char(char c) const override;
+    char encode(char c) override;
 
     /**
      * @brief Decodes a character by returning it unchanged.
@@ -36,7 +37,8 @@ public:
      * @param c The character to decode.
      * @return The unchanged character.
      */
-    virtual char decode_char(char c) const override;
+    char decode(char c) override;
+
 };
 
 }       //  namespace palantir

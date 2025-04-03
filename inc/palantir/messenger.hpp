@@ -27,7 +27,7 @@ public:
      *
      * @param encryption A reference to an EncryptionAbstract representing the single encryption layer to apply to messages.
      */
-    explicit Messenger(const EncryptionAbstract& encryption);
+    explicit Messenger(EncryptionAbstract const& encryption);
 
     /**
      * @brief Constructs a Messenger with a list of encryptions.
@@ -38,7 +38,7 @@ public:
      * @param encryptions A vector of pointers to EncryptionAbstract representing the sequence
      *                    of encryption layers to apply to messages.
      */
-    explicit Messenger(const std::vector<EncryptionAbstract*>& encryptions);
+    explicit Messenger(std::vector<EncryptionAbstract*> const& encryptions);
 
     ~Messenger() = default;
 
