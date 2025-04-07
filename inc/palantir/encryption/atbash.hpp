@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "palantir/encryption/char_encryption.hpp"
+#include "palantir/encryption/key_base_encryptor.hpp"
 
 namespace palantir {
 
@@ -18,7 +18,7 @@ namespace palantir {
  * and so forth. This class provides methods to encode and decode strings using 
  * this cipher method, relying on a lookup table for fast character substitution.
  */
-class Atbash : public CharEncryptor {
+class Atbash : public KeyBaseEncryptor {
 public:
     /**
      * @brief Constructs an Atbash cipher object.

@@ -17,6 +17,8 @@ namespace palantir {
  */
 class RotateCharEncryptor : public EncryptionAbstract {
 public:
+    explicit RotateCharEncryptor(int shift = 0);
+
     virtual ~RotateCharEncryptor() = default;
 
     /**
@@ -36,14 +38,6 @@ public:
      */
     std::string decode(std::string const& buffer) override;
 
-protected:
-    /**
-     * @brief Sets the character shift used for encoding and decoding.
-     *
-     * @param shift The number of positions each character is shifted in the cipher.
-     */
-    void set_shift(int shift);
-
 private:
     /**
      * @brief Shifts a single character by the specified shift value.
@@ -58,11 +52,7 @@ private:
     char shift_element(const char c, int shift);
 
 private:
-    /**
-     * @brief The shift amount used for encoding and decoding.
-     * 
-     */
-    int shift_ = 0;
+    int shift_;
 };
 
 }       // namespace palantir

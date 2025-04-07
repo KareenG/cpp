@@ -1,68 +1,88 @@
 #pragma once
 
 #include <string>
-#include <netinet/in.h> // Necessary for network communication structures
 
-namespace palantir {
+namespace net {
+
+class TcpServer; // Forward declare TcpServer
 
 class TcpClient {
 public:
     /**
-     * @brief Constructs a TcpClient configured to communicate with a specific IP and port.
+     * @brief Constructs a TcpClient to communicate with a specific IP and port.
      *
-     * Initializes the network settings for TCP communication, setting up the socket and
-     * configuring it to target a specific destination. If the socket fails to create, it
-     * throws a runtime_error.
+     * This constructor initializes network settings for TCP communication by setting up the
+     * socket and configuring its connection parameters to a specific IP and port. If the socket
+     * fails to create, a std::runtime_error is thrown.
      *
-     * @param ip The IP address of the target destination for messages.
-     * @param port The port number at the destination to which messages will be sent.
+     * @param ip The IP address of the target server.
+     * @param port The port number on the server for communications.
      */
-    TcpClient(const std::string& ip, int port);
+    explicit TcpClient(const std::string& ip, int port);
 
     /**
-     * @brief Destructor.
+     * @brief Constructs a TcpClient using an existing socket descriptor.
      *
-     * Ensures that the TCP socket is properly closed, releasing any associated resources.
+     * This constructor sets up the TcpClient with an existing socket descriptor, allowing
+     * use of an already created and configured socket.
+     *
+     * @param socket The existing socket descriptor to use.
      */
-    ~TcpClient();
+    //explicit TcpClient(int socket); //friend TcpClient TcpServer::accept_client();
 
     /**
-     * @brief Connects to the server.
+     * @brief Destructor that closes the TCP socket.
      *
-     * This method establishes a connection to the server at the given IP address and port.
-     *
-     * @return true if the connection was successful, false otherwise.
+     * Cleans up by ensuring that the TCP socket is properly closed, thereby releasing any
+     * network resources associated with this client.
      */
-    bool connect_to_server();
+    ~TcpClient() noexcept;
 
     /**
-     * @brief Closes the client connection.
-     */
-    void close_connection();
-
-    /**
-     * @brief Sends a message to the server.
+     * @brief Sends a message to the server and returns the status.
      *
-     * This method sends a message to the server over the established connection.
+     * Attempts to send a message to the server over the established connection. It returns
+     * a pair where the first element is the status code (0 for success, non-zero for error)
+     * and the second element is a message describing the status.
      *
-     * @param message The message to send.
+     * @param message The message to be sent to the server.
+     * @return std::pair<int, std::string> indicating the result of the send operation.
      */
     void send_message(const std::string& message);
 
     /**
-     * @brief Receives a message from the server.
+     * @brief Receives a message from the server and returns the status.
      *
-     * This method receives a message from the server.
+     * Waits for and receives a message from the server. It returns a pair where the first
+     * element is the status code (0 for success, non-zero for error) and the second element
+     * is the message received or an error description.
      *
-     * @return A string containing the message received from the server.
+     * @return std::pair<int, std::string> containing the message received and the receive status.
      */
-    std::string receive_message();
+    std::string receive_message(size_t lenght);
 
 private:
-    std::string ip_;
-    int port_;
+    int create_socket();
+    void attempt_connect(const std::string& ip, int port);
+    std::pair<int, std::string> handle_send_error(int err);
+    std::pair<int, std::string> handle_recv_error(int err);
+
+    // Private constructor that only TcpServer can use
+    /**
+     * @brief Constructs a TcpClient using an existing socket descriptor.
+     *
+     * This constructor sets up the TcpClient with an existing socket descriptor, allowing
+     * use of an already created and configured socket.
+     *
+     * @param socket The existing socket descriptor to use.
+     */
+    explicit TcpClient(int socket); // : socket_id_(socket) {}
+    friend class TcpServer;// TcpServer::accept_client();
+    // Declare TcpServer's accept_client function as a friend
+    
+
+private:
     int socket_id_;
-    bool connected_;
 };
 
-} // namespace palantir
+} // namespace net

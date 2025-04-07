@@ -4,92 +4,134 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <system_error>
+//#include <boost/system.hpp>
+
+#include "net/exceptions.hpp"
+
 #include <cassert>
 
-#include "palantir/tcp/tcp_client.hpp"
+#include "net/tcp/tcp_client.hpp"
+#include <vector>
 
-namespace palantir {
+namespace net {
 
-TcpClient::TcpClient(const std::string& ip, int port)
-: ip_{ip}
-, port_{port}
-, socket_id_{-1}
-, connected_{false}
+TcpClient::TcpClient(int socket)
+: socket_id_{socket}
 {
 }
+// keeeeeeeeeeeeeeeeeeeeeeeep
+// TcpClient::TcpClient(const std::string& ip, int port) 
+// {
+//     socket_id_ = create_socket();
+//     if (!attempt_connect(ip, port)) {
+//         close(socket_id_);
+//         socket_id_ = create_socket();
+//         if (!attempt_connect(ip, port)) {
+//             close(socket_id_);
+//             throw SocketException(errno, "Failed to connect to server after two attempts");
+//         }
+//     }
+// }
 
-TcpClient::~TcpClient() 
+TcpClient::TcpClient(const std::string& ip, int port) 
 {
-    close_connection();
-}
-
-bool TcpClient::connect_to_server() {
-    if (connected_) {
-        std::cerr << "Already connected to server.\n";
-        return false;
-    }
-
-    socket_id_ = socket(AF_INET, SOCK_STREAM, 0);
-    if (socket_id_ < 0) {
-        std::cerr << "Failed to create socket.\n";
-        return false;
-    }
-
-    struct sockaddr_in server_addr;
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr(ip_.c_str());
-    server_addr.sin_port = htons(port_);
-
-    if (connect(socket_id_, reinterpret_cast<struct sockaddr*>(&server_addr), sizeof(server_addr)) < 0) {
-        std::cerr << "Connection failed.\n";
-        close(socket_id_);
-        socket_id_ = -1;
-        return false;
-    }
-
-    connected_ = true;
-    std::cout << "Connected to server.\n";
-    return true;
-}
-
-void TcpClient::close_connection() {
-    if (socket_id_ != -1) {
-        close(socket_id_);
-        socket_id_ = -1;
-        connected_ = false;
-        std::cout << "Connection closed.\n";
-    }
-}
-
-void TcpClient::send_message(const std::string& message) {
-    if (!connected_) {
-        std::cerr << "Not connected to server.\n";
-        return;
-    }
-
-    if (send(socket_id_, message.c_str(), message.length(), 0) < 0) {
-        std::cerr << "Send failed.\n";
-        close_connection();
-    }
-}
-
-std::string TcpClient::receive_message() {
-    if (!connected_) {
-        std::cerr << "Not connected to server.\n";
-        return "";
-    }
-
-    char buffer[1024];
-    ssize_t n = recv(socket_id_, buffer, sizeof(buffer) - 1, 0);
-    if (n < 0) {
-        std::cerr << "Receive failed.\n";
-        close_connection();
-        return "";
+    try {
+        socket_id_ = create_socket();
+    } catch (...) {
+        throw;
     }
     
-    buffer[n] = '\0';
-    return std::string(buffer);
+    try {
+        attempt_connect(ip, port);
+    } catch (...) {  
+        throw;                
+    }
 }
 
-} // namespace palantir
+TcpClient::~TcpClient() noexcept
+{
+    if (close(socket_id_) == -1) {
+        std::cerr << "Failed to close socket: " << strerror(errno) << '\n';
+        // Handle the error, e.g., logging to a file or error monitoring system
+    }
+}
+
+int TcpClient::create_socket()
+{
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) {
+        throw CreateSocketException(errno);
+    }
+    
+    return sock;
+}
+
+void TcpClient::attempt_connect(const std::string& ip, int port) 
+{
+    struct sockaddr_in server_addr;
+    std::fill(reinterpret_cast<char*>(&server_addr), reinterpret_cast<char*>(&server_addr) + sizeof(server_addr), 0);
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr(ip.c_str());
+    server_addr.sin_port = htons(port);
+
+    if (connect(socket_id_, (struct sockaddr *)&server_addr, sizeof(server_addr)) != 0) {
+        throw ConnectException(errno);
+    }
+}
+
+/*--------------------------------------------------------------------------------------------------*/
+
+void TcpClient::send_message(const std::string& message)
+{
+    size_t total = 0; // how many bytes we've sent
+    size_t length = message.length();
+    ssize_t result;
+
+    while (total < length) {
+        result = send(socket_id_, message.c_str() + total, length - total, 0);
+        if (result < 0) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                // If no data is sent, try again.
+                continue;
+            }
+            throw SendException(errno);//return handle_send_error(errno);
+        }
+        total += result; // increment total bytes sent
+    }
+}
+
+std::string TcpClient::receive_message(size_t lenght)
+{
+    std::vector<char> buffer(lenght);
+    std::string data;
+    ssize_t n = 0;
+
+    while (true) {
+        n = recv(socket_id_, buffer.data(), buffer.size(), 0);
+        if (n < 0) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                // If no data is received, and it's due to the buffer being temporarily unavailable, retry.
+                continue;
+            }
+            throw ReceiveException(errno);//handle_recv_error(errno);
+            //return 
+        }
+        if (n == 0) {
+            // If n is 0, the connection has been closed by the peer.
+            break;
+        }
+        // Append received data to the data string
+        data.append(buffer.begin(), buffer.begin() + n);
+
+        // Optionally, you can check for message completion or delimiters here if needed.
+    }
+
+    if (data.empty()) {
+        return "";//{-1, "No data received, connection might be closed"};
+    }
+    return data;
+}
+
+} // namespace net
+

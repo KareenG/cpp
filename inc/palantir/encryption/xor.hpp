@@ -1,6 +1,6 @@
 #pragma once
 
-#include "palantir/encryption/char_encryption.hpp"
+#include "palantir/encryption/key_base_encryptor.hpp"
 
 namespace palantir {
 
@@ -21,7 +21,7 @@ namespace palantir {
  * assert(decrypted == "Hello World");
  * ```
  */
-class XorEncryptor : public CharEncryptor {
+class XorEncryptor : public KeyBaseEncryptor {
 public:
     /**
      * @brief Constructs a new Xor Encryptor object with the given key.
@@ -36,13 +36,6 @@ public:
 private:
     char encode(char c) override;
     char decode(char c) override;
-
-private:
-    /**
-     * @brief The key used for XOR encryption.
-     * 
-     */
-    std::string key_;
 };
 
 }  // namespace palantir

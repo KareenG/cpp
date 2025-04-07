@@ -1,7 +1,7 @@
 #pragma once
 
 #include "palantir/message_destination/message_destination_abstract.hpp"
-#include "palantir/tcp/tcp_client.hpp"
+#include "net/tcp/tcp_client.hpp"
 
 namespace palantir {
 
@@ -34,7 +34,7 @@ public:
      *
      * Ensures the proper closure of the TCP connection and cleanup of resources.
      */
-    ~TcpDestination() override;
+    ~TcpDestination() override = default;
 
     /**
      * @brief Sends a message over TCP to the configured destination.
@@ -61,7 +61,7 @@ private:
     /**
      * @brief The TCP client used for sending and optionally receiving messages.
      */
-    TcpClient tcp_client_;
+    net::TcpClient tcp_client_;
 };
 
 } // namespace palantir

@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "palantir/encryption/char_encryption.hpp"
+#include "palantir/encryption/key_base_encryptor.hpp"
 
 namespace palantir {
 
@@ -16,7 +16,7 @@ namespace palantir {
  * simply return the input character unchanged. This can be useful in contexts where 
  * optional encryption is needed, and sometimes no encryption should be applied.
  */
-class NullEncryption : public CharEncryptor {
+class NullEncryption : public KeyBaseEncryptor {
 public:
     NullEncryption() = default;
     

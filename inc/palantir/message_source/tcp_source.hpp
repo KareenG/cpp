@@ -1,7 +1,7 @@
 #pragma once
 
 #include "palantir/message_source/message_source_abstract.hpp"
-#include "palantir/tcp/tcp_server.hpp"
+#include "net/tcp/tcp_server.hpp"
 
 namespace palantir {
 
@@ -30,7 +30,7 @@ public:
      *
      * Ensures the proper closure of the server's connection and cleanup of resources.
      */
-    ~TcpSource() override;
+    ~TcpSource() override = default;
 
     /**
      * @brief Retrieves a message from the connected client over TCP.
@@ -51,20 +51,7 @@ public:
     bool is_fully_processed() const override;
 
 private:
-    /**
-     * @brief The TCP server used to accept and manage client connections.
-     * 
-     */
-    TcpServer tcp_server_;
-    /**
-     * @brief The socket used to communicate with the connected client.
-     * 
-     */
-    int client_socket_;
-    /**
-     * @brief Flag to indicate if all messages have been processed.
-     * 
-     */
+    net::TcpServer tcp_server_;
     bool fully_processed_;
 };
 

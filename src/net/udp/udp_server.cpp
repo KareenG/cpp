@@ -4,12 +4,12 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h> // for close
-#include "palantir/udp/udp_server.hpp"
+#include "net/udp/udp_server.hpp"
 
-namespace palantir {
+namespace net {
 
 UdpServer::UdpServer(int port)
-: port_(port) 
+//: port_(port) 
 {
     socket_id_ = socket(AF_INET, SOCK_DGRAM, 0);
     if (socket_id_ < 0) {
@@ -21,7 +21,7 @@ UdpServer::UdpServer(int port)
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    server_addr.sin_port = htons(port_);
+    server_addr.sin_port = htons(port);
 
     if (bind(socket_id_, reinterpret_cast<struct sockaddr *>(&server_addr), sizeof(server_addr)) < 0) {
         std::cerr << "Failed to bind socket.\n";

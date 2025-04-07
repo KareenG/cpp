@@ -4,7 +4,12 @@
 #include "palantir/encryption/rotate.hpp"
 
 namespace palantir {
-   
+
+RotateCharEncryptor::RotateCharEncryptor(int shift)
+: shift_{shift}
+{
+}
+
 std::string RotateCharEncryptor::encode(std::string const& buffer) {
     std::string decoded;
     for (char c : buffer) {
@@ -21,10 +26,10 @@ std::string RotateCharEncryptor::decode(std::string const& buffer) {
     return decoded;
 }
 
-void RotateCharEncryptor::set_shift(int shift)
-{
-    shift_ = shift;
-}
+// void RotateCharEncryptor::set_shift(int shift)
+// {
+//     shift_ = shift;
+// }
 
 char RotateCharEncryptor::shift_element(const char c, int shift) 
 {

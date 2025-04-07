@@ -15,16 +15,16 @@ OBJS = $(SOURCES_DIR)/palantir/encryption/atbash.o \
        $(SOURCES_DIR)/palantir/message_source/file_source.o \
        $(SOURCES_DIR)/palantir/message_source/udp_source.o \
        $(SOURCES_DIR)/palantir/message_source/tcp_source.o \
-       $(SOURCES_DIR)/palantir/udp/udp_client.o \
-       $(SOURCES_DIR)/palantir/udp/udp_server.o \
+       $(SOURCES_DIR)/net/udp/udp_client.o \
+       $(SOURCES_DIR)/net/udp/udp_server.o \
        $(SOURCES_DIR)/palantir/message_destination/console_out.o \
        $(SOURCES_DIR)/palantir/message_destination/file_destination.o \
        $(SOURCES_DIR)/palantir/message_destination/udp_destination.o \
        $(SOURCES_DIR)/palantir/message_destination/tcp_destination.o \
-       $(SOURCES_DIR)/palantir/tcp/tcp_client.o \
-       $(SOURCES_DIR)/palantir/tcp/tcp_server.o \
+       $(SOURCES_DIR)/net/tcp/tcp_client.o \
+       $(SOURCES_DIR)/net/tcp/tcp_server.o \
        $(SOURCES_DIR)/palantir/messenger.o \
-       $(SOURCES_DIR)/palantir/encryption/char_encryption.o \
+       $(SOURCES_DIR)/palantir/encryption/key_base_encryptor.o \
        $(SOURCES_DIR)/palantir/encryption/rotate.o \
        $(SOURCES_DIR)/palantir/encryption/xor.o
 

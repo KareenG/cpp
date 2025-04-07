@@ -8,19 +8,21 @@
 namespace palantir {
 
 Vigenere::Vigenere(std::string key)
-: key_{key}
+//: key_{key}
+: KeyBaseEncryptor([key]() {
+    std::string lower = key;
+    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    return lower;
+}())
 {
-    std::transform(key_.begin(), key_.end(), key_.begin(), [](char c) { 
-        return std::tolower(c); 
-    });
 }
 
 char Vigenere::encode(char c) 
 {
     if (std::isalpha(c)) {
-        int key_shift = key_[key_index_ % key_.size()] - 'a';
+        int key_shift = get_key_char_and_inc_index() - 'a';
         char base = std::isupper(c) ? 'A' : 'a';
-        ++key_index_;
+        //++key_index_;
         return base + (c - base + key_shift + 26) % 26;
     }
     return c;
@@ -29,9 +31,9 @@ char Vigenere::encode(char c)
 char Vigenere::decode(char c) 
 {
     if (std::isalpha(c)) {
-        int key_shift = -(key_[key_index_ % key_.size()] - 'a');
+        int key_shift = -(get_key_char_and_inc_index() - 'a'); //key_[key_index_ % key_.size()]
         char base = std::isupper(c) ? 'A' : 'a';
-        ++key_index_;
+        //++key_index_;
         return base + (26 + c - base + key_shift) % 26;
     }
     return c;

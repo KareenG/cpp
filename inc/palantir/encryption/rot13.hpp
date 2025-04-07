@@ -17,7 +17,7 @@ namespace palantir {
  * developed in ancient Rome. Since the cipher operates by using rotations, encoding and decoding
  * are performed by the same operation.
  */
-class Rot13 : public RotateCharEncryptor { //CharEncryptor
+class Rot13 : public RotateCharEncryptor {
 public:
     /**
      * @brief Constructs a Rot13 cipher object.

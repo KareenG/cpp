@@ -3,8 +3,8 @@
 namespace palantir {
 
 Rot13::Rot13()
-{
-    set_shift(13);
+: RotateCharEncryptor(13)
+{  
 }
 
 }       // namespace palantir

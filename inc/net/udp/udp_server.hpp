@@ -3,7 +3,7 @@
 #include <string>
 #include <netinet/in.h>
 
-namespace palantir {
+namespace net {
 
 /**
  * @class UdpServer
@@ -63,7 +63,7 @@ private:
      * @brief The port number on which the server listens.
      * 
      */
-    int port_;
+    //int port_;
 
      /**
      * @brief Identifier for the created UDP socket.

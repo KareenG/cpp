@@ -1,7 +1,7 @@
 #pragma once
 
 #include "palantir/message_destination/message_destination_abstract.hpp"
-#include "palantir/udp/udp_client.hpp"
+#include "net/udp/udp_client.hpp"
 
 namespace palantir {
 
@@ -57,7 +57,7 @@ private:
      * @brief The UDP client used for sending and optionally receiving messages.
      * 
      */
-    UdpClient udp_client_;
+    net::UdpClient udp_client_;
 };
 
 }       //  namespace palantir

@@ -3,8 +3,8 @@
 namespace palantir {
 
 Caesar::Caesar(int shift)
+: RotateCharEncryptor(shift)
 {  
-    set_shift(shift);
 }
 
 }  

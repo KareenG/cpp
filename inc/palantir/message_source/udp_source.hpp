@@ -1,7 +1,7 @@
 #pragma once
 
 #include "palantir/message_source/message_source_abstract.hpp"
-#include "palantir/udp/udp_server.hpp"
+#include "net/udp/udp_server.hpp"
 
 namespace palantir {
 
@@ -70,7 +70,7 @@ private:
      * @brief The UDP server used to receive messages.
      * 
      */
-    UdpServer udp_source_;
+    net::UdpServer udp_source_;
 
     bool is_done_;
 };

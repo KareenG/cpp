@@ -21,8 +21,26 @@ void CommandLineArgs::parse_args(int argc, char* argv[], InputComponents& compon
     } else if (sourceType == "console") {
         components.source_ = new ConsoleInput();
     } else if (sourceType == "tcp") {
+        //components.source_ = new TcpSource(port);
         int port = prompt_for_input<int>("Enter port for TCP source: ");
-        components.source_ = new TcpSource(port);
+        try {
+            components.source_ = new TcpSource(port);
+        } catch (const net::CreateSocketException& e) {
+            std::cerr << "Invalid port number: " << e.what() << '\n';
+            exit(EXIT_FAILURE);
+        } catch (const net::BindException& e) {
+            std::cerr << "Binding the port of TCP source failed: " << e.what() << '\n';
+            exit(EXIT_FAILURE);
+        } catch (const net::ListenException& e) {
+            std::cerr << "Listening on the socket failed: " << e.what() << '\n';
+            exit(EXIT_FAILURE);
+        } catch (const net::AcceptException& e) {
+            std::cerr << "Socket failed to accept connection: " << e.what() << '\n';
+            exit(EXIT_FAILURE);
+        } catch (const std::exception& e) {
+            std::cerr << "General error while setting up TCP source: " << e.what() << '\n';
+            exit(EXIT_FAILURE);
+        }
     }
     
     // Parse encryption types
@@ -46,7 +64,7 @@ void CommandLineArgs::parse_args(int argc, char* argv[], InputComponents& compon
             encryption = new NullEncryption();
         } else {
             std::cerr << "Unsupported encryption type provided: " << encryptType << "\n";
-            exit(1);
+            exit(EXIT_FAILURE);
         }
         components.encryptions_.push_back(encryption);
     }
@@ -61,10 +79,23 @@ void CommandLineArgs::parse_args(int argc, char* argv[], InputComponents& compon
         components.destination_ = new UdpDestination(ip, port);
     } else if (destType == "console") {
         components.destination_ = new ConsoleOutput();
-    } else if (sourceType == "tcp") {
+    } else if (destType == "tcp") {
         std::string ip = prompt_for_input<std::string>("Enter IP for TCP destination: ");
         int port = prompt_for_input<int>("Enter port for TCP destination: ");
-        components.destination_ = new TcpDestination(ip, port);
+        //components.destination_ = new TcpDestination(ip, port);
+        try {
+            components.destination_ = new TcpDestination(ip, port);
+            // Use components.source_ as needed, such as registering it for further operations
+        } catch (const net::CreateSocketException& e) {
+            std::cerr << "Create socket failed: " << e.what() << '\n';
+            exit(EXIT_FAILURE);  // Exiting or you can handle it in another way based on application needs
+        } catch (const net::ConnectException& e) {
+            std::cerr << "Socket failed to connect to server: " << e.what() << '\n';
+            exit(EXIT_FAILURE);
+        } catch (const std::exception& e) {
+            std::cerr << "General error while setting up TCP destination: " << e.what() << '\n';
+            exit(EXIT_FAILURE);
+        }
     }
 
     if (!components.source_ || components.encryptions_.empty() || !components.destination_) {

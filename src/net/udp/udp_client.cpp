@@ -4,16 +4,39 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include "palantir/udp/udp_client.hpp"
+#include "net/udp/udp_client.hpp"
 
-namespace palantir {
+#include "net/exceptions.hpp"
+#include <vector>
+
+namespace net {
 
 UdpClient::UdpClient(const std::string& ip, int port)
-: ip_(ip), port_(port) {
+//: ip_(ip), port_(port) 
+{
     socket_id_ = socket(AF_INET, SOCK_DGRAM, 0);
     if (socket_id_ < 0) {
-        std::cerr << "Failed to create socket." << '\n';
+        throw SocketException(errno, "Failed to create UDP socket.");
+        //std::cerr << "Failed to create socket." << '\n';
     }
+    struct sockaddr_in server_addr;
+    //memset(&server_addr, 0, sizeof(server_addr));
+
+    std::fill(reinterpret_cast<char*>(&server_addr), reinterpret_cast<char*>(&server_addr) + sizeof(server_addr), 0);
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr(ip.c_str());
+    server_addr.sin_port = htons(port);
+
+    if (server_addr.sin_addr.s_addr == INADDR_NONE) {
+        close(socket_id_);
+        //throw InvalidArgument(errno, "Invalid IP address format.");
+    }
+    if (connect(socket_id_, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        close(socket_id_);
+        //throw ConnectException(errno, "Failed to connect UDP socket.");
+    }
+    
 }
 
 UdpClient::~UdpClient() {
@@ -24,27 +47,39 @@ UdpClient::~UdpClient() {
 
 void UdpClient::send_message(const std::string& message)
 {
-    struct sockaddr_in server_addr;
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr(ip_.c_str());
-    server_addr.sin_port = htons(port_);
+    // struct sockaddr_in server_addr;
+    // memset(&server_addr, 0, sizeof(server_addr));
+    // server_addr.sin_family = AF_INET;
+    // server_addr.sin_addr.s_addr = inet_addr(ip_.c_str());
+    // server_addr.sin_port = htons(port_);
 
-    sendto(socket_id_, message.c_str(), message.length(), 0, reinterpret_cast<struct sockaddr *>(&server_addr), sizeof(server_addr));
+    // sendto(socket_id_, message.c_str(), message.length(), 0, reinterpret_cast<struct sockaddr *>(&server_addr), sizeof(server_addr));
+    if (send(socket_id_, message.c_str(), message.length(), 0) < 0) {
+        //throw SendException(errno, "Failed to send message");
+    }
 }
 
 std::string UdpClient::receive_message() 
 {
-    char buffer[65'535];
-    struct sockaddr_in server_addr;
-    socklen_t len = sizeof(server_addr);
-    ssize_t n = recvfrom(socket_id_, buffer, sizeof(buffer) - 1, 0, reinterpret_cast<struct sockaddr *>(&server_addr), &len);
+    // char buffer[65'535];
+    // struct sockaddr_in server_addr;
+    // socklen_t len = sizeof(server_addr);
+    // ssize_t n = recvfrom(socket_id_, buffer, sizeof(buffer) - 1, 0, reinterpret_cast<struct sockaddr *>(&server_addr), &len);
+    // if (n < 0) {
+    //     std::cerr << "Receive failed\n";
+    //     return "";
+    // }
+    // buffer[n] = '\0';
+    // return static_cast<std::string>(buffer);
+
+    std::vector<char> buffer(65'535); // using vector to manage the buffer
+    ssize_t n = recv(socket_id_, buffer.data(), buffer.size() - 1, 0); // buffer.data() provides pointer to the buffer
     if (n < 0) {
-        std::cerr << "Receive failed\n";
-        return "";
+        //throw ReceiveException(std::strerror(errno));  // Including errno for more detailed error context
+        //throw ReceiveException(errno, "Failed to receive message");
     }
-    buffer[n] = '\0';
-    return static_cast<std::string>(buffer);
+
+    return std::string(buffer.begin(), buffer.begin() + n);  // Construct string from vector
 }
 
 } // namespace palantir

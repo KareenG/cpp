@@ -3,18 +3,19 @@
 namespace palantir {
 
 XorEncryptor::XorEncryptor(std::string key)
-: key_{key}
+//: key_{key}
+: KeyBaseEncryptor(key)
 {
 }
 
 char XorEncryptor::encode(char c) 
 {
-    return c ^ key_[key_index_ % key_.size()];
+    return c ^ get_key_char_and_inc_index();
 }
 
 char XorEncryptor::decode(char c) 
 {
-    return c ^ key_[key_index_ % key_.size()];
+    return c ^ get_key_char_and_inc_index();
 }
 
 }  // namespace palantir

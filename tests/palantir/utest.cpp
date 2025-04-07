@@ -26,11 +26,13 @@
 #include "palantir/message_destination/tcp_destination.hpp"
 #include "palantir/message_source/tcp_source.hpp"
 
-#include "palantir/udp/udp_client.hpp"
-#include "palantir/udp/udp_server.hpp"
+#include "net/udp/udp_client.hpp"
+#include "net/udp/udp_server.hpp"
 
-#include "palantir/tcp/tcp_client.hpp"
-#include "palantir/tcp/tcp_server.hpp"
+#include "net/tcp/tcp_client.hpp"
+#include "net/tcp/tcp_server.hpp"
+
+#include "net/exceptions.hpp"
 
 #include "palantir/messenger.hpp"
 
@@ -258,7 +260,7 @@ BEGIN_TEST(test_udp_source_receive_using_udp_client)
     std::string expected_result{"Hello"};
     
     // Setup UdpClient to send message to UdpSource
-    palantir::UdpClient udpClient("127.0.0.1", 1139);
+    net::UdpClient udpClient("127.0.0.1", 1139);
     udpClient.send_message(expected_result);
 
     std::string result = udpSource.get_message();
@@ -271,7 +273,7 @@ END_TEST
 BEGIN_TEST(udp_destination_send_message_using_udp_server)
     // Setup UdpServer to receive messages
     int listening_port = 1138;
-    palantir::UdpServer udpServer(listening_port);
+    net::UdpServer udpServer(listening_port);
 
     // Setup UdpDestination to send messages to the UdpServer
     palantir::UdpDestination udpDestination{"127.0.0.1", listening_port};
@@ -381,6 +383,142 @@ END_TEST
 
 // END_TEST
 
+// BEGIN_TEST(test_tcp_source_receive_using_tcp_destination)
+//     // Setup TcpSource to receive messages
+//     palantir::TcpSource tcpSource{1139};
+//     std::string expected_result{"Hello"};
+
+//     // Allow some time for the server to start up and listen
+//     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+//     // Setup TcpDestination to send a message to TcpSource
+//     palantir::TcpDestination tcpDest("127.0.0.1", 1139);
+//     tcpDest.send_message(expected_result);
+
+//     // Receive the message at the source
+//     std::string result = tcpSource.get_message();
+
+//     ASSERT_EQUAL(result, expected_result);
+// END_TEST
+
+/*-------------------------------------------------------------------------------*/
+
+// BEGIN_TEST(tcp_destination_send_message_using_tcp_server)
+//     // Setup TcpServer to receive messages
+//     int listening_port = 1138;
+//     net::TcpServer tcpServer(listening_port);
+
+//     // Allow some time for the server to start up and listen
+//     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+//     // Setup TcpDestination to send messages to the TcpServer
+//     palantir::TcpDestination tcpDestination("127.0.0.1", listening_port);
+//     std::string expected_message = "Test message";
+//     tcpDestination.send_message(expected_message);
+
+//     // Receive the message at the server
+//     net::TcpClient client = tcpServer.accept_client();
+//     std::string received_message = client.receive_message(1024);
+//     ASSERT_EQUAL(received_message, expected_message);
+// END_TEST
+
+
+
+// BEGIN_TEST(full_test_example_tcp_to_tcp)
+//     palantir::EncryptionAbstract* rot13 = new palantir::Rot13();
+//     palantir::EncryptionAbstract* vigenere = new palantir::Vigenere("LEMON");
+//     palantir::EncryptionAbstract* caesar = new palantir::Caesar(-7);
+//     palantir::EncryptionAbstract* null_enc = new palantir::NullEncryption();
+//     palantir::EncryptionAbstract* atbash = new palantir::Atbash();
+    
+//     std::vector<palantir::EncryptionAbstract*> encryptions{rot13, vigenere, caesar, null_enc, atbash};
+//     palantir::Messenger m(encryptions);
+
+//     // Assuming the TcpDestination is set up to listen on port 1139
+//     palantir::TcpDestination tcpDest("127.0.0.1", 1133);
+//     palantir::TcpSource tcpSrc(1133); // TcpSource listens on the same port
+
+//     // Simulate processing a message read from a file, encrypted and sent over TCP
+//     palantir::FileSource fs("myfile.txt");
+//     m.process(fs, tcpDest);
+
+//     std::string received = tcpSrc.get_message();
+
+//     ASSERT_EQUAL(received, "BLWUS blwus\n"); // Check if the received message is as expected
+//     delete rot13;
+//     delete vigenere;
+//     delete caesar;
+//     delete null_enc;
+//     delete atbash;
+
+// END_TEST
+
+BEGIN_TEST(test_tcp_server_recv)
+    /**
+     * @brief to run open a second terminal and navigat eto the base directory (using "cd")
+     * and run "echo -n "hello from netcat" | nc localhost 1166"
+     */
+    net::TcpServer server{1166};
+    net::TcpClient client = server.accept_client();
+    std::string message = client.receive_message(1024);
+    std::cout << "Recieved from client " << message << '\n'; 
+    ASSERT_THAT(message.size());
+END_TEST
+
+
+BEGIN_TEST(test_tcp_source_get_message)
+    /**
+     * @brief to run open a second terminal and navigat eto the base directory (using "cd")
+     * and run "echo -e "hello from netcat" | nc localhost 1166"
+     */
+    net::TcpServer server{4444};
+    net::TcpClient client = server.accept_client();
+    std::string expected_client_message{"csdevSD\x04""C8HBNUjunibgiy"};
+    std::string message = client.receive_message(1024);
+    std::cout << "Recieved from client " << message << '\n'; 
+    ASSERT_EQUAL("csdevSD", message.substr(0, 7));
+END_TEST
+
+
+// BEGIN_TEST(test_tcp_client_send_to_tcp_server)
+//     // net::TcpServer server{1166};
+//     // net::TcpClient client = server.accept_client();
+//     // client.send_message("hey there!\n");
+//     // std::string message = client.receive_message(1024);
+//     // std::cout << "Recieved from client:     " << message << '\n'; 
+//     // ASSERT_THAT(message.size());
+
+
+
+//     /**
+//      * @brief To run this test ensure no service is running on port 1166.
+//      * This test is conceptual and does not work without concurrency handling.
+//      */
+//     net::TcpServer server(1188);
+//     std::string expected_message = "hello from TcpClient";
+
+//     net::TcpClient client("127.0.0.1", 1188);
+//     client.send_message(expected_message);
+
+
+//     // Conceptually accept a connection from a client
+//     // This part needs to be ready to accept connections before the client sends a message.
+//     // You could run this executable, ensure the server is up, then manually run a client that connects to this server.
+
+//     // Assume a client is sending a message
+//     // net::TcpClient client("localhost", 1188);
+//     // client.send_message(expected_message);
+
+//     // Now accept the client and receive the message
+//     net::TcpClient client_c = server.accept_client();
+//     std::string received_message = client_c.receive_message(1024);
+
+//     std::cout << "Received from client: " << received_message << '\n';
+
+//     // Validate the message
+//     ASSERT_EQUAL(received_message, expected_message);
+
+// END_TEST
 
 /*-------------------------------------------------------------------------------*/
 
@@ -416,5 +554,12 @@ BEGIN_SUITE(palantir_tests)
     //TEST(test_tcp_source_receive_using_tcp_client)
 
     //TEST(test_tcp_source_receive_using_tcp_client)
+    //TEST(full_test_example_tcp_to_tcp)
+
+    //TEST(test_tcp_source_receive_using_tcp_destination)
+    //TEST(tcp_destination_send_message_using_tcp_server)
+    TEST(test_tcp_server_recv)
+    //TEST(test_tcp_client_send_to_tcp_server)
+    TEST(test_tcp_source_get_message)
 
 END_SUITE

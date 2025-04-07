@@ -24,6 +24,8 @@
 #include "palantir/message_destination/udp_destination.hpp"
 #include "palantir/message_destination/tcp_destination.hpp"
 
+#include "net/exceptions.hpp"
+
 namespace palantir {
 
 /**

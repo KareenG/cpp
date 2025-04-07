@@ -3,7 +3,7 @@
 #include <string>
 #include <netinet/in.h> // Necessary for network communication structures
 
-namespace palantir {
+namespace net {
        
 /**
  * @class UdpClient
@@ -60,22 +60,10 @@ public:
     std::string receive_message();
 
 private:
-    /**
-     * @brief IP address of the destination.
-     * 
-     */
-    std::string ip_;
+    //std::string ip_;
 
-    /**
-     * @brief Port number at the destination.
-     * 
-     */
-    int port_;
+    //int port_;
 
-    /**
-     * @brief Identifier for the created UDP socket.
-     * 
-     */
     int socket_id_;
 };
     

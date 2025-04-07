@@ -3,7 +3,7 @@
 #include <string>
 #include <array>
 
-#include "palantir/encryption/char_encryption.hpp"
+#include "palantir/encryption/key_base_encryptor.hpp"
 
 namespace palantir {
 
@@ -18,7 +18,7 @@ namespace palantir {
  * the Vigenère cipher, which is based on the Caesar cipher but uses a series of shifts
  * determined by a keyword.
  */
-class Vigenere : public CharEncryptor { 
+class Vigenere : public KeyBaseEncryptor { 
 public:
      /**
      * @brief Constructs a Vigenere cipher object with a specific key.
@@ -49,14 +49,6 @@ private:
      * @return The decoded character.
      */
     char decode(char c) override;
-    //void set_key_index();
-
-private:
-    /**
-     * @brief The keyword used for encoding and decoding.
-     * 
-     */
-    std::string key_;
 };
 
 }       //  namespace palantir

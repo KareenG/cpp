@@ -1,81 +1,63 @@
 #pragma once
 
+#include <stdexcept>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>     // For close
+#include <arpa/inet.h>
 #include <string>
-#include <netinet/in.h> // Necessary for network communication structures
 
-namespace palantir {
+#include "net/exceptions.hpp"
+#include "net/tcp/tcp_client.hpp"
 
-/**
- * @class TcpServer
- * 
- * @brief Manages TCP server operations, primarily focused on receiving messages.
- *
- * TcpServer is responsible for setting up a TCP server on a specified port, accepting an incoming
- * connection, and optionally sending responses. This class abstracts the complexities of socket
- * programming and provides a streamlined interface for handling TCP communications.
- */
+namespace net {
+
 class TcpServer {
 public:
     /**
-     * @brief Constructs a TcpServer that listens on a specified port.
+     * @brief Constructs a TcpServer to listen for incoming connections on a specified port.
      *
-     * This constructor sets up a TCP server to listen for an incoming connection on the given port.
-     * It configures the underlying socket and binds it to the specified port. If the socket setup
-     * fails, it prints an error message and returns.
+     * This constructor initializes a TCP server, setting up and binding a socket to the
+     * specified port to listen for incoming connections. If there is a failure in setting
+     * up the socket, an error message is logged and the constructor returns.
      *
      * @param port The port number on which the server will listen for incoming connections.
      */
     explicit TcpServer(int port);
 
     /**
-     * @brief Destructor.
+     * @brief Destructor that closes the server socket.
      *
-     * Ensures that the server's socket is properly closed, releasing any network resources
-     * and associated connections.
+     * Ensures that the server socket is properly closed, releasing any network resources
+     * associated with this server.
      */
-    ~TcpServer();
+    ~TcpServer() noexcept;
+
 
     /**
-     * @brief Accepts the client connection.
+     * @brief Accepts a new client connection.
      *
-     * This method accepts an incoming client connection and returns the client socket.
+     * Waits for a new client connection attempt and, upon success, returns a TcpClient object
+     * that represents the connected client. This object can then be used for further communications.
      *
-     * @return The client socket identifier.
+     * @return TcpClient An object representing the newly connected client.
      */
-    int accept_client();
-
-    /**
-     * @brief Receives a message from the client.
-     *
-     * This method handles receiving a message from the client and returns it as a std::string.
-     *
-     * @param client_socket The client socket identifier.
-     * @return The received message as a std::string.
-     */
-    std::string receive(int client_socket);
-
-    /**
-     * @brief Sends a response to the client.
-     *
-     * This method sends a response message to the client.
-     *
-     * @param client_socket The client socket identifier.
-     * @param message The message to send to the client.
-     */
-    void send_message(int client_socket, const std::string& message);
+    TcpClient accept_client();
 
 private:
     /**
-     * @brief Port number the server listens on.
-     * 
+     * @brief Sets up the server socket.
+     *
+     * Configures and binds the server socket to listen on the specified port. It sets
+     * the socket to non-blocking mode to allow the server to perform other tasks
+     * while waiting for client connections.
+     *
+     * @param port The port number on which the server socket will listen.
      */
-    int port_;     
-    
-     /**
-     * @brief TCP socket identifier.
-     * 
-     */
-    int socket_id_;
+    void setup_server_socket(int port);
+
+private:
+    int server_socket_;
 };
 
-} // namespace palantir
+} // namespace net
