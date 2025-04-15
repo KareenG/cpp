@@ -38,4 +38,4 @@ leak-check :$(UTEST)
 	valgrind ./$(UTEST)
 
 clean:
-	$(RM) $(UTEST) $(OBJS) # $(RM) $(UTEST) $(OBJS) $(APP) $(APP_OBJS)
+	$(RM) $(UTEST) $(OBJS) $(APP) $(APP_OBJS)
