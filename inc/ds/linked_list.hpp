@@ -280,6 +280,16 @@ private:
 template <typename T>
 bool operator!=(ConstIterator<T> const& lhs, ConstIterator<T> const& rhs) noexcept;
 
+
+template <typename T>
+void reverse(LinkedList<T>& list) noexcept;
+
+template <typename T>
+LinkedList<T> flatten(LinkedList<LinkedList<T>>& list_of_lists);
+
+template <typename T>
+LinkedList<T> flatten(LinkedList<LinkedList<T>>&& list_of_lists);
+
 } // namespace ds
 
 #include "linked_list.inl"

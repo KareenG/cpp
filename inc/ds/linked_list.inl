@@ -320,4 +320,61 @@ bool operator!=(ConstIterator<T> const& lhs, ConstIterator<T> const& rhs) noexce
     return !(lhs == rhs);
 }
 
+// Handles both cases (whether the list is an lvalue or an rvalue)
+template <typename T>
+void reverse(LinkedList<T>& list) noexcept {
+    // LinkedList<T> temp;
+    // for (Iterator<T> it = list.begin(); it != list.end(); ++it) {
+    //     temp.push_front(std::move(*it));
+    // }
+    // list = std::move(temp);
+
+    LinkedList<T> reversed;
+    // Using iterator to access each element from the original list
+    for (Iterator<T> it = list.begin(); it != list.end(); ++it) {
+        // If LinkedList supports push_front, use it to reverse the elements
+        reversed.push(std::move(*it)); // Assuming push_front is a member function
+    }
+    // Replace the original list with the reversed one
+    list = std::move(reversed);
+}
+
+template<typename T>
+LinkedList<T> flatten(const ds::LinkedList<ds::LinkedList<T>>& list_of_lists)
+{
+    LinkedList<T> flattened;
+    for(const LinkedList<T>& sublist : list_of_lists) {
+        for(const T& item : sublist) {
+            flattened.push(item);  // Copies each item
+        }
+    }
+    return flattened;
+
+    // LinkedList<T> flattened;
+    // // Iterate over each sublist using a const_iterator
+    // for (Iterator<LinkedList<T>> outer_it = list_of_lists.begin(); outer_it != list_of_lists.end(); ++outer_it) {
+    //     const ds::LinkedList<T>& sublist = *outer_it;
+    //     // Use iterator to go through each element in the sublist
+    //     for (Iterator<T> inner_it = sublist.begin(); inner_it != sublist.end(); ++inner_it) {
+    //         const T& item = *inner_it;
+    //         flattened.push(item);  // Copies each item
+    //     }
+    // }
+    // return flattened;
+}
+
+
+template <typename T>
+LinkedList<T> flatten(LinkedList<LinkedList<T>>&& list_of_lists) {
+    LinkedList<T> flattened;
+    for (LinkedList& sublist : list_of_lists) {
+        while (!sublist.empty()) {
+            T element;
+            sublist.pop(element);
+            flattened.push(std::move(element));
+        }
+    }
+    return flattened;
+}
+
 } // namespace ds
