@@ -1,36 +1,44 @@
 #include <fstream>
-#include <cassert>
-#include <netinet/in.h> // for ntohs
+#include <filesystem>  // Add this include
 
 #include "lc3/loader.hpp"
+#include "lc3/utility.hpp"
+#include "lc3/lc3_exceptions.hpp"  // For FileOpenException
 
 namespace lc3 {
 
-std::vector<uint16_t> Loader::load(std::string const& file_path)
+std::vector<Word> Loader::load(std::string const& file_path)
 {
     std::ifstream fs{file_path, std::ios::binary};
-    
-    assert(fs && "Failed to open binary file");
+    if (!fs) {
+        throw FileOpenException(file_path);
+    }
 
-    uint16_t origin;
+    // Read origin address
+    Address origin;
     fs.read(reinterpret_cast<char*>(&origin), sizeof(origin));
-    origin = ntohs(origin);  // Convert from big endian
-
+    origin = from_big_endian(origin);
     start_address_ = origin;
 
-    std::vector<uint16_t> program;
-    uint16_t instruction_word;
+    // Use filesystem to get file size and compute number of instructions
+    std::uintmax_t file_size = std::filesystem::file_size(file_path);
+    std::size_t instr_count = static_cast<std::size_t>((file_size - sizeof(Word)) / sizeof(Word));
 
+    std::vector<Word> program;
+    program.reserve(instr_count);
+
+    Word instruction_word;
     while (fs.read(reinterpret_cast<char*>(&instruction_word), sizeof(instruction_word))) {
-        program.push_back(ntohs(instruction_word)); // Store in host byte order
+        program.push_back(from_big_endian(instruction_word));
     }
 
     return program;
 }
 
-uint16_t Loader::get_start_address() const noexcept
+Address Loader::get_start_address() const noexcept
 {
     return start_address_;
 }
 
 } // namespace lc3
+

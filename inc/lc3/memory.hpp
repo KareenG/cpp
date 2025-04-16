@@ -4,10 +4,10 @@
 #include <cstdint>
 #include <vector>
 
+#include "lc3/consts_and_sizes.hpp"
+
 namespace lc3
 {
-
-static const size_t MEMORY_SIZE = 65'536; // 1 << 16
 
 /**
  * @brief Simulates the LC-3 memory space (65,536 16-bit words).
@@ -22,31 +22,13 @@ public:
      * 
      * @param start The program start address (default 0x3000).
      */
-    explicit Memory(uint16_t start = 0x3000);
+    explicit Memory(Address start = 0x3000);
 
-    /**
-     * @brief Deleted copy constructor.
-     */
     Memory(Memory const&) = delete;
-
-    /**
-     * @brief Deleted move constructor.
-     */
     Memory(Memory&&) = delete;
-
-    /**
-     * @brief Deleted copy assignment operator.
-     */
     Memory& operator=(Memory const&) = delete;
-
-    /**
-     * @brief Deleted move assignment operator.
-     */
     Memory& operator=(Memory&&) = delete;
 
-    /**
-     * @brief Defaulted destructor.
-     */
     ~Memory() noexcept = default;
 
     /**
@@ -54,25 +36,25 @@ public:
      *
      * @param data The program data to load (moved in).
      * @param start_addr The address at which to begin loading.
-     * 
-     * @note Asserts that the program fits in available memory.
+     *
+     * @throws MemoryBoundsException if the program does not fit.
      */
-    void load_dense(std::vector<uint16_t>&& data, uint16_t start_addr);
+    void load_dense(std::vector<Word>&& data, Address start_addr);
 
     /**
      * @brief Gets the address where the program was loaded.
      * 
-     * @return uint16_t Program start address.
+     * @return Address Program start address.
      */
-    uint16_t get_program_start() const noexcept;
+    Address get_program_start() const noexcept;
 
     /**
      * @brief Reads a value from memory.
      * 
      * @param address The address to read from.
-     * @return uint16_t The value stored at the address.
+     * @return Word The value stored at the address.
      */
-    uint16_t read(uint16_t address) const noexcept;
+    Word read(Address address) const noexcept;
 
     /**
      * @brief Writes a value to memory.
@@ -80,11 +62,11 @@ public:
      * @param address The address to write to.
      * @param value The 16-bit value to store.
      */
-    void write(uint16_t address, uint16_t value) noexcept;
+    void write(Address address, Word value) noexcept;
 
 private:
-    std::vector<uint16_t> memory_;
-    uint16_t start_;
+    std::vector<Word> memory_;
+    Address start_;
 };
 
 } // namespace lc3

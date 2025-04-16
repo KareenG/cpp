@@ -1,58 +1,29 @@
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "lc3/loader.hpp"
 #include "lc3/memory.hpp"
 
 namespace lc3 {
 
+namespace program_loader {
+
 /**
- * @brief Loads an LC-3 binary program and commits it into memory.
+ * @brief Loads an LC-3 binary file into memory at the address specified in the file.
  *
- * This class uses a `Loader` to parse a binary file and places the loaded
- * instructions into the `Memory` starting at the origin specified in the binary.
+ * This function uses the Loader to read a `.bin` file, then stores the decoded LC-3 instructions
+ * into the provided memory starting from the program's origin address.
+ *
+ * @param file_path Path to the LC-3 binary file.
+ * @param memory Reference to the memory instance to load data into.
+ *
+ * @throws FileOpenException if the file cannot be opened.
+ * @throws MemoryBoundsException if the program does not fit in memory.
  */
-class ProgramLoader {
-public:
-    /**
-     * @brief Constructs a ProgramLoader and immediately loads the given file into memory.
-     *
-     * @param file_path Path to the LC-3 binary (.bin) file.
-     * @param memory Reference to the memory to load the program into.
-     * @throws std::runtime_error if the file cannot be read or program is too large.
-     */
-    explicit ProgramLoader(std::string const& file_path, Memory& memory);
+void program_loader(const std::string& file_path, Memory& memory);
 
-    /**
-     * @brief Deleted copy constructor.
-     */
-    ProgramLoader(ProgramLoader const&) = delete;
-
-    /**
-     * @brief Deleted move constructor.
-     */
-    ProgramLoader(ProgramLoader&&) = delete;
-
-    /**
-     * @brief Deleted copy assignment.
-     */
-    ProgramLoader& operator=(ProgramLoader const&) = delete;
-
-    /**
-     * @brief Deleted move assignment.
-     */
-    ProgramLoader& operator=(ProgramLoader&&) = delete;
-
-    /**
-     * @brief Defaulted destructor.
-     */
-    ~ProgramLoader() noexcept = default;
-
-private:
-    Loader loader_;
-    Memory& memory_;
-};
+} // namespace program_loader
 
 } // namespace lc3

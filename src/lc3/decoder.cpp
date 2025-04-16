@@ -3,90 +3,90 @@
 #include "lc3/decoder_detail/bit_manipulations.hpp"
 
 namespace lc3 {
-
+    
 namespace decoder {
 
-OpCode get_opcode(uint16_t raw)
+OpCode get_opcode(Word raw)
 {
     return static_cast<OpCode>(bits::opcode(raw));
 }
 
-uint8_t get_dr(uint16_t raw)
+RegisterIndex get_dr(Word raw)
 { 
-    return bits::dr(raw); 
+    return static_cast<RegisterIndex>(bits::dr(raw)); 
 }
 
-uint8_t get_sr(uint16_t raw)
+RegisterIndex get_sr(Word raw)
 { 
-    return bits::sr(raw); 
+    return static_cast<RegisterIndex>(bits::sr(raw)); 
 }
 
-uint8_t get_sr1(uint16_t raw)
+RegisterIndex get_sr1(Word raw)
 { 
-    return bits::sr1(raw); 
+    return static_cast<RegisterIndex>(bits::sr1(raw)); 
 }
 
-uint8_t get_sr2(uint16_t raw)
+RegisterIndex get_sr2(Word raw)
 { 
-    return bits::sr2(raw); 
+    return static_cast<RegisterIndex>(bits::sr2(raw)); 
 }
 
-uint8_t get_base_r(uint16_t raw)
+RegisterIndex get_base_r(Word raw)
 { 
-    return bits::base_r(raw); 
+    return static_cast<RegisterIndex>(bits::base_r(raw)); 
 }
 
-uint8_t get_trap_vector8(uint16_t raw)
+TrapVector get_trap_vector8(Word raw)
 { 
-    return bits::trap_vector(raw); 
+    return static_cast<TrapVector>(bits::trap_vector(raw)); 
 }
 
-int16_t get_signed_imm5(uint16_t raw)
+int16_t get_signed_imm5(Word raw)
 {
     return bit_manipulations::sign_extend(bits::raw_imm5(raw), 5);
 }
 
-int16_t get_signed_offset9(uint16_t raw)
+int16_t get_signed_offset9(Word raw)
 {
     return bit_manipulations::sign_extend(bits::raw_pc_offset9(raw), 9);
 }
 
-int16_t get_signed_offset11(uint16_t raw)
+int16_t get_signed_offset11(Word raw)
 {
     return bit_manipulations::sign_extend(bits::raw_pc_offset11(raw), 11);
 }
 
-int16_t get_signed_offset6(uint16_t raw)
+int16_t get_signed_offset6(Word raw)
 {
     return bit_manipulations::sign_extend(bits::raw_offset6(raw), 6);
 }
 
-bool is_immediate_mode(uint16_t raw)
+bool is_immediate_mode(Word raw)
 {
     return bit_manipulations::is_immediate(raw);
 }
 
-bool branch_on_n(uint16_t raw)
+bool branch_on_n(Word raw)
 { 
     return bit_manipulations::check_n(raw); 
 }
 
-bool branch_on_z(uint16_t raw)
+bool branch_on_z(Word raw)
 { 
     return bit_manipulations::check_z(raw); 
 }
 
-bool branch_on_p(uint16_t raw)
+bool branch_on_p(Word raw)
 { 
     return bit_manipulations::check_p(raw); 
 }
 
-bool is_jsr(uint16_t raw_instruction)
+bool is_jsr(Word raw)
 {
-    return bit_manipulations::is_jsr(raw_instruction);
+    return bit_manipulations::is_jsr(raw);
 }
 
-uint16_t get_raw_value(uint16_t raw)
+Word get_raw_value(Word raw)
 { 
     return raw; 
 }

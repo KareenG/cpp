@@ -13,11 +13,6 @@ namespace lc3 {
  *
  * This class abstracts TRAP routines such as GETC, OUT, PUTS, IN, and HALT,
  * interfacing with the provided input/output streams and register file.
- *
- * @details
- * Members:
- * - std::ostream& os_: Output stream (default: std::cout).
- * - std::istream& is_: Input stream (default: std::cin).
  */
 class Console {
 public:
@@ -29,53 +24,49 @@ public:
      */
     explicit Console(std::ostream& os = std::cout, std::istream& is = std::cin);
 
-    /**
-     * @brief Default copy constructor.
-     */
     Console(Console const& other) = default;
-
-    /**
-     * @brief Default copy assignment.
-     */
     Console& operator=(Console const& other) = default;
 
-    /**
-     * @brief Default destructor.
-     */
     ~Console() noexcept = default;
 
     /**
-     * @brief TRAP x20 - Reads a character from input (no echo) and stores it in R0.
+     * @brief TRAP x20 - Reads a character from input without echoing it and stores it in R0.
+     *
+     * Uses low-level unbuffered input to read a single character directly from the terminal.
      *
      * @param reg Reference to the register file.
-     * @note Asserts that input is available. Clears newlines.
      */
-    void get_c(Registers& reg);
+    void read_char_no_echo(Registers& reg);
 
     /**
      * @brief TRAP x21 - Outputs the character in R0 to the output stream.
      *
+     * Interprets the low byte of R0 as an ASCII character and prints it.
+     *
      * @param reg Reference to the register file.
-     * @note Asserts that R0 contains a valid ASCII character.
      */
-    void out(const Registers& reg);
+    void write_char(const Registers& reg);
 
     /**
-     * @brief TRAP x22 - Outputs null-terminated string from memory at address in R0.
+     * @brief TRAP x22 - Outputs a null-terminated string from memory starting at address in R0.
+     *
+     * Reads characters from memory one word at a time and prints the lower byte
+     * until a null byte is encountered.
      *
      * @param reg Reference to the register file.
      * @param memory Reference to the memory.
-     * @note Asserts that memory contains a valid null-terminated ASCII string.
      */
-    void put_s(const Registers& reg, const Memory& memory);
+    void write_string_from_memory(const Registers& reg, const Memory& memory);
 
     /**
-     * @brief TRAP x23 - Prompts user, reads one character into R0, and echoes it.
+     * @brief TRAP x23 - Prompts the user and reads one character into R0, echoing it afterward.
+     *
+     * Displays a prompt, reads one character from input using unbuffered terminal I/O,
+     * stores it in R0, and echoes it back to the screen followed by a newline.
      *
      * @param reg Reference to the register file.
-     * @note Asserts that input is available.
      */
-    void in(Registers& reg);
+    void prompt_and_read_char(Registers& reg);
 
 private:
     std::ostream& os_;

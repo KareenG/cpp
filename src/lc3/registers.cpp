@@ -2,37 +2,36 @@
 
 namespace lc3 {
 
-static constexpr uint8_t FLAGS_REGISTER_INDEX = 8;
+static constexpr uint8_t FLAGS_REGISTER_INDEX = static_cast<uint8_t>(RegisterIndex::FR);
 
 Registers::Registers() noexcept
-: registers_(9, 0) // R0–R7 + flags
+: registers_{}
 {
 }
 
-uint16_t Registers::read(uint8_t index) const noexcept
+Word Registers::read(RegisterIndex index) const noexcept
 {
-    assert(index <= FLAGS_REGISTER_INDEX);
-    return registers_[index];
+    return registers_[static_cast<uint8_t>(index)];
 }
 
-void Registers::write(uint8_t index, uint16_t value, bool update_flags) noexcept
+void Registers::write(RegisterIndex index, Word value, bool update_flags) noexcept
 {
-    assert(index <= FLAGS_REGISTER_INDEX);
-    registers_[index] = value;
+    const uint8_t i = static_cast<uint8_t>(index);
+    registers_[i] = value;
 
-    if (index < 8 && update_flags) {
+    if (i < FLAGS_REGISTER_INDEX && update_flags) {
         update_condition_flags(value);
     }
 }
 
-void Registers::update_condition_flags(uint16_t value) noexcept
+void Registers::update_condition_flags(Word value) noexcept
 {
     if (value == 0) {
-        registers_[FLAGS_REGISTER_INDEX] = static_cast<uint16_t>(ConditionFlag::ZERO);
-    } else if (value >> 15) {
-        registers_[FLAGS_REGISTER_INDEX] = static_cast<uint16_t>(ConditionFlag::NEGATIVE);
+        registers_[FLAGS_REGISTER_INDEX] = static_cast<Word>(ConditionFlag::ZERO);
+    } else if (value >> (WordSize - 1)) {
+        registers_[FLAGS_REGISTER_INDEX] = static_cast<Word>(ConditionFlag::NEGATIVE);
     } else {
-        registers_[FLAGS_REGISTER_INDEX] = static_cast<uint16_t>(ConditionFlag::POSITIVE);
+        registers_[FLAGS_REGISTER_INDEX] = static_cast<Word>(ConditionFlag::POSITIVE);
     }
 }
 

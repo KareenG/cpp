@@ -14,6 +14,8 @@
 #include "lc3/decoder.hpp"
 #include "lc3/alu.hpp"
 #include "lc3/cpu.hpp"
+#include "lc3/control_unit.hpp"
+#include "lc3/terminal_io.hpp"
 
 /**
  * @brief xxd print10.bin - in terminal
@@ -24,7 +26,7 @@
 BEGIN_TEST(loads_print10_correctly)
     const std::string file_path = "print10.bin";
     lc3::Memory memory;
-    lc3::ProgramLoader loader(file_path, memory);
+    lc3::program_loader::program_loader(file_path, memory);
 
     uint16_t base = memory.get_program_start();
     ASSERT_THAT(base == 0x3000);
@@ -83,7 +85,7 @@ END_TEST
 BEGIN_TEST(run_print10_program)
     const std::string file_path = "print10.bin";
     lc3::Memory memory;
-    lc3::ProgramLoader loader(file_path, memory);
+    lc3::program_loader::program_loader(file_path, memory);
 
     std::ostringstream os;
     std::istringstream is;
@@ -103,7 +105,7 @@ END_TEST
 
 BEGIN_TEST(run_fib22_program)
     lc3::Memory memory;
-    lc3::ProgramLoader loader("fib22.bin", memory); // Patches TRAP vectors
+    lc3::program_loader::program_loader("fib22.bin", memory); // Patches TRAP vectors
 
     std::ostringstream os;
     lc3::Console console(os);
@@ -138,8 +140,10 @@ END_TEST
 // END_TEST
 
 BEGIN_TEST(run_2048_program)
+    lc3::TerminalIO terminal_guard;  // Ensures terminal is restored on exit
+
     lc3::Memory memory;
-    lc3::ProgramLoader loader("2048.bin", memory); // Load binary
+    lc3::program_loader::program_loader("2048.bin", memory); // Load binary
 
     std::istringstream input_stream("y\n");  // Automatically reply "y" to ANSI terminal prompt
     std::ostringstream output_stream;
@@ -157,7 +161,7 @@ END_TEST
 
 BEGIN_TEST(run_rogue_program)
     lc3::Memory memory;
-    lc3::ProgramLoader loader("rogue.bin", memory);
+    lc3::program_loader::program_loader("rogue.bin", memory);
 
     std::istringstream is("k\ndsdsdddsdsdsddsdddsdsdddddsdsddddsdddddddsds\nn\n");
     std::ostringstream os;

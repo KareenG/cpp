@@ -1,9 +1,8 @@
 #pragma once
 
-#include <cstdint>
+#include "lc3/consts_and_sizes.hpp"
 
-namespace lc3
-{
+namespace lc3 {
 
 /**
  * @brief Represents the LC-3 program counter.
@@ -17,56 +16,38 @@ public:
      * 
      * @param pc Initial program counter value (default is 0x3000).
      */
-    explicit ProgramCounter(uint16_t pc = 0x3000) noexcept;
+    explicit ProgramCounter(Address pc = 0x3000) noexcept;
 
-    /**
-     * @brief Deleted copy constructor.
-     */
     ProgramCounter(ProgramCounter const&) = delete;
-
-    /**
-     * @brief Deleted move constructor.
-     */
     ProgramCounter(ProgramCounter&&) = delete;
-
-    /**
-     * @brief Deleted copy assignment operator.
-     */
     ProgramCounter& operator=(ProgramCounter const&) = delete;
-
-    /**
-     * @brief Deleted move assignment operator.
-     */
     ProgramCounter& operator=(ProgramCounter&&) = delete;
-
-    /**
-     * @brief Defaulted destructor.
-     */
+    
     ~ProgramCounter() noexcept = default;
 
     /**
      * @brief Gets the current program counter value.
      * 
-     * @return Current PC value.
+     * @return Address Current PC value.
      */
-    uint16_t get() const noexcept;
+    Address get() const noexcept;
 
     /**
      * @brief Sets the program counter to a new address.
      * 
      * @param new_pc The address to set as PC.
      */
-    void set(uint16_t new_pc) noexcept;
+    void set(Address new_pc) noexcept;
 
     /**
      * @brief Increments the program counter by an offset (default 1).
      * 
      * @param offset Value to increment the PC by.
      */
-    void increment(uint16_t offset = 1) noexcept;
+    void increment(Address offset = 1) noexcept;
 
 private:
-    uint16_t p_counter_;
+    Address p_counter_;
 };
 
 } // namespace lc3
