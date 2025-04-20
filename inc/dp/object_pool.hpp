@@ -5,7 +5,12 @@
 #include <cstddef>
 #include <memory>
 
+#include "dp/pool_deleter.hpp"
+
 namespace dp {
+
+// template<typename T>
+// class PoolDeleter;
 
 /**
  * @brief A generic object pool that reuses allocated objects of type T.
@@ -25,7 +30,7 @@ public:
     ObjectPool(ObjectPool&&) = delete;
     ObjectPool& operator=(ObjectPool&&) = delete;
 
-    std::unique_ptr<T> get() noexcept;
+    std::unique_ptr<T, PoolDeleter<T, Factory>> get() noexcept;
     void release(std::unique_ptr<T>&& p);
 
     size_t size() const noexcept;

@@ -1,10 +1,8 @@
 #pragma once
-#include <memory>
+
 #include "dp/object_pool.hpp"
 
-
-namespace dp
-
+namespace dp 
 {
 
 template<typename T, typename Factory>
@@ -26,21 +24,23 @@ ObjectPool<T, Factory>::ObjectPool(size_t initial, Factory fac)
 template<typename T, typename Factory>
 ObjectPool<T, Factory>::~ObjectPool()
 {
-    while (!storage_.empty()) {
+    while(!storage_.empty()) {
         storage_.pop();  // std::unique_ptr<T> is automatically destroyed here
     }
 }
 
 template<typename T, typename Factory>
-std::unique_ptr<T> ObjectPool<T, Factory>::get() noexcept
-{
-    if(storage_.empty()) {
-        return nullptr;
+std::unique_ptr<T, PoolDeleter<T, Factory>> ObjectPool<T, Factory>::get() noexcept {
+    if (storage_.empty()) {
+        return {nullptr, PoolDeleter<T, Factory>(this)};
     }
-    auto obj = std::move(storage_.top());
+
+    auto raw = std::move(storage_.top());
     storage_.pop();
-    return obj;
+
+    return {raw.release(), PoolDeleter<T, Factory>(this)};
 }
+
 
 template<typename T, typename Factory>
 void ObjectPool<T, Factory>::release(std::unique_ptr<T>&& p)
@@ -61,5 +61,18 @@ size_t ObjectPool<T, Factory>::available() const noexcept
 {
     return storage_.size();
 }
+
+template<typename T, typename Factory>
+void ObjectPool<T, Factory>::reset()
+{
+    while (!storage_.empty()) {
+        storage_.pop(); // destroys std::unique_ptr<T>
+    }
+
+    for (size_t i = 0; i < initial_capacity_; ++i) {
+        storage_.push(factory_());
+    }
+}
+
 
 } // namespace dp
