@@ -22,7 +22,24 @@ ObjectPool<T, Factory>::ObjectPool(size_t initial, Factory fac)
 }
 
 template<typename T, typename Factory>
-ObjectPool<T, Factory>::~ObjectPool()
+ObjectPool<T, Factory>::ObjectPool(size_t initial, size_t extra)
+: ObjectPool(initial, extra, Factory())
+{
+}
+
+template<typename T, typename Factory>
+ObjectPool<T, Factory>::ObjectPool(size_t initial, size_t extra, Factory fac)
+: initial_capacity_{initial}
+, extra_capacity_{extra}
+, factory_{std::move(fac)}
+{
+    for (size_t i = 0; i < initial; ++i) {
+        storage_.push(factory_.create());
+    }
+}
+
+template<typename T, typename Factory>
+ObjectPool<T, Factory>::~ObjectPool() noexcept
 {
     while(!storage_.empty()) {
         storage_.pop();  // std::unique_ptr<T> is automatically destroyed here
@@ -30,23 +47,33 @@ ObjectPool<T, Factory>::~ObjectPool()
 }
 
 template<typename T, typename Factory>
-std::unique_ptr<T, PoolDeleter<T, Factory>> ObjectPool<T, Factory>::get() noexcept {
-    if (storage_.empty()) {
-        return {nullptr, PoolDeleter<T, Factory>(this)};
+std::unique_ptr<T, PoolDeleter<T, Factory>> ObjectPool<T, Factory>::get() noexcept
+{
+    if (storage_.empty() && !grew_) {
+        // Grow by extra capacity if allowed
+        for (size_t i = 0; i < extra_capacity_; ++i) {
+            storage_.push(factory_.create());
+        }
+        grew_ = true;
     }
 
+    if (storage_.empty()) {
+            return {nullptr, PoolDeleter<T, Factory>(this)};
+    }
     auto raw = std::move(storage_.top());
     storage_.pop();
 
     return {raw.release(), PoolDeleter<T, Factory>(this)};
 }
 
-
 template<typename T, typename Factory>
 void ObjectPool<T, Factory>::release(std::unique_ptr<T>&& p)
 {
-    if(p) {
-        storage_.push(std::move(p));
+    if (p) {
+        if (storage_.size() < initial_capacity_) {
+            storage_.push(std::move(p));  // store only if under limit
+        }
+        // the object is destroyed (out of scope)
     }
 }
 
@@ -73,6 +100,5 @@ void ObjectPool<T, Factory>::reset()
         storage_.push(factory_.create());
     }
 }
-
 
 } // namespace dp

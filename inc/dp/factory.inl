@@ -5,19 +5,13 @@
 namespace dp {
 
 template<typename T>
-std::unique_ptr<T> DefFactory<T>::create() 
-{
-    return std::make_unique<T>();
-}
-
-template<typename T>
-RegFactory<T>::RegFactory(std::function<std::unique_ptr<T>()> func)
+Factory<T>::Factory(std::function<std::unique_ptr<T>()> func)
 : func_(std::move(func))
 {
 }
 
 template<typename T>
-std::unique_ptr<T> RegFactory<T>::create()
+std::unique_ptr<T> Factory<T>::create() const
 {
     return func_();
 }
