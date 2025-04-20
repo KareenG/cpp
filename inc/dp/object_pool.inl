@@ -7,7 +7,7 @@ namespace dp
 
 template<typename T, typename Factory>
 ObjectPool<T, Factory>::ObjectPool(size_t initial)
-: ObjectPool(initial, [] { return std::make_unique<T>(); })
+: ObjectPool(initial, Factory())
 {
 }
 
@@ -17,7 +17,7 @@ ObjectPool<T, Factory>::ObjectPool(size_t initial, Factory fac)
 , factory_{std::move(fac)} 
 {
     for (size_t i = 0; i < initial; ++i) {
-        storage_.push(factory_());
+        storage_.push(factory_.create());
     }
 }
 
@@ -70,7 +70,7 @@ void ObjectPool<T, Factory>::reset()
     }
 
     for (size_t i = 0; i < initial_capacity_; ++i) {
-        storage_.push(factory_());
+        storage_.push(factory_.create());
     }
 }
 
