@@ -166,21 +166,14 @@ END_TEST
 BEGIN_TEST(dynamic_release_discards_excess)
     dp::ObjectPool<Dummy> pool(2, 2);
 
-    // Lease 4 objects (2 + 2 overflow)
-    auto obj1 = pool.get();
-    auto obj2 = pool.get();
-    auto obj3 = pool.get();
-    auto obj4 = pool.get();
-
-    ASSERT_EQUAL(pool.available(), 0);
-
-    // Manually release two objects (should be kept)
-    pool.release(std::unique_ptr<Dummy>(obj1.release()));
-    pool.release(std::unique_ptr<Dummy>(obj2.release()));
-
-    // Manually release overflow (should be destroyed)
-    pool.release(std::unique_ptr<Dummy>(obj3.release()));
-    pool.release(std::unique_ptr<Dummy>(obj4.release()));
+    {
+        // Lease 4 objects (2 + 2 overflow)
+        auto obj1 = pool.get();
+        auto obj2 = pool.get();
+        auto obj3 = pool.get();
+        auto obj4 = pool.get();
+        ASSERT_EQUAL(pool.available(), 0);
+    }
 
     ASSERT_EQUAL(pool.available(), 2); // No more than initial capacity
 END_TEST

@@ -10,6 +10,9 @@
 
 namespace dp {
 
+template<typename T, typename Factory = Factory<T>>
+class PoolDeleter;
+
 /**
  * @brief A generic object pool that manages reusable objects of type T.
  * 
@@ -67,7 +70,7 @@ public:
     /**
      * @brief Destroys the pool and all objects it holds.
      */
-    ~ObjectPool() noexcept;
+    ~ObjectPool() noexcept = default;
 
     ObjectPool(ObjectPool const&) = delete;
     ObjectPool& operator=(ObjectPool const&) = delete;
@@ -86,22 +89,6 @@ public:
     std::unique_ptr<T, PoolDeleter<T, Factory>> get() noexcept;
 
     /**
-     * @brief Manually returns an object to the pool.
-     * 
-     * If the pool is already full (based on initial capacity), the object is discarded.
-     * 
-     * @param p The object to return.
-     */
-    void release(std::unique_ptr<T>&& p);
-
-    /**
-     * @brief Called by the custom deleter to return the object to the pool.
-     * @note This overload is internal — users should not call it directly.
-     * @param p The object to return.
-     */
-    void release(std::unique_ptr<T, PoolDeleter<T, Factory>>&& p);
-
-    /**
      * @brief Returns the number of objects the pool retains at idle (initial capacity).
      */
     size_t size() const noexcept;
@@ -110,6 +97,27 @@ public:
      * @brief Returns the number of objects currently available in the pool.
      */
     size_t available() const noexcept;
+
+    
+private:
+
+    friend PoolDeleter<T, Factory>;
+
+    /**
+     * @brief Called by the custom deleter to return the object to the pool.
+     * @note This overload is internal — users should not call it directly.
+     * @param p The object to return.
+     */
+    //void release(std::unique_ptr<T, PoolDeleter<T, Factory>>&& p);
+
+    /**
+     * @brief Manually returns an object to the pool.
+     * 
+     * If the pool is already full (based on initial capacity), the object is discarded.
+     * 
+     * @param p The object to return.
+     */
+    void release(std::unique_ptr<T>&& p);
 
     /**
      * @brief Resets the pool, destroying all objects and reinitializing to the original size.

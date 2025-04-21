@@ -21,6 +21,12 @@ public:
      */
     Factory() = default;
 
+    ~Factory() noexcept = default;
+    Factory(const Factory&) = default;
+    Factory(Factory&&) noexcept = default;
+    Factory& operator=(const Factory&) = default;
+    Factory& operator=(Factory&&) noexcept = default;
+
     /**
      * @brief Constructs a factory with a user-defined object creation function.
      * 

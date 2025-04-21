@@ -39,14 +39,6 @@ ObjectPool<T, Factory>::ObjectPool(size_t initial, size_t extra, Factory fac)
 }
 
 template<typename T, typename Factory>
-ObjectPool<T, Factory>::~ObjectPool() noexcept
-{
-    while(!storage_.empty()) {
-        storage_.pop();  // std::unique_ptr<T> is automatically destroyed here
-    }
-}
-
-template<typename T, typename Factory>
 std::unique_ptr<T, PoolDeleter<T, Factory>> ObjectPool<T, Factory>::get() noexcept
 {
     if (storage_.empty() && !grew_) {
@@ -96,9 +88,10 @@ void ObjectPool<T, Factory>::reset()
         storage_.pop(); // destroys std::unique_ptr<T>
     }
 
-    for (size_t i = 0; i < initial_capacity_; ++i) {
+    for (size_t i = 0; i < initial_capacity_ ; ++i) {
         storage_.push(factory_.create());
     }
+    grew_ = false;
 }
 
 } // namespace dp
