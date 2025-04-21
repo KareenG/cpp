@@ -49,6 +49,9 @@ void ObjectPool<T, Factory>::release(std::unique_ptr<T>&& p)
             storage_.push(std::move(p));  // store only if under limit
         }
         // the object is destroyed (out of scope)
+        else {
+            ++extra_available_;
+        }
     }
 }
 
