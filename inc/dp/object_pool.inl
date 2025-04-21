@@ -6,24 +6,8 @@ namespace dp
 {
 
 template<typename T, typename Factory>
-ObjectPool<T, Factory>::ObjectPool(size_t initial)
-: ObjectPool(initial, Factory())
-{
-}
-
-template<typename T, typename Factory>
 ObjectPool<T, Factory>::ObjectPool(size_t initial, Factory fac)
-: initial_capacity_{initial}
-, factory_{std::move(fac)} 
-{
-    for (size_t i = 0; i < initial; ++i) {
-        storage_.push(factory_.create());
-    }
-}
-
-template<typename T, typename Factory>
-ObjectPool<T, Factory>::ObjectPool(size_t initial, size_t extra)
-: ObjectPool(initial, extra, Factory())
+: ObjectPool(initial, 0, fac)
 {
 }
 
@@ -31,6 +15,7 @@ template<typename T, typename Factory>
 ObjectPool<T, Factory>::ObjectPool(size_t initial, size_t extra, Factory fac)
 : initial_capacity_{initial}
 , extra_capacity_{extra}
+, extra_available_{extra}
 , factory_{std::move(fac)}
 {
     for (size_t i = 0; i < initial; ++i) {
@@ -39,14 +24,12 @@ ObjectPool<T, Factory>::ObjectPool(size_t initial, size_t extra, Factory fac)
 }
 
 template<typename T, typename Factory>
-std::unique_ptr<T, PoolDeleter<T, Factory>> ObjectPool<T, Factory>::get() noexcept
+std::unique_ptr<T, PoolDeleter<T, Factory>> ObjectPool<T, Factory>::get()
 {
-    if (storage_.empty() && !grew_) {
+    if (storage_.empty() && extra_available_ > 0) {
         // Grow by extra capacity if allowed
-        for (size_t i = 0; i < extra_capacity_; ++i) {
-            storage_.push(factory_.create());
-        }
-        grew_ = true;
+        storage_.push(factory_.create());
+        --extra_available_;
     }
 
     if (storage_.empty()) {
@@ -91,7 +74,7 @@ void ObjectPool<T, Factory>::reset()
     for (size_t i = 0; i < initial_capacity_ ; ++i) {
         storage_.push(factory_.create());
     }
-    grew_ = false;
+    extra_available_ = extra_capacity_;
 }
 
 } // namespace dp

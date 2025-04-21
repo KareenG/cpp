@@ -10,65 +10,48 @@
 
 namespace dp {
 
-template<typename T, typename Factory = Factory<T>>
+template<typename T, typename Factory = DefHeapAllocatingFactory<T>>
 class PoolDeleter;
 
 /**
  * @brief A generic object pool that manages reusable objects of type T.
  * 
- * The pool creates an initial number of objects and allows clients to acquire
- * and release them. Optionally, the pool can grow dynamically to serve more
- * clients than initially allocated. Dynamically created objects are discarded
- * once returned if the pool already holds its initial capacity.
+ * This pool allocates and stores a number of reusable objects to reduce
+ * allocation overhead. It supports dynamic growth and automatically returns
+ * objects to the pool via a custom deleter.
  * 
- * @tparam T The type of objects managed by the pool.
- * @tparam Factory A factory type that provides `std::unique_ptr<T> create()`.
+ * @tparam T The type of object managed by the pool.
+ * @tparam Factory A type providing `std::unique_ptr<T> create()` to instantiate objects.
  * 
  * @details
- * Member variables:
- * - initial_capacity_: The maximum number of objects that the pool will retain internally.
- *   This defines the size of the pool when idle.
- * - extra_capacity_: The number of additional objects to allocate when the pool runs out
- *   of available objects. These extras are not retained when returned.
- * - factory_: The factory used to construct new objects. It must provide a `create()` method
- *   returning `std::unique_ptr<T>`.
- * - storage_: A stack-based container holding the currently available (idle) objects.
- * - grew_: A flag that indicates whether the pool has already grown dynamically once. Used
- *   to enforce single-growth semantics if desired.
+ * - initial_capacity_: The maximum number of idle objects retained.
+ * - extra_capacity_: Number of temporary objects allowed beyond the initial pool.
+ * - extra_available_: Tracks remaining dynamic allocations allowed.
+ * - factory_: Responsible for creating new instances of `T`.
+ * - storage_: Internal LIFO stack of available objects.
  */
-template<typename T, typename Factory = Factory<T>>
+template<typename T, typename Factory = DefHeapAllocatingFactory<T>>
 class ObjectPool {
 public:
     /**
-     * @brief Constructs a pool with an initial number of objects using the default factory.
-     * @param initial Number of objects to pre-allocate.
+     * @brief Constructs a pool with a fixed number of pre-allocated objects.
+     * 
+     * @param initial Number of objects to pre-allocate and retain.
+     * @param fac Factory used to construct each object (default-constructed if not provided).
      */
-    explicit ObjectPool(size_t initial = 0);
+    explicit ObjectPool(size_t initial = 0, Factory fac = Factory());
 
     /**
-     * @brief Constructs a pool with an initial number of objects using a custom factory.
-     * @param initial Number of objects to pre-allocate.
-     * @param fac Factory object used to create objects.
+     * @brief Constructs a dynamically growing pool with extra capacity.
+     * 
+     * @param initial Number of objects to pre-allocate and retain.
+     * @param extra Maximum number of additional objects to create on demand.
+     * @param fac Factory used to construct each object.
      */
-    explicit ObjectPool(size_t initial, Factory fac);
+    explicit ObjectPool(size_t initial, size_t extra, Factory fac = Factory());
 
     /**
-     * @brief Constructs a dynamic pool with initial and extra capacity using the default factory.
-     * @param initial Number of objects to pre-allocate.
-     * @param extra Number of objects to create on-demand when exhausted.
-     */
-    explicit ObjectPool(size_t initial, size_t extra);
-
-    /**
-     * @brief Constructs a dynamic pool with initial and extra capacity using a custom factory.
-     * @param initial Number of objects to pre-allocate.
-     * @param extra Number of objects to create on-demand when exhausted.
-     * @param fac Factory object used to create objects.
-     */
-    explicit ObjectPool(size_t initial, size_t extra, Factory fac);
-
-    /**
-     * @brief Destroys the pool and all objects it holds.
+     * @brief Destructor that releases all owned objects.
      */
     ~ObjectPool() noexcept = default;
 
@@ -80,56 +63,49 @@ public:
     /**
      * @brief Acquires an object from the pool.
      * 
-     * If the pool is exhausted, it will grow by the extra capacity if allowed.
-     * Returned objects are automatically returned to the pool when their
-     * unique_ptr goes out of scope (via a custom deleter).
+     * If the pool is exhausted and dynamic growth is allowed, a temporary object
+     * will be created. All returned objects are wrapped in a `unique_ptr` with
+     * a custom deleter to return them to the pool automatically.
      * 
-     * @return A unique_ptr to an object, or nullptr if no object can be provided.
+     * @return A unique_ptr to an object, or nullptr if allocation is not possible.
      */
-    std::unique_ptr<T, PoolDeleter<T, Factory>> get() noexcept;
+    std::unique_ptr<T, PoolDeleter<T, Factory>> get();
 
     /**
-     * @brief Returns the number of objects the pool retains at idle (initial capacity).
+     * @brief Returns the number of objects the pool retains when idle.
      */
     size_t size() const noexcept;
 
     /**
-     * @brief Returns the number of objects currently available in the pool.
+     * @brief Returns the number of currently available (idle) objects in the pool.
      */
     size_t available() const noexcept;
 
-    
 private:
-
     friend PoolDeleter<T, Factory>;
 
     /**
-     * @brief Called by the custom deleter to return the object to the pool.
-     * @note This overload is internal — users should not call it directly.
-     * @param p The object to return.
-     */
-    //void release(std::unique_ptr<T, PoolDeleter<T, Factory>>&& p);
-
-    /**
-     * @brief Manually returns an object to the pool.
+     * @brief Returns an object to the pool.
      * 
-     * If the pool is already full (based on initial capacity), the object is discarded.
+     * If the pool is full (i.e., already holds the initial capacity), the object is destroyed.
      * 
      * @param p The object to return.
+     * 
+     * @note This is called by the `PoolDeleter`. Do not call it manually.
      */
     void release(std::unique_ptr<T>&& p);
 
     /**
-     * @brief Resets the pool, destroying all objects and reinitializing to the original size.
+     * @brief Destroys all current pool contents and resets to the initial capacity.
      */
     void reset();
 
 private:
     size_t initial_capacity_;
-    size_t extra_capacity_ = 0;
+    size_t extra_capacity_;
+    size_t extra_available_;
     Factory factory_;
     std::stack<std::unique_ptr<T>> storage_;
-    bool grew_ = false;
 };
 
 } // namespace dp

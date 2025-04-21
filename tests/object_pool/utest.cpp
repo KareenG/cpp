@@ -113,12 +113,12 @@ END_TEST
 
 BEGIN_TEST(feature2_with_factory)
     // Define a factory that creates Dummy objects with value 77
-    auto factory = dp::Factory<Dummy>([] {
+    auto factory = dp::DefHeapAllocatingFactory<Dummy>([] {
         return std::make_unique<Dummy>(77);
     });
 
     // Create a pool using this factory
-    dp::ObjectPool<Dummy, dp::Factory<Dummy>> pool(2, factory);
+    dp::ObjectPool<Dummy, dp::DefHeapAllocatingFactory<Dummy>> pool(2, factory);
 
     ASSERT_EQUAL(pool.size(), 2);
     ASSERT_EQUAL(pool.available(), 2);

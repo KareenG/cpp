@@ -6,33 +6,33 @@
 namespace dp {
 
 /**
- * @brief A generic factory that creates objects of type T using std::unique_ptr.
+ * @brief A generic DefHeapAllocatingFactory that creates objects of type T using std::unique_ptr.
  * 
- * This factory defaults to using `std::make_unique<T>()`, but can also wrap 
+ * This DefHeapAllocatingFactory defaults to using `std::make_unique<T>()`, but can also wrap 
  * a user-supplied function to create objects with custom constructors or logic.
  * 
  * @tparam T The type of object to create.
  */
 template<typename T>
-class Factory {
+class DefHeapAllocatingFactory {
 public:
     /**
-     * @brief Constructs a default factory that uses `std::make_unique<T>()`.
+     * @brief Constructs a default DefHeapAllocatingFactory that uses `std::make_unique<T>()`.
      */
-    Factory() = default;
+    DefHeapAllocatingFactory() = default;
 
-    ~Factory() noexcept = default;
-    Factory(const Factory&) = default;
-    Factory(Factory&&) noexcept = default;
-    Factory& operator=(const Factory&) = default;
-    Factory& operator=(Factory&&) noexcept = default;
+    ~DefHeapAllocatingFactory() noexcept = default;
+    DefHeapAllocatingFactory(const DefHeapAllocatingFactory&) = default;
+    DefHeapAllocatingFactory(DefHeapAllocatingFactory&&) noexcept = default;
+    DefHeapAllocatingFactory& operator=(const DefHeapAllocatingFactory&) = default;
+    DefHeapAllocatingFactory& operator=(DefHeapAllocatingFactory&&) noexcept = default;
 
     /**
-     * @brief Constructs a factory with a user-defined object creation function.
+     * @brief Constructs a DefHeapAllocatingFactory with a user-defined object creation function.
      * 
      * @param func A callable that returns a `std::unique_ptr<T>`.
      */
-    explicit Factory(std::function<std::unique_ptr<T>()> func);
+    explicit DefHeapAllocatingFactory(std::function<std::unique_ptr<T>()> func);
 
     /**
      * @brief Creates a new object using the stored creation function.
