@@ -4,6 +4,13 @@
 #include <string>
 #include <memory>
 
+#include <memory>
+#include <iostream>
+#include <thread>
+#include <vector>
+#include <chrono>
+#include <atomic>
+
 struct Dummy {
     int val = 0;
     explicit Dummy(int v = 0)
@@ -196,6 +203,35 @@ BEGIN_TEST(dynamic_auto_release_only_keeps_initial)
     ASSERT_EQUAL(pool.available(), 2);
 END_TEST
 
+/*----------------------------------------------------------------------------------------------------*/
+
+BEGIN_TEST(ObjectPool_Get_ThreadSafety)
+    dp::ObjectPool<Dummy> pool(10, 5);
+
+    std::vector<std::thread> threads1;
+    threads1.reserve(15);
+
+    for (int i = 0; i < 15; ++i) {
+        threads1.emplace_back([&, i]() {
+            {
+                auto obj = pool.get();
+            }
+        });
+
+    }
+
+    for (auto& t : threads1) {
+        t.join();
+    }
+
+    ASSERT_EQUAL(pool.available(), 10);
+    ASSERT_EQUAL(pool.size(), 10);
+END_TEST
+
+
+
+
+
 BEGIN_SUITE(ObjectPool_BasicTests)
     // feature 1
     // TEST(construction_and_get)
@@ -215,4 +251,5 @@ BEGIN_SUITE(ObjectPool_BasicTests)
     TEST(dynamic_release_discards_excess)
     TEST(dynamic_auto_release_only_keeps_initial)
 
+    TEST(ObjectPool_Get_ThreadSafety)
 END_SUITE
