@@ -31,10 +31,11 @@ void calc_time(std::vector<T> const& vec, double& time_run, size_t thrds_num, Fu
 {
     auto start = std::chrono::high_resolution_clock::now();
 
-    func(vec, thrds_num); // executes find_max or calc_sum
+    auto result = func(vec, thrds_num); // executes find_max or calc_sum
 
     auto end = std::chrono::high_resolution_clock::now();
-    
+
+    std::cout << "Result: " << result << "\n";
     std::chrono::duration<double, std::milli> duration_ms = end - start;
     time_run = duration_ms.count();
     std::cout << "Execution time with " << thrds_num << " threads: " << time_run << " ms\n";
