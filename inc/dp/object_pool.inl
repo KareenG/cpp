@@ -26,6 +26,8 @@ ObjectPool<T, Factory>::ObjectPool(size_t initial, size_t extra, Factory fac)
 template<typename T, typename Factory>
 std::unique_ptr<T, PoolDeleter<T, Factory>> ObjectPool<T, Factory>::get()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+
     if (storage_.empty() && extra_available_ > 0) {
         // Grow by extra capacity if allowed
         storage_.push(factory_.create());
@@ -33,7 +35,7 @@ std::unique_ptr<T, PoolDeleter<T, Factory>> ObjectPool<T, Factory>::get()
     }
 
     if (storage_.empty()) {
-            return {nullptr, PoolDeleter<T, Factory>(this)};
+        return {nullptr, PoolDeleter<T, Factory>(this)};
     }
     auto raw = std::move(storage_.top());
     storage_.pop();
@@ -44,6 +46,8 @@ std::unique_ptr<T, PoolDeleter<T, Factory>> ObjectPool<T, Factory>::get()
 template<typename T, typename Factory>
 void ObjectPool<T, Factory>::release(std::unique_ptr<T>&& p)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+    
     if (p) {
         if (storage_.size() < initial_capacity_) {
             storage_.push(std::move(p));  // store only if under limit
@@ -62,8 +66,9 @@ size_t ObjectPool<T, Factory>::size() const noexcept
 }
 
 template<typename T, typename Factory>
-size_t ObjectPool<T, Factory>::available() const noexcept
+size_t ObjectPool<T, Factory>::available() noexcept
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     return storage_.size();
 }
 

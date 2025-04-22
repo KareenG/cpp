@@ -4,6 +4,7 @@
 #include <stack>
 #include <cstddef>
 #include <memory>
+#include <mutex>
 
 #include "dp/factory.hpp"
 #include "dp/pool_deleter.hpp"
@@ -79,7 +80,7 @@ public:
     /**
      * @brief Returns the number of currently available (idle) objects in the pool.
      */
-    size_t available() const noexcept;
+    size_t available() noexcept;
 
 private:
     friend PoolDeleter<T, Factory>;
@@ -106,6 +107,7 @@ private:
     size_t extra_available_;
     Factory factory_;
     std::stack<std::unique_ptr<T>> storage_;
+    mutable std::mutex mutex_;
 };
 
 } // namespace dp
