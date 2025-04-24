@@ -76,5 +76,11 @@
         "future": "cpp",
         "mutex": "cpp",
         "class": "cpp"
+    },
+    "github.copilot.enable": {
+        "*": false,
+        "plaintext": false,
+        "markdown": false,
+        "scminput": false
     }
 }
