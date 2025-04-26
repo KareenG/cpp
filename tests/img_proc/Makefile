@@ -18,7 +18,6 @@ OBJS =
 
 TARGET = utest
 
-
 $(TARGET) : $(OBJS)
 
 all: $(TARGET)
@@ -28,14 +27,17 @@ check : $(TARGET)
 
 recheck: clean check
 
+# Files to keep
+KEEP_FILES = Trump.ppm kiyomizudera_temple.ppm vegetables.ppm Makefile
+
 clean:
 	@$(RM) utest.o ./$(TARGET) $(OBJS)
+	@find . -maxdepth 1 -type f \
+		! \( -name "*.cpp" -o -name "*.hpp" -o -name "*.inl" $(foreach f,$(KEEP_FILES),-o -name $(f)) \) \
+		-exec rm -f {} +
 
 .PHONY : make clean check
 
 make:
 	@echo 'Attend a maker faire next year! now back to coding...'
 	@${TRUE}
-
-leak-check:
-	valgrind ./$(TARGET)
