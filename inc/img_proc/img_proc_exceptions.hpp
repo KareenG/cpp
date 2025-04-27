@@ -24,9 +24,6 @@ public:
  */
 class InputStreamException : public std::invalid_argument {
 public:
-    /**
-     * @brief Constructs the exception with a standard message.
-     */
     explicit InputStreamException();
 };
 
@@ -36,9 +33,6 @@ public:
  */
 class OutputStreamException : public std::invalid_argument {
 public:
-    /**
-     * @brief Constructs the exception with a standard message.
-     */
     explicit OutputStreamException();
 };
 
@@ -48,22 +42,33 @@ public:
  */
 class FileASCIIException : public std::invalid_argument {
 public:
-    /**
-     * @brief Constructs the exception with a standard message.
-     */
     explicit FileASCIIException();
+};
+
+/**
+ * @brief Thrown when when a file has an invalid or corrupted format.
+ * @throws std::invalid_argument
+ * 
+ * This exception is typically thrown during file parsing or reading operations
+ * when the structure or contents of the file do not match the expected format.
+ */
+class FileFormatException : public std::invalid_argument {
+public:
+    explicit FileFormatException();
 };
 
 /**
  * @brief Thrown when an invalid kernel size is given for Gaussian blur.
  * @throws std::invalid_argument
  */
-class InvalidKernelSize : public std::invalid_argument {
+class InvalidKernelSizeException : public std::invalid_argument {
 public:
-    /**
-     * @brief Constructs the exception with a standard message.
-     */
-    explicit InvalidKernelSize();
+    explicit InvalidKernelSizeException();
+};
+
+class OutOfBoundsException : public std::out_of_range {
+public:
+    explicit OutOfBoundsException();
 };
 
 /*---------------------------------------------------------*/
@@ -90,8 +95,18 @@ inline FileASCIIException::FileASCIIException()
 {
 }
 
-inline InvalidKernelSize::InvalidKernelSize()
+inline FileFormatException::FileFormatException()
+: std::invalid_argument("Invalid or corrupted file format.") 
+{
+}
+
+inline InvalidKernelSizeException::InvalidKernelSizeException()
 : std::invalid_argument("Gaussian kernel size must be odd (3,5,7,9...)")
+{
+}
+
+inline OutOfBoundsException::OutOfBoundsException()
+: std::out_of_range("Image<T>::at_index: Row or column out of range")
 {
 }
 

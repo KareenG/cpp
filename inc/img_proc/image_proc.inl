@@ -17,21 +17,22 @@
 namespace img_proc {
 
 template<typename T>
-void NullTransformer<T>::transform_image(Image<T> const& original_image, Image<T>& image_transformed, size_t threads) const
+Image<T> NullTransformer<T>::transform_image(Image<T> const& original_image, size_t threads)
 {
-    image_transformed.resize(original_image.height(), original_image.width(), original_image.max_val());
+    Image<T> image_transformed = Image<T>{original_image.height(), original_image.width(), original_image.max_color()};
 
     ThreadWorker worker(threads);
     worker.run(original_image.height(),
         [&original_image, &image_transformed](std::size_t start_row, std::size_t end_row) {
             for (size_t row = start_row; row < end_row; ++row) {
                 for (size_t col = 0; col < original_image.width(); ++col) {
-                    size_t idx = original_image.at_index(row, col);
-                    image_transformed[idx] = original_image[idx];
+                    image_transformed(row, col) = original_image(row, col);
                 }
             }
         }
     );
+
+    return image_transformed;
 }
 
 
@@ -66,28 +67,30 @@ static std::array<Quantizer<T>, 3> make_quantizers(std::vector<T> const& bins) {
 }
 
 template<typename T>
-void ColorReduction<T>::transform_to_bw(Image<T> const& original_image, Image<T>& image_transformed) const {
-    T upper_bound = original_image.max_val();
+Image<T> ColorReduction<T>::transform_to_bw(Image<T> const& original_image) const {
+    Image<T> image_transformed = Image<T>{original_image.height(), original_image.width(), original_image.max_color()};
+
+    T upper_bound = original_image.max_color();
     image_transformed = original_image;
     for (size_t i = 0; i < image_transformed.size(); ++i) {
         T intensity = original_image[i].to_intensity();
         image_transformed[i] = (intensity < upper_bound / 2) ? RGB<T>::black() : RGB<T>::white();
     }
+    return image_transformed;
 }
 
 template<typename T>
-void ColorReduction<T>::transform_image(Image<T> const& original_image, Image<T>& image_transformed, size_t threads) const
+Image<T> ColorReduction<T>::transform_image(Image<T> const& original_image, size_t threads)
 {
-    image_transformed.resize(original_image.height(), original_image.width(), original_image.max_val());
-
     // Special case for black-and-white conversion
     if(levels_ == 2) {
-        transform_to_bw(original_image, image_transformed);
-        return;
+        return transform_to_bw(original_image);
     }
 
+    Image<T> image_transformed = Image<T>{original_image.height(), original_image.width(), original_image.max_color()};
+
     std::vector<T> bins(levels_);
-    size_t upper_bound = original_image.max_val();
+    size_t upper_bound = original_image.max_color();
     size_t step = upper_bound / (levels_ - 1);
 
     bins[0] = 0;
@@ -104,9 +107,8 @@ void ColorReduction<T>::transform_image(Image<T> const& original_image, Image<T>
         [&original_image, &image_transformed, &quantizers](std::size_t start, std::size_t end) {
             for(std::size_t y = start; y < end; ++y) {
                 for(std::size_t x = 0; x < original_image.width(); ++x) {
-                    std::size_t index = original_image.at_index(y, x);
-                    const RGB<T>& orig_px = original_image[index];
-                    RGB<T>& px = image_transformed[index];
+                    const RGB<T>& orig_px = original_image(y, x);
+                    RGB<T>& px = image_transformed(y, x);
 
                     px.r = quantizers[0](orig_px.r);
                     px.g = quantizers[1](orig_px.g);
@@ -114,13 +116,15 @@ void ColorReduction<T>::transform_image(Image<T> const& original_image, Image<T>
                 }
             }
     });
+
+    return image_transformed;
 }
 
 //----------------->        Option 2        DO NOT DELETE
 /**
 template<typename T>
 void ColorReduction<T>::transform_image(Image<T> const& original_image, Image<T>& image_transformed, size_t) const {
-    T upper_bound = original_image.max_val();
+    T upper_bound = original_image.max_color();
 
     // Special case for black-and-white conversion
     if (levels_ == 2) {
@@ -190,9 +194,9 @@ Pixelator<T>::Pixelator(size_t block_size)
 }
 
 template<typename T>
-void Pixelator<T>::transform_image(Image<T> const& original_image, Image<T>& image_transformed, size_t threads) const
+Image<T> Pixelator<T>::transform_image(Image<T> const& original_image, size_t threads)
 {
-    image_transformed.resize(original_image.height(), original_image.width(), original_image.max_val());
+    Image<T> image_transformed = Image<T>{original_image.height(), original_image.width(), original_image.max_color()};
 
     auto block_averages = precompute_block_averages(original_image);
 
@@ -203,12 +207,13 @@ void Pixelator<T>::transform_image(Image<T> const& original_image, Image<T>& ima
                 for (size_t col = 0; col < original_image.width(); ++col) {
                     size_t block_row = row / block_size_;
                     size_t block_col = col / block_size_;
-                    size_t idx = original_image.at_index(row, col);
-                    image_transformed[idx] = block_averages[block_row][block_col];
+                    image_transformed(row, col) = block_averages[block_row][block_col];
                 }
             }
         }
     );
+
+    return image_transformed;
 }
 
 template<typename T>
@@ -233,7 +238,7 @@ std::vector<std::vector<RGB<T>>> Pixelator<T>::precompute_block_averages(Image<T
 
             for (size_t row = row_start; row < row_end; ++row) {
                 for (size_t col = col_start; col < col_end; ++col) {
-                    RGB<T> px = image[image.at_index(row, col)];
+                    RGB<T> px = image(row, col);
                     sum.r += px.r;
                     sum.g += px.g;
                     sum.b += px.b;
@@ -257,29 +262,32 @@ std::vector<std::vector<RGB<T>>> Pixelator<T>::precompute_block_averages(Image<T
 
 template<typename T>
 GaussianBlur<T>::GaussianBlur(size_t kernel_size, double sigma)
-: kernel_size_{kernel_size}, sigma_{sigma}
+: kernel_size_{kernel_size}
+, sigma_{sigma}
 {
 }
 
 template<typename T>
-void GaussianBlur<T>::transform_image(Image<T> const& original_image, Image<T>& image_transformed, size_t threads) const
+Image<T> GaussianBlur<T>::transform_image(Image<T> const& original_image, size_t threads)
 {
     int half_k = std::max(static_cast<int>(kernel_size_ / 2), 1);
 
     auto kernel = generate_gaussian_kernel(kernel_size_, sigma_);
 
-    image_transformed.resize(original_image.height(), original_image.width(), original_image.max_val());
+    Image<T> image_transformed = Image<T>{original_image.height(), original_image.width(), original_image.max_color()};
 
     ThreadWorker worker(threads);
     worker.run(original_image.height(),
         [&, this](std::size_t start_row, std::size_t end_row) {
             for (size_t y = start_row; y < end_row; ++y) {
                 for (size_t x = 0; x < original_image.width(); ++x) {
-                    image_transformed[original_image.at_index(y, x)] =
+                    image_transformed(y, x) =
                         apply_kernel_to_pixel(original_image, kernel, y, x, half_k);
                 }
             }
         });
+
+    return image_transformed;
 }
 
 
@@ -287,7 +295,7 @@ template<typename T>
 std::vector<std::vector<double>> GaussianBlur<T>::generate_gaussian_kernel(int size, double sigma) const
 {
     if (size % 2 == 0) {
-        throw InvalidKernelSize();//std::invalid_argument("Gaussian kernel size must be odd (3,5,7,9...)");
+        throw InvalidKernelSizeException();
     }
 
     std::vector<std::vector<double>> kernel(size, std::vector<double>(size));
@@ -326,7 +334,7 @@ RGB<T> GaussianBlur<T>::apply_kernel_to_pixel(Image<T> const& image, std::vector
             int sy = std::clamp(y + ky, 0, height - 1);
             int sx = std::clamp(x + kx, 0, width - 1);
 
-            RGB<T> px = image[image.at_index(static_cast<size_t>(sy), static_cast<size_t>(sx))];
+            RGB<T> px = image(static_cast<size_t>(sy), static_cast<size_t>(sx));
             double weight = kernel[ky + half_k][kx + half_k];
 
             r_sum += static_cast<double>(px.r) * weight;
@@ -334,7 +342,7 @@ RGB<T> GaussianBlur<T>::apply_kernel_to_pixel(Image<T> const& image, std::vector
             b_sum += static_cast<double>(px.b) * weight;
         }
     }
-    double upper_bound = static_cast<double>(image.max_val());
+    double upper_bound = static_cast<double>(image.max_color());
     return RGB<T>{
         static_cast<T>(std::clamp(r_sum, 0.0, upper_bound)),//255.0
         static_cast<T>(std::clamp(g_sum, 0.0, upper_bound)),//255.0

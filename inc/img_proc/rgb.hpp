@@ -15,8 +15,10 @@ namespace img_proc {
  */
 template<typename T>
 struct RGB {
-    static_assert(std::is_integral<T>::value && std::is_unsigned<T>::value,
-        "RGB<T> must use an unsigned integral type.");
+    // static_assert(std::is_integral<T>::value && std::is_unsigned<T>::value,
+    //     "RGB<T> must use an unsigned integral type.");
+    static_assert(std::is_arithmetic<T>::value,
+        "RGB<T> must use an unsigned integral type.");        
 
     T r;
     T g;
