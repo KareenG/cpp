@@ -15,50 +15,52 @@ template<typename T, typename Container>
 void BlockingBoundedQueue<T, Container>::enqueue(T const& new_val)
 {
     std::unique_lock<std::mutex> lock(mtx_);
-    full_.wait(lock, [this] { return !(this->full()); });
+    not_full_.wait(lock, [this] { return !(Container::size() == capacity_); });
     this->push(new_val);
-    empty_.notify_all();
+    not_empty_.notify_all();
 }
 
 template<typename T, typename Container>
 void BlockingBoundedQueue<T, Container>::enqueue(T&& new_val)
 {
     std::unique_lock<std::mutex> lock(mtx_);
-    full_.wait(lock, [this] { return !(this->full()); });
+    not_full_.wait(lock, [this] { return !(Container::size() == capacity_); });
     this->push(std::move(new_val));
-    empty_.notify_all();
+    not_empty_.notify_all();
 }
 
 template<typename T, typename Container>
 void BlockingBoundedQueue<T, Container>::dequeue(T& new_val)
 {
     std::unique_lock<std::mutex> lock(mtx_);
-    empty_.wait(lock, [this] { return !(this->empty()); });
+    not_empty_.wait(lock, [this] { return !(Container::empty()); });
     new_val = this->front();
     this->pop();
-    full_.notify_all();
+    not_full_.notify_all();
 }
 
 template<typename T, typename Container>
-bool BlockingBoundedQueue<T, Container>::empty()
+bool BlockingBoundedQueue<T, Container>::empty() const noexcept
 {
+    std::unique_lock<std::mutex> lock(mtx_);
     return Container::empty();
 }
 
 template<typename T, typename Container>
-bool BlockingBoundedQueue<T, Container>::full()
+bool BlockingBoundedQueue<T, Container>::full() const noexcept
 {
-    return Container::size() >= capacity_;
+    return size() == capacity_;
 }
 
 template<typename T, typename Container>
-size_t BlockingBoundedQueue<T, Container>::size()
+size_t BlockingBoundedQueue<T, Container>::size() const noexcept
 {
+    std::unique_lock<std::mutex> lock(mtx_);
     return Container::size();
 }
 
 template<typename T, typename Container>
-size_t BlockingBoundedQueue<T, Container>::capacity()
+size_t BlockingBoundedQueue<T, Container>::capacity() const noexcept
 {
     return capacity_;
 }
