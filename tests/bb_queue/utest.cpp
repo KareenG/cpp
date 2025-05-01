@@ -2,8 +2,12 @@
 
 #include <thread>
 #include <vector>
+#include <algorithm>
+#include <atomic>
 
 #include "mt/queue.hpp"
+
+
 
 BEGIN_TEST(test_constructor)
     mt::BlockingBoundedQueue<int> q{7};
@@ -219,7 +223,7 @@ BEGIN_TEST(fifo_four_producers_four_consumers)
     }
 
     for (int c = 0; c < 4; ++c) {
-        consumers.emplace_back([&queue, &results, &results_mutex]() {
+        consumers.emplace_back([&queue, &results, &results_mutex]() {//
             for (int i = 0; i < items_per_consumer; ++i) {
                 int item;
                 queue.dequeue(item);
@@ -228,6 +232,7 @@ BEGIN_TEST(fifo_four_producers_four_consumers)
                     std::lock_guard<std::mutex> lock(results_mutex);
                     results.push_back(item);
                 }
+                
             }
         });
     }
@@ -245,6 +250,11 @@ BEGIN_TEST(fifo_four_producers_four_consumers)
 END_TEST
 
 /*------------------------------------------------------------------------------------------*/
+
+// TODO: Add tests with Cat objects that have an id_ member indicating their enqueue order.
+// The id_ will be assigned in debug mode inside the enqueue() function.
+// Optionally, record the enqueue and dequeue order for each specific category (e.g., by color).
+// Perform this test with a single producer and a single consumer for deterministic verification.
 
 BEGIN_SUITE(blocking_bounded_queue_tests)
     // Basic Tests

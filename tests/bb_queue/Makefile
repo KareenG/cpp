@@ -6,7 +6,7 @@ CXXFLAGS += -g3
 CXXFLAGS += -std=c++17
 
 # CPPFLAGS = -DDEBUG
-CPPFLAGS = -I$(INCLUDES_DIR)
+CPPFLAGS = -I$(INCLUDES_DIR) -DDDEBUG
 
 # LDFLAGS =
 # LDLIBS = -lm    # link math library
@@ -16,20 +16,28 @@ SOURCES_DIR = ../../src
 
 OBJS = 
 
-TARGET = utest
+# APP_OBJS = $(OBJS) $(SOURCES_DIR)/bf/command_line_args.o
+# APP = $(SOURCES_DIR)/bf/run_bf
 
+UTEST = utest
 
-$(TARGET) : $(OBJS)
+all : $(UTEST) #$(APP) 
 
-all: $(TARGET)
+# $(APP) : CPPFLAGS += -DNDEBUG
+# $(APP) : $(APP_OBJS)
 
-check : $(TARGET)
-	@./$(TARGET) -v
+$(UTEST) : CPPFLAGS += -DDEBUG
+$(UTEST) : $(OBJS)
 
-recheck: clean check
+# check : CPPFLAGS += -DBF_DEBUG
+# check: $(UTEST)
+# 	./$(UTEST)
 
+#recheck: clean check
+
+# $(APP) $(APP_OBJS)
 clean:
-	@$(RM) utest.o ./$(TARGET) $(OBJS)
+	$(RM) $(UTEST) $(OBJS)
 
 .PHONY : make clean check
 
@@ -37,5 +45,5 @@ make:
 	@echo 'Attend a maker faire next year! now back to coding...'
 	@${TRUE}
 
-leak-check:
-	valgrind ./$(TARGET)
+leak-check : $(UTEST)
+	valgrind ./$(UTEST)
