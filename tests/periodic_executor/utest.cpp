@@ -144,9 +144,9 @@ BEGIN_TEST(executor_multiple_tasks_with_runtime_pause)
 
     std::cout << "[SUMMARY] A: " << a_total << " B: " << b_total << " C: " << c_total << "\n";
 
-    ASSERT_THAT(a_total == 3);
-    ASSERT_THAT(b_total == 13);
-    ASSERT_THAT(c_total == 23);
+    ASSERT_THAT(a_total == 21);
+    ASSERT_THAT(b_total == 31);
+    ASSERT_THAT(c_total == 41);
 END_TEST
 
 

@@ -7,13 +7,12 @@
 #include <stdexcept>
 
 #include <thread>
-#include <atomic>
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
 #include <memory>
 
-#include "mt/queue.hpp"
+#include "mt/thread_safe_priority_queue.hpp"
 
 namespace mt
 {
@@ -165,17 +164,8 @@ public:
 private:
     /**
      * @brief Represents a scheduled task with its execution logic and timing.
-     *
-     * Each task stores:
-     * - func_: the function to execute
-     * - period_: the interval between executions
-     * - next_run_: the next scheduled execution time
      */
-    struct Task {
-        TaskFunction func_;
-        duration period_;
-        time_point next_run_;
-    };
+    class Task;
 
     /**
      * @brief Main execution loop running in a dedicated thread.
@@ -199,12 +189,12 @@ private:
     void shutdown();
 
 private:
-    mt::BlockingBoundedQueue<Task> task_queue_;
+    mt::ThreadSafePriorityQueue<Task> task_queue_;
     std::thread executor_thread_;
     mutable std::mutex mtx_;
     std::condition_variable control_cv_;
-    std::atomic<bool> running_;
-    std::atomic<bool> paused_;
+    bool running_;
+    bool paused_;
     bool shutdown_;
     time_util::Clock<> clock_;
 };

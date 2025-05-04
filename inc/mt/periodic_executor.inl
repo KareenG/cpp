@@ -9,6 +9,30 @@ namespace mt
 {
 
 template<typename Clock>
+   /**
+     * @brief Represents a scheduled task with its execution logic and timing.
+     *
+     * Each task stores:
+     * - func_: the function to execute
+     * - period_: the interval between executions
+     * - next_run_: the next scheduled execution time
+     */
+class PeriodicExecutor<Clock>::Task {
+public:
+    TaskFunction func_;
+    duration period_;
+    time_point next_run_;
+
+    bool operator<(const Task& other) const noexcept;
+};
+
+template<typename Clock>
+bool PeriodicExecutor<Clock>::Task::operator<(const Task& other) const noexcept
+{
+    return next_run_ > other.next_run_; // Min-heap (earlier times come first)
+}
+
+template<typename Clock>
 PeriodicExecutor<Clock>::PeriodicExecutor(Clock clock, bool start_paused)
 : task_queue_{}
 , executor_thread_([this] { run(); })
@@ -25,7 +49,7 @@ template<typename Clock>
 PeriodicExecutor<Clock>::~PeriodicExecutor() noexcept
 {
     shutdown();
-    if(executor_thread_.joinable()) {
+    if (executor_thread_.joinable()) {
         executor_thread_.join();
     }
 }
@@ -34,7 +58,7 @@ template<typename Clock>
 void PeriodicExecutor<Clock>::shutdown()
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    if(shutdown_) {
+    if (shutdown_) {
         return;
     }
     running_ = false;
@@ -47,12 +71,12 @@ void PeriodicExecutor<Clock>::submit(TaskFunction func, duration period)
 {
     {
         std::lock_guard<std::mutex> lock(mtx_);
-        if(shutdown_) {
+        if (shutdown_) {
             throw ExecutorDownException();
         }
-        Task task{std::move(func), period, clock_.get_next_start_time(period)};
-        task_queue_.enqueue(std::move(task));
     }
+    Task task{std::move(func), period, clock_.get_next_start_time(period)};
+    task_queue_.enqueue(std::move(task));
     control_cv_.notify_all();
 }
 
@@ -60,7 +84,7 @@ template<typename Clock>
 void PeriodicExecutor<Clock>::pause()
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    if(shutdown_) {
+    if (shutdown_) {
         throw ExecutorDownException();
     }
     paused_ = true;
@@ -71,7 +95,7 @@ void PeriodicExecutor<Clock>::resume()
 {
     {
         std::lock_guard<std::mutex> lock(mtx_);
-        if(shutdown_) {
+        if (shutdown_) {
             throw ExecutorDownException();
         }
         paused_ = false;
@@ -88,26 +112,36 @@ std::size_t PeriodicExecutor<Clock>::size() const
 template<typename Clock>
 void PeriodicExecutor<Clock>::run()
 {
-    while(true) {
+    while (true) {
         Task task;
         task_queue_.dequeue(task);
-
         {
             std::unique_lock<std::mutex> lock(mtx_);
             control_cv_.wait(lock, [this] { return !paused_ || !running_; });
-            if(!running_) {
+            if (!running_){
                 return;
             }
         }
 
         auto now = clock_.now();
-        if(now < task.next_run_) {
+        if (now < task.next_run_) {
             clock_.sleep_until_runtime(task.next_run_);
         }
 
-        task.func_();
-        task.next_run_ = clock_.get_next_start_time(task.period_);
-        task_queue_.enqueue(std::move(task));
+        try
+        {
+            task.func_();
+            task.next_run_ = clock_.get_next_start_time(task.period_);
+            task_queue_.enqueue(std::move(task));
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+        catch(...)
+        {
+            std::cerr << "Unexpected error occured.\n";
+        }
     }
 }
 
