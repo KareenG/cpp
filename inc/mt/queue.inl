@@ -16,7 +16,7 @@ void BlockingBoundedQueue<T, Container>::enqueue(T const& new_val)
 {
     std::unique_lock<std::mutex> lock(mtx_);
     not_full_.wait(lock, [this] { return !(Container::size() == capacity_); });
-    this->push(new_val);
+    this->push_back(new_val);
     not_empty_.notify_all();
 }
 
@@ -25,17 +25,44 @@ void BlockingBoundedQueue<T, Container>::enqueue(T&& new_val)
 {
     std::unique_lock<std::mutex> lock(mtx_);
     not_full_.wait(lock, [this] { return !(Container::size() == capacity_); });
-    this->push(std::move(new_val));
+    this->push_back(std::move(new_val));
     not_empty_.notify_all();
 }
 
+template<typename T, typename Container>
+void BlockingBoundedQueue<T, Container>::enqueue_front(T const& new_val)
+{
+    std::unique_lock<std::mutex> lock(mtx_);
+    not_full_.wait(lock, [this] { return !(Container::size() == capacity_); });
+    this->push_front(new_val);
+    not_empty_.notify_all();
+}
+
+template<typename T, typename Container>
+void BlockingBoundedQueue<T, Container>::enqueue_front(T&& new_val)
+{
+    std::unique_lock<std::mutex> lock(mtx_);
+    not_full_.wait(lock, [this] { return !(Container::size() == capacity_); });
+    this->push_front(std::move(new_val));
+    not_empty_.notify_all();
+}
+
+// template<typename T, typename Container>
+// void BlockingBoundedQueue<T, Container>::dequeue(T& new_val)
+// {
+//     std::unique_lock<std::mutex> lock(mtx_);
+//     not_empty_.wait(lock, [this] { return !(Container::empty()); });
+//     new_val = this->front();
+//     this->pop();
+//     not_full_.notify_all();
+// }
 template<typename T, typename Container>
 void BlockingBoundedQueue<T, Container>::dequeue(T& new_val)
 {
     std::unique_lock<std::mutex> lock(mtx_);
     not_empty_.wait(lock, [this] { return !(Container::empty()); });
     new_val = this->front();
-    this->pop();
+    this->pop_front();
     not_full_.notify_all();
 }
 

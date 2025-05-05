@@ -13,7 +13,7 @@ namespace mt
  * @brief A thread-safe blocking bounded queue with fixed capacity.
  * 
  * @tparam T Type of elements stored in the queue.
- * @tparam Container Container type to store elements. Must behave like FIFO (default: std::queue<T>).
+ * @tparam Container Container type to store elements. Must behave like FIFO (default: std::deque<T>).
  * 
  * Internally, it inherits from the container type (default std::queue<T>).
  * 
@@ -23,7 +23,7 @@ namespace mt
  * - std::condition_variable full_: Condition variable to block on full queue during enqueue.
  * - std::condition_variable empty_: Condition variable to block on empty queue during dequeue.
  */
-template<typename T, typename Container = std::queue<T>>
+template<typename T, typename Container = std::deque<T>> // queue
 // requires a FIFO container like std::queue
 class BlockingBoundedQueue : private Container
 { 
@@ -56,6 +56,21 @@ public:
      * @param new_val The value to move and enqueue.
      */
     void enqueue(T&& new_val);
+
+    /**
+     * @brief Enqueue a copy of an element at the front of the deque. Blocks if full.
+     * 
+     * @param new_val The value to enqueue at the front.
+     */
+    void enqueue_front(T const& new_val);
+
+    /**
+     * @brief Enqueue a moved element at the front of the deque. Blocks if full.
+     * 
+     * @param new_val The value to move and enqueue at the front.
+     */
+    void enqueue_front(T&& new_val);
+
 
     /**
      * @brief Dequeue an element from the queue. Blocks if empty.
