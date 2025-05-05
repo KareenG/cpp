@@ -24,7 +24,6 @@ namespace mt
  * - `tasks_`        : Reference to a shared task queue from which tasks are dequeued.
  * - `queue_mutex_`  : Mutex used to protect thread operations such as adding or joining workers.
  * - `shutdown_`     : Atomic flag indicating whether shutdown has been initiated.
- * - `max_threads_`  : Maximum number of threads this worker manager is allowed to spawn.
  */
 template<typename F = std::function<void()>,
         typename SequenceContainer = BlockingBoundedQueue<F>>
@@ -38,14 +37,17 @@ public:
      * @brief Construct a new ThreadWorker
      * 
      * @param tasks Reference to a thread-safe task queue
-     * @param max_threads Maximum number of concurrent threads allowed
+     * @param initial_threads Initial number of concurrent threads allowed
      */
-    explicit ThreadWorker(SequenceContainer& tasks, size_t max_threads);
+    explicit ThreadWorker(SequenceContainer& tasks, size_t initial_threads);
 
     /**
      * @brief Destructor - triggers graceful shutdown
      */
     ~ThreadWorker();
+
+    ThreadWorker(const ThreadWorker&) = delete;
+    ThreadWorker& operator=(const ThreadWorker&) = delete;
 
     /**
      * @brief Adds up to n worker threads, not exceeding max_threads_
@@ -69,16 +71,25 @@ public:
     void enqueue(F task);
 
     /**
+     * @brief Gets the current number of worker threads.
+     * 
+     * @return size_t Current number of active worker threads.
+     */
+    size_t workers() const;
+
+    /**
      * @brief Gracefully shuts down all worker threads after completing tasks
      */
     void shutdown_graceful();
+
+private:
+    void assert_only_poison_pills() const;
 
 private:
     std::vector<std::thread> workers_;
     SequenceContainer& tasks_;
     std::mutex queue_mutex_;
     std::atomic<bool> shutdown_;
-    size_t max_threads_;
 };
 
 /**
@@ -104,12 +115,15 @@ public:
      * @param num_threads Number of base worker threads to start with
      * @param extra_threads Optional additional threads
      */
-    explicit ThreadPool(size_t num_threads = std::thread::hardware_concurrency(), size_t extra_threads = 0);
+    explicit ThreadPool(size_t num_threads = std::thread::hardware_concurrency() - 1);
 
     /**
      * @brief Destructor - gracefully shuts down all threads
      */
     ~ThreadPool();
+
+    ThreadPool(const ThreadPool&) = delete;
+    ThreadPool& operator=(const ThreadPool&) = delete;
 
     /**
      * @brief Submit a task to be executed by the thread pool
@@ -136,6 +150,13 @@ public:
     //  * @param n Number of threads to remove
     //  */
     // void remove_workers(size_t n = 1);
+    
+    /**
+     * @brief Gets the current number of worker threads in the pool.
+     * 
+     * @return size_t Current number of active worker threads.
+     */
+    size_t workers() const;
 
 private:
     SequenceContainer tasks_;

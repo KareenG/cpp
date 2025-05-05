@@ -10,20 +10,20 @@ namespace mt
 {
     
 template<typename F, typename SequenceContainer>
-ThreadWorker<F, SequenceContainer>::ThreadWorker(SequenceContainer& tasks, size_t max_threads)
-: tasks_(tasks)
+ThreadWorker<F, SequenceContainer>::ThreadWorker(SequenceContainer& tasks, size_t initial_threads)
+: workers_(initial_threads)
+, tasks_(tasks)
 , queue_mutex_()
 , shutdown_(false)
-, max_threads_(max_threads)
 {
-    add_workers(max_threads_);
+    add_workers(initial_threads);
 }
 
 template<typename F, typename SequenceContainer>
 ThreadWorker<F, SequenceContainer>::~ThreadWorker()
 {
     shutdown_graceful();
-    assert(tasks_.empty());
+    assert_only_poison_pills();
 }
 
 template<typename F, typename SequenceContainer>
@@ -34,9 +34,6 @@ void ThreadWorker<F, SequenceContainer>::add_workers(size_t n)
     }
 
     std::lock_guard<std::mutex> lock(queue_mutex_);
-
-    size_t can_add = max_threads_ - workers_.size();
-    n = std::min(n, can_add);
 
     for (size_t i = 0; i < n; ++i) {
         workers_.emplace_back([this] {
@@ -65,10 +62,17 @@ void ThreadWorker<F, SequenceContainer>::add_workers(size_t n)
 template<typename F, typename SequenceContainer>
 void ThreadWorker<F, SequenceContainer>::enqueue(F task)
 {
-    if (shutdown_) {
+    if (shutdown_.load(std::memory_order_acquire)) {
         return;
     }
     tasks_.enqueue(std::move(task));
+}
+
+template<typename F, typename SequenceContainer>
+size_t ThreadWorker<F, SequenceContainer>::workers() const
+{
+    std::lock_guard<std::mutex> lock(queue_mutex_);
+    return workers_.size();
 }
 
 template<typename F, typename SequenceContainer>
@@ -97,9 +101,18 @@ void ThreadWorker<F, SequenceContainer>::shutdown_graceful()
 }
 
 template<typename F, typename SequenceContainer>
-ThreadPool<F, SequenceContainer>::ThreadPool(size_t num_threads, size_t extra_threads)
+void ThreadWorker<F, SequenceContainer>::assert_only_poison_pills() const {
+    for (size_t i = 0; i < tasks_.size(); ++i) {
+        F task;
+        tasks_.dequeue(task);
+        assert(!task && "Non-null task found after shutdown");
+    }
+}
+
+template<typename F, typename SequenceContainer>
+ThreadPool<F, SequenceContainer>::ThreadPool(size_t num_threads)
 : tasks_{}
-, worker_{tasks_, num_threads + extra_threads}
+, worker_{tasks_, num_threads}
 {
 }
 
