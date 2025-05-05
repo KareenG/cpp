@@ -3,7 +3,7 @@ CC = $(CXX)
 
 CXXFLAGS  = -pedantic -Wall -Werror -Wextra
 CXXFLAGS += -g3
-CXXFLAGS += -std=c++17
+CXXFLAGS += -std=c++20
 
 # CPPFLAGS = -DDEBUG
 CPPFLAGS = -I$(INCLUDES_DIR)
@@ -14,7 +14,7 @@ CPPFLAGS = -I$(INCLUDES_DIR)
 INCLUDES_DIR = ../../inc
 SOURCES_DIR = ../../src
 
-OBJS = 
+OBJS = $(SOURCES_DIR)/mt/thread_pool.o
 
 TARGET = utest
 
