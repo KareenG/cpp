@@ -6,9 +6,6 @@
 #include <condition_variable>
 #include <mutex>
 
-namespace mt
-{
-
 /**
  * @brief A thread-safe blocking bounded queue with fixed capacity.
  * 
@@ -23,25 +20,53 @@ namespace mt
  * - std::condition_variable full_: Condition variable to block on full queue during enqueue.
  * - std::condition_variable empty_: Condition variable to block on empty queue during dequeue.
  */
-template<typename T, typename Container = std::deque<T>> // queue
-// requires a FIFO container like std::queue
-class BlockingBoundedQueue : private Container
-{ 
+namespace mt
+{
+
+// Forward declaration of internal privilege logic
+namespace details {
+    template<typename T>
+    struct PrivilegedOps;
+}
+
+// Grants access to privileged operations
+template<typename WithPrivilege>
+class Secret {
+private:
+    friend WithPrivilege;
+    Secret() = default;
+};
+
+/**
+ * @brief A thread-safe blocking bounded queue with fixed capacity.
+ * 
+ * @tparam T Type of elements stored in the queue.
+ * @tparam WithPrivilege Internal class allowed to call enqueue_front.
+ * @tparam Container Container type to store elements. Must behave like FIFO (default: std::deque<T>).
+ */
+template<typename T, typename WithPrivilege, typename Container = std::deque<T>>
+class BlockingBoundedQueueImpl : private Container {
 public:
+    // Cache-aware default capacity: 32 blocks of 64 bytes each
+    inline static constexpr std::size_t k_default_block_size_bytes = 64;
+    inline static constexpr std::size_t k_default_block_count = 32;
+    inline static constexpr std::size_t k_default_capacity =
+        (k_default_block_size_bytes / sizeof(T)) * k_default_block_count;
+
     /**
      * @brief Construct a BlockingBoundedQueue with a given capacity.
      * 
      * @param initial_capacity Maximum number of elements the queue can hold.
      */
-    explicit BlockingBoundedQueue(size_t initial_capacity = (64 / sizeof(T)) * 32);
+    explicit BlockingBoundedQueueImpl(std::size_t initial_capacity = k_default_capacity);
 
-    ~BlockingBoundedQueue() noexcept = default;
+    ~BlockingBoundedQueueImpl() noexcept = default;
 
-    BlockingBoundedQueue(BlockingBoundedQueue const& other) = delete;
-    BlockingBoundedQueue(BlockingBoundedQueue &&other) = default;
+    BlockingBoundedQueueImpl(BlockingBoundedQueueImpl const& other) = delete;
+    BlockingBoundedQueueImpl(BlockingBoundedQueueImpl&& other) = default;
 
-    BlockingBoundedQueue& operator=(BlockingBoundedQueue const& other) = delete;
-    BlockingBoundedQueue& operator=(BlockingBoundedQueue &&other) = default;
+    BlockingBoundedQueueImpl& operator=(BlockingBoundedQueueImpl const& other) = delete;
+    BlockingBoundedQueueImpl& operator=(BlockingBoundedQueueImpl&& other) = default;
 
     /**
      * @brief Enqueue a copy of an element into the queue. Blocks if full.
@@ -56,21 +81,6 @@ public:
      * @param new_val The value to move and enqueue.
      */
     void enqueue(T&& new_val);
-
-    /**
-     * @brief Enqueue a copy of an element at the front of the deque. Blocks if full.
-     * 
-     * @param new_val The value to enqueue at the front.
-     */
-    void enqueue_front(T const& new_val);
-
-    /**
-     * @brief Enqueue a moved element at the front of the deque. Blocks if full.
-     * 
-     * @param new_val The value to move and enqueue at the front.
-     */
-    void enqueue_front(T&& new_val);
-
 
     /**
      * @brief Dequeue an element from the queue. Blocks if empty.
@@ -98,21 +108,45 @@ public:
      * 
      * @return Current size of the queue.
      */
-    size_t size() const noexcept;
+    std::size_t size() const noexcept;
 
     /**
      * @brief Get the maximum capacity of the queue.
      * 
      * @return Maximum number of elements the queue can hold.
      */
-    size_t capacity() const noexcept;
+    std::size_t capacity() const noexcept;
 
 private:
-    size_t capacity_;
+    /**
+     * @brief Enqueue a copy of an element at the front of the deque. Blocks if full.
+     * 
+     * @param new_val The value to enqueue at the front.
+     */
+    void enqueue_front(T const& new_val, Secret<WithPrivilege>);
+
+    /**
+     * @brief Enqueue a moved element at the front of the deque. Blocks if full.
+     * 
+     * @param new_val The value to move and enqueue at the front.
+     */
+    void enqueue_front(T&& new_val, Secret<WithPrivilege>);
+    friend WithPrivilege;
+
+private:
+    std::size_t capacity_;
     mutable std::mutex mtx_;
     std::condition_variable not_full_;
     std::condition_variable not_empty_;
 };
+
+/**
+ * @brief Public-facing alias. The user only sees this clean name.
+ * 
+ * @tparam T Element type.
+ */
+template<typename T, typename Container = std::deque<T>>
+using BlockingBoundedQueue = BlockingBoundedQueueImpl<T, details::PrivilegedOps<T>, Container>;
 
 } // namespace mt
 
