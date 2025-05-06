@@ -5,37 +5,35 @@ CXXFLAGS  = -pedantic -Wall -Werror -Wextra
 CXXFLAGS += -g3
 CXXFLAGS += -std=c++20
 
-# CPPFLAGS = -DDEBUG
-CPPFLAGS = -I$(INCLUDES_DIR)
-
-# LDFLAGS =
-# LDLIBS = -lm    # link math library
-
 INCLUDES_DIR = ../../inc
 SOURCES_DIR = ../../src
 
-OBJS = $(SOURCES_DIR)/mt/thread_pool.o
+CPPFLAGS += -MMD -MP
+CPPFLAGS += -I$(INCLUDES_DIR)
 
 TARGET = utest
 
-$(TARGET) : $(OBJS)
+OBJS = $(SOURCES_DIR)/mt/thread_pool.o utest.o
 
 all: $(TARGET)
 
 check : $(TARGET)
-	@./$(TARGET) -v
+	./$(TARGET)
 
 recheck: clean check
 
+leaks: $(TARGET)
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose ./$(TARGET)
+
+races: $(TARGET)
+	valgrind --tool=helgrind ./$(TARGET)
+
 clean:
-	$(RM) $(TARGET) $(OBJS)
+	@$(RM) ./$(TARGET) $(OBJS) $(DEPENDS)
 
-.PHONY : make clean check
+.PHONY: clean check leaks races
 
-make:
-	@echo 'Attend a maker faire next year! now back to coding...'
-	@${TRUE}
+$(TARGET) : $(OBJS)
 
-# make leak-check
-leak-check:
-	valgrind --leak-check=full ./utest
+DEPENDS += $(OBJS:.o=.d)
+-include $(DEPENDS)

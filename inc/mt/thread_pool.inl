@@ -8,79 +8,83 @@
 namespace mt
 {
 
-template<typename F, typename SequenceContainer>
-ThreadPool<F, SequenceContainer>::ThreadPool(size_t num_threads, size_t initial_capacity)
+template< typename Task, typename SequenceContainer>
+ThreadPool<Task, SequenceContainer>::ThreadPool(size_t num_threads, size_t initial_capacity)
 : tasks_{initial_capacity}
-, worker_([this]() {worker_function();}, num_threads)
 , shutdown_called_{false}
+, workers_([this]() {workers_function();}, num_threads)
 {
 }
 
-template<typename F, typename SequenceContainer>
-void ThreadPool<F, SequenceContainer>::submit(F&& task)
+template< typename Task, typename SequenceContainer>
+void ThreadPool<Task, SequenceContainer>::submit(Task&& task)
 {
-    if (!shutdown_called_.load(std::memory_order_acquire)) {
-        tasks_.enqueue(std::move(task));
+    if (shutdown_called_.load(std::memory_order_acquire)) {
+        throw std::runtime_error("Cannot submit more tasks: Thread pool is at shutdown");
     }
+    tasks_.enqueue(std::move(task));
 }
 
-template<typename F, typename SequenceContainer>
-void ThreadPool<F, SequenceContainer>::shutdown_graceful() {
+template< typename Task, typename SequenceContainer>
+void ThreadPool<Task, SequenceContainer>::shutdown_graceful() {
     shutdown_called_ = true;
 
     for (size_t i = 0; i < workers(); ++i) {
-        tasks_.enqueue(F{}); // poison pills
+        tasks_.enqueue(Task{}); // poison apples
     }
 
-    worker_.shutdown_graceful();
+    workers_.shutdown_graceful();
 }
 
-
-template<typename F, typename SequenceContainer>
-void ThreadPool<F, SequenceContainer>::shutdown_immediate()
+template< typename Task, typename SequenceContainer>
+void ThreadPool<Task, SequenceContainer>::shutdown_immediate()
 {
     shutdown_called_ = true;
     for (size_t i = 0; i < workers(); ++i) {
-        tasks_.enqueue_front(F{});
+        ThreadPoolPrivileged::enqueue_front(tasks_, Task{}); // poison apples
     }
-    worker_.shutdown_immediate();
+    workers_.shutdown_immediate(); 
 }
 
-
-template<typename F, typename SequenceContainer>
-void ThreadPool<F, SequenceContainer>::add_workers(size_t n)
+template< typename Task, typename SequenceContainer>
+void ThreadPool<Task, SequenceContainer>::add_workers(size_t n)
 {
-    worker_.add_workers(n);
+    if (shutdown_called_.load(std::memory_order_acquire)) {
+        throw std::runtime_error("Cannot add workers: Thread pool is at shutdown");
+    }
+    workers_.add_workers(n);
 }
 
-template<typename F, typename SequenceContainer>
-void ThreadPool<F, SequenceContainer>::remove_workers(size_t n)
+template< typename Task, typename SequenceContainer>
+void ThreadPool<Task, SequenceContainer>::remove_workers(size_t n)
 {
+    if (shutdown_called_.load(std::memory_order_acquire)) {
+        throw std::runtime_error("Cannot remove workers: Thread pool is at shutdown");
+    }
     for (size_t i = 0; i < n; ++i) {
-        tasks_.enqueue(F{});
+        tasks_.enqueue(Task{});
     }
-    worker_.remove_workers(n);
+    workers_.remove_workers(n);
 }
 
-template<typename F, typename SequenceContainer>
-size_t ThreadPool<F, SequenceContainer>::workers() const
+template< typename Task, typename SequenceContainer>
+size_t ThreadPool<Task, SequenceContainer>::workers() const
 {
-    return worker_.workers();
+    return workers_.workers();
 }
 
-template<typename F, typename SequenceContainer>
-inline void ThreadPool<F, SequenceContainer>::worker_function()
+template< typename Task, typename SequenceContainer>
+inline void ThreadPool<Task, SequenceContainer>::workers_function()
 {
     for (;;) {
-        F task;
+        Task task;
         tasks_.dequeue(task);
 
-        if (!task) {
-            break;
-        }
-        
         try {
             task();
+        } catch (const std::bad_function_call& ex) {
+            // poison apples
+            break;
         } catch (const std::exception& e) {
             std::osyncstream(std::cerr) << "[ThreadWorker] Task exception: " << e.what() << '\n';
         } catch (...) {

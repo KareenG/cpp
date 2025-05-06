@@ -31,7 +31,7 @@ namespace mt
  * - immediate_shutdown_   : Flag for immediate shutdown mode
  * 
  * @note Requires the `SequenceContainer` type to support:
- * - enqueue(F) and dequeue(F&)
+ * - enqueue(F) and dequeue(Task&)
  */
 class ThreadWorker {
 public:
@@ -41,7 +41,7 @@ public:
      * @param thread_function The function each worker thread will execute.
      * @param num_threads Number of worker threads to create.
      */
-    explicit ThreadWorker(std::function<void()> thread_function, size_t num_threads);
+    explicit ThreadWorker(std::function<void()> thread_function, size_t num_threads = std::thread::hardware_concurrency());
 
     /**
      * @brief Destructor - triggers graceful shutdown, ensuring all tasks are completed.
@@ -56,14 +56,14 @@ public:
      * 
      * @param n Number of threads to add.
      */
-    void add_workers(size_t n);
+    void add_workers(size_t n = 1);
 
     /**
      * @brief Removes up to `n` worker threads by submitting null-tasks to the queue.
      * 
      * @param n Number of threads to remove.
      */
-    void remove_workers(size_t n);
+    void remove_workers(size_t n = 1);
 
     /**
      * @brief Returns the current number of active worker threads.
@@ -88,9 +88,17 @@ private:
     mutable std::mutex mutex_;
     std::atomic<bool> shutdown_;
     BlockingBoundedQueue<std::thread::id> retiring_threads_;
-    std::atomic<bool> immediate_shutdown_;
 };
 
+/**
+ * @brief Grants privileged access to internal operations like enqueue_front.
+ */
+struct ThreadPoolPrivileged {
+    template <typename TaskQueue, typename Task>
+    static void enqueue_front(TaskQueue& queue, Task&& task) {
+        queue.enqueue_front(std::forward<Task>(task), Secret<ThreadPoolPrivileged>{});
+    }
+};
 
 /**
  * @brief Manages a pool of worker threads that execute tasks concurrently.
@@ -100,14 +108,16 @@ private:
  * 
  * @details
  * - tasks_           : Internal task queue holding tasks for worker threads.
- * - worker_          : Manages the worker threads.
+ * - workers_          : Manages the worker threads.
  * - shutdown_called_ : Atomic flag indicating if a shutdown has been called.
  */
-template<typename F = std::function<void()>,
-        typename SequenceContainer = BlockingBoundedQueue<F>>
+template<
+    typename Task = std::function<void()>,
+    typename SequenceContainer = BlockingBoundedQueueImpl<Task, ThreadPoolPrivileged>
+    >
 /** 
  * @note Requires the `SequenceContainer` type to support:
- * - enqueue(F) and dequeue(F&)
+ * - enqueue(F) and dequeue(Task&)
  */
 class ThreadPool {
 public:
@@ -131,8 +141,9 @@ public:
      * @brief Submits a task to be executed by the thread pool.
      * 
      * @param task The task to run.
+     * @throws std::runtime_error If shutdown has already been initiated.
      */
-    void submit(F&& task);
+    void submit(Task&& task);
 
     /**
      * @brief Gracefully shuts down all worker threads after all tasks are completed.
@@ -148,6 +159,7 @@ public:
      * @brief Adds additional worker threads to the pool.
      * 
      * @param n Number of threads to add (default: 1).
+     * @throws std::runtime_error If shutdown has already been initiated.
      */
     void add_workers(size_t n = 1);
 
@@ -155,6 +167,7 @@ public:
      * @brief Removes active worker threads by submitting null-tasks.
      * 
      * @param n Number of threads to remove (default: 1).
+     * @throws std::runtime_error If shutdown has already been initiated.
      */
     void remove_workers(size_t n = 1);
 
@@ -162,6 +175,7 @@ public:
      * @brief Returns the current number of worker threads in the pool.
      * 
      * @return size_t The number of active worker threads.
+     * @throws std::runtime_error If shutdown has already been initiated.
      */
     size_t workers() const;
 
@@ -169,14 +183,15 @@ private:
     /**
      * @brief Function executed by each worker thread to process tasks.
      */
-    void worker_function();
+    void workers_function();
 
 private:
     SequenceContainer tasks_;
-    ThreadWorker worker_;
     std::atomic<bool> shutdown_called_;
+    ThreadWorker workers_;
 };
 
+using ThreadPool_T = ThreadPool<>;
 } // namespace mt
 
 #include "mt/thread_pool.inl"
