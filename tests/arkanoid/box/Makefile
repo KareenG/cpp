@@ -22,7 +22,7 @@ TARGET = utest
 
 OBJS = $(SOURCES_DIR)/arkanoid/box/box.o $(SOURCES_DIR)/arkanoid/box/collision_detector.o\
 	   $(SOURCES_DIR)/arkanoid/box/entity.o $(SOURCES_DIR)/arkanoid/box/game.o\
-	   $(SOURCES_DIR)/arkanoid/box/particle.o utest.o
+	   $(SOURCES_DIR)/arkanoid/box/particle.o $(SOURCES_DIR)/arkanoid/box/spatial_grid.o utest.o
 
 # === Build Targets ===
 all: $(TARGET)
