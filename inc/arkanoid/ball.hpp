@@ -18,7 +18,8 @@ public:
     float get_mass() const;
 
     void reset();
-
+    void launch();
+    
 private:
     float radius_;
     sf::Vector2f velocity_;
@@ -26,6 +27,7 @@ private:
     sf::Vector2f start_position_;
     sf::Vector2f start_velocity_;
     float mass_;
+    bool is_launched_ = false;
 };
 
 } // namespace arkanoid

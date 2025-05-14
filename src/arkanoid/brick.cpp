@@ -18,7 +18,7 @@ Brick::Brick(const sf::Vector2f& size, const sf::Vector2f& position, sf::Color c
     shape_.setPosition(position);
     shape_.setFillColor(color);
     shape_.setOutlineColor(sf::Color::Black);
-    shape_.setOutlineThickness(2.f);
+    shape_.setOutlineThickness(1.f);
 }
 
 void Brick::draw(sf::RenderWindow& window) const

@@ -6,10 +6,34 @@
 
 namespace arkanoid::level {
 
-// Load from string pattern (e.g. "RRRRR\nGGGGG\nBBBBB")
-std::vector<Brick> load_pattern(const std::string& pattern, sf::Vector2f origin, sf::Vector2f brick_size, int level_num = 1);
+namespace util {
 
-// Generate rows × cols procedurally, with spacing (0 = tight grid)
-std::vector<Brick> load_grid(int rows, int cols, sf::Vector2f origin, sf::Vector2f brick_size, float spacing = 0.f, int level_num = 1);
+std::vector<std::unique_ptr<Brick>> load_grid(int level_num,
+    sf::Vector2f box_left_top_boarders,
+    sf::Vector2f box_size,
+    float padding_left,
+    float padding_right,
+    float padding_top,
+    float brick_height);
+
+std::vector<std::unique_ptr<Brick>> load_level_pattern_with_spaces(int level_num,
+    sf::Vector2f box_left_top_boarders,
+    sf::Vector2f box_size,
+    float padding_left,
+    float padding_right,
+    float padding_top,
+    float brick_height
+);
+
+} // namespace util
+
+std::vector<std::unique_ptr<Brick>> load(
+    int level_num,
+    sf::Vector2f box_left_top_boarders,
+    sf::Vector2f box_size,
+    float padding_left,
+    float padding_right,
+    float padding_top,
+    float brick_height);
 
 } // namespace arkanoid::level

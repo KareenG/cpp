@@ -13,6 +13,7 @@ public:
     void decrease_life();
     void add_score(std::size_t amount);
     std::size_t get_score() const;
+    void reset();
 
 private:
     std::string name_;

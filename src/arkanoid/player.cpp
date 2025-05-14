@@ -34,5 +34,10 @@ std::size_t Player::get_score() const
 {
     return score_;
 }
+void Player::Player::reset()
+{
+    score_ = 0;
+    lives_left_ = 3;
+}
 
 } // namespace arkanoid
