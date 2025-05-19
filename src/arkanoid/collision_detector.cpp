@@ -1,4 +1,5 @@
 #include <cmath>
+#include <cstdlib> // for std::rand()
 
 #include "arkanoid/collision_detector.hpp"
 
@@ -24,6 +25,19 @@ namespace util {
     float length(const sf::Vector2f& v)
     {
         return std::sqrt(v.x * v.x + v.y * v.y);
+    }
+
+    float clamp_ball_angle(float angle_deg)
+    {
+        if (angle_deg < 30.f)
+            return 30.f;
+        if (angle_deg > 150.f)
+            return 150.f;
+        if (angle_deg > 75.f && angle_deg < 90.f)
+            return 75.f;
+        if (angle_deg >= 90.f && angle_deg < 105.f)
+            return 105.f;
+        return angle_deg;
     }
 }
 
@@ -133,7 +147,6 @@ void handle_brick_collision(Ball& ball, Brick& brick)
 
 void handle_paddle_collision(Ball& ball, const Paddle& paddle)
 {
-    // Get positions and sizes
     const sf::Vector2f ball_pos = ball.get_position();
     const float r = ball.get_radius();
 
@@ -141,36 +154,54 @@ void handle_paddle_collision(Ball& ball, const Paddle& paddle)
     const sf::Vector2f paddle_size = paddle.get_size();
     const sf::Vector2f half = paddle_size / 2.f;
 
-    // Calculate AABB overlap
     const float left   = paddle_pos.x - half.x;
     const float right  = paddle_pos.x + half.x;
     const float top    = paddle_pos.y - half.y;
     const float bottom = paddle_pos.y + half.y;
 
-    // Ball's bounding box
     const float ball_left   = ball_pos.x - r;
     const float ball_right  = ball_pos.x + r;
     const float ball_top    = ball_pos.y - r;
     const float ball_bottom = ball_pos.y + r;
 
-    // Check for intersection
-    bool overlaps_x = ball_right > left && ball_left < right;
-    bool overlaps_y = ball_bottom > top && ball_top < bottom;
+    const bool overlaps_x = ball_right > left && ball_left < right;
+    const bool overlaps_y = ball_bottom > top && ball_top < bottom;
 
     if (!overlaps_x || !overlaps_y)
         return;
 
-    // Reflect ball vertically
-    sf::Vector2f velocity = ball.get_velocity();
-    velocity.y = -std::abs(velocity.y); // always bounce upward
-    ball.set_velocity(velocity);
+    // --- Direction based on hit location ---
+    const float hit_offset = ball_pos.x - paddle_pos.x; // distance from paddle center
+    const float normalized_offset = hit_offset / (paddle_size.x / 2.f); // in [-1, 1]
 
-    // Move ball above the paddle to prevent sticking
+    // Base angle range: [-60°, 60°] mapped to [30°, 150°] after clamping
+    float angle_deg = -normalized_offset * 60.f + 90.f;
+
+    // Add randomness: ±5°
+    angle_deg += static_cast<float>(std::rand() % 11 - 5);
+
+    // Clamp to valid gameplay angles
+    angle_deg = util::clamp_ball_angle(angle_deg);
+
+    // Convert to radians
+    float angle_rad = angle_deg * 3.14159265f / 180.f;
+
+    // Maintain current speed
+    const sf::Vector2f old_velocity = ball.get_velocity();
+    const float speed = std::sqrt(old_velocity.x * old_velocity.x + old_velocity.y * old_velocity.y);
+
+    // Set new velocity based on angle
+    sf::Vector2f new_velocity {
+        std::cos(angle_rad) * speed,
+        -std::sin(angle_rad) * speed // upwards
+    };
+    ball.set_velocity(new_velocity);
+
+    // Move ball above paddle to avoid sticking
     sf::Vector2f new_pos = ball_pos;
     new_pos.y = top - r - 0.1f;
     ball.set_position(new_pos);
 }
-
 
 } // namespace collision_detector
 

@@ -1,35 +1,30 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <memory>
 
 #include "arkanoid/scene.hpp"
+#include "arkanoid/opening_scene.hpp"
 #include "arkanoid/game_scene.hpp"
-#include "arkanoid/game_board.hpp"
-#include "arkanoid/player.hpp"
+#include "arkanoid/high_scores.hpp"
+#include "arkanoid/ui.hpp"
 
 namespace arkanoid {
 
 class Game {
 public:
-    Game(sf::Vector2u window_size = {800, 600}, const std::string& title = "Arkanoid");
+    Game(sf::Vector2u window_size = consts::ArkanoidWindowSize, const std::string& title = "Arkanoid");
     void run(int target_fps = 60);
 
 private:
     void process_events();
     void update(sf::Time dt);
     void render();
+    void switch_scene(scene::SceneID id);
 
-private:
     sf::RenderWindow window_;
-
-    Player player_;
-    GameBoard board_;
     std::unique_ptr<scene::Scene> scene_;
-    bool paused_{false};
-    int current_level{1};
-
-    scene::SceneID current_scene_id_ = scene::SceneID::Game; // start directly
+    HighScoreTable top_scores_;
+    //UI ui_; // For overlays or UI outside of scenes if needed
 };
 
 } // namespace arkanoid

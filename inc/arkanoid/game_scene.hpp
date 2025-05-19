@@ -1,15 +1,35 @@
 #pragma once
 
+#include <SFML/Graphics.hpp>
+#include <string>
+
 #include "arkanoid/scene.hpp"
 #include "arkanoid/game_board.hpp"
 #include "arkanoid/player.hpp"
+#include "arkanoid/resources_and_consts.hpp"
+#include "arkanoid/input_controller.hpp"
+#include "arkanoid/ui.hpp"
+#include "arkanoid/game_logic.hpp"
+#include "arkanoid/overlay_layer.hpp"
+#include "arkanoid/input_name.hpp"
+#include "arkanoid/high_scores.hpp"
 
 namespace arkanoid {
+    
 namespace scene {
 
+// enum class SceneResult {
+//     None,
+//     BallFell,
+//     BrickHit,
+//     LevelComplete
+// };
+
 class GameScene : public Scene {
+    using NameInputCallback = std::function<void(int score, float time, std::function<void(const std::string&)>)>;
+
 public:
-    GameScene(GameBoard* board, Player* player, const std::string& font_path = "arial.ttf");
+    GameScene(HighScoreTable* high_scores, int num_level = 1, const std::string& font_path = consts::FontArial);
 
     SceneEvent handle_events(sf::RenderWindow& window, std::optional<sf::Event> const& event) override;
     void update(float dt) override;
@@ -17,29 +37,37 @@ public:
 
     SceneID get_next_scene() const override;
 
+    int get_level() const;
+
+    void set_name_input_callback(NameInputCallback cb);
+
 private:
-    GameBoard* board_;
-    Player* player_;
+    void finish_scene();
+    void setup_input_bindings();
+    void reset_level();
+
+private:
+    GameBoard board_;
+    Player player_;
+    int num_level_;
 
     sf::Font font_;
-    sf::Text score_text_;
-    sf::Text lives_text_;
+    InputController input_controller_;
+    UI ui_;
+    GameLogic logic_;
+    OverlayLayer overlay_;
+    NameEntryDialog name_input_;
+    HighScoreTable* high_scores_;
 
-    bool game_started_ = false;
+    bool started_ = false;
     bool paused_ = false;
     bool ball_fell_down_ = false;
 
-    bool show_game_over_text_ = false;
-    float game_over_timer_ = 0.f;
-
-    bool show_win_text_ = false;
-    float win_timer_ = 0.f;
+    NameInputCallback on_name_input_requested_;
 
     SceneID next_scene_ = SceneID::None;
-
-    void setup_input_bindings();
-    void draw_lives(sf::RenderWindow& window) const;
 };
 
 } // namespace scene
+
 } // namespace arkanoid

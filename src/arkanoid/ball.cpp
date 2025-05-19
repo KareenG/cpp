@@ -1,21 +1,23 @@
+#include <cmath>
+
 #include "arkanoid/ball.hpp"
 #include "arkanoid/input_controller.hpp"
-#include <cmath>
+#include "arkanoid/resources_and_consts.hpp"
 
 namespace arkanoid {
 
-using VelocityGenerator = std::function<sf::Vector2f()>;
+using velocity_generator = std::function<sf::Vector2f()>;
 
 // Generates a random initial velocity direction after collision with minor randomness on the angle.
-const VelocityGenerator velocity_gen_ = []() {
+const velocity_generator velocity_gen_ = []() {
     float angle_deg = 60.f + static_cast<float>(std::rand() % 61);  // Random angle between 60° and 120°
-    float angle_rad = angle_deg * 3.14159265f / 180.f;
+    float angle_rad = angle_deg * M_PI / 180.f;
     float speed = 430.f;
 
     // Add minor randomness to the angle after collision
     float randomness = static_cast<float>(std::rand() % 21 - 10); // Randomness between -10 and 10 degrees
     angle_deg += randomness;
-    angle_rad = angle_deg * 3.14159265f / 180.f;  // Recalculate angle in radians
+    angle_rad = angle_deg * M_PI / 180.f;  // Recalculate angle in radians
 
     return sf::Vector2f{std::cos(angle_rad) * speed, -std::sin(angle_rad) * speed};
 };
@@ -26,13 +28,15 @@ Ball::Ball(const sf::Vector2f& position, float radius, const sf::Vector2f& veloc
 , shape_{radius_}
 , mass_{mass}
 {
+    (void)color;
     position_ = position;
     start_position_ = position;
     start_velocity_ = velocity;
     shape_.setOrigin( {radius_, radius_} );
     shape_.setPosition(position_);
-    shape_.setFillColor(color);
-    shape_.setOutlineColor(sf::Color::Black);
+    //shape_.setFillColor(color);
+    shape_.setTexture(&resources::get_texture(consts::TextureBall));
+    shape_.setOutlineColor(sf::Color::White);//Black
     shape_.setOutlineThickness(1.f);
 }
 
@@ -82,6 +86,5 @@ void Ball::reset()
     shape_.setPosition(position_);
     is_launched_ = false;
 }
-
 
 } // namespace arkanoid

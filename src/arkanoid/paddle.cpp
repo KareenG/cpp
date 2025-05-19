@@ -20,23 +20,6 @@ Paddle::Paddle(const sf::Vector2f& size, const sf::Vector2f& position, sf::Color
     shape_.setFillColor(color);
     shape_.setOutlineColor(sf::Color::Black);
     shape_.setOutlineThickness(1.f);
-
-    input_controller::bind_key(sf::Keyboard::Key::Space, [this]() {
-        is_fixed_ = !is_fixed_;
-    });
-
-    // // Add input bindings for left and right movement
-    // input_controller::bind_key(sf::Keyboard::Key::Left, [this]() {
-    //     if (!is_fixed_) {
-    //         move_left();
-    //     }
-    // });
-    
-    // input_controller::bind_key(sf::Keyboard::Key::Right, [this]() {
-    //     if (!is_fixed_) {
-    //         move_right();
-    //     }
-    // });
 }
 
 void Paddle::move_left()
@@ -77,7 +60,7 @@ void Paddle::update(float dt)
 {
     position_ += velocity_ * dt;
     shape_.setPosition(position_);
-    velocity_ = {0.f, 0.f};  // reset movement after each frame
+    velocity_ = {0.f, 0.f};
 }
 
 sf::Vector2f Paddle::get_velocity() const
@@ -97,6 +80,5 @@ void Paddle::reset()
     shape_.setPosition(position_);
     is_fixed_ = false;
 }
-
 
 } // namespace arkanoid

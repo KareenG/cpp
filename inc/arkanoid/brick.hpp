@@ -27,7 +27,6 @@ private:
 
 private:
    bool was_hit_ = false;
-//sf::RectangleShape shape_;
 };
 
 } // namespace arkanoid

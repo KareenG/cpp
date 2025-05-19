@@ -1,224 +1,240 @@
-#include <SFML/Graphics.hpp>
+#include "arkanoid/game_scene.hpp"
+#include "arkanoid/collision_detector.hpp"
+#include "arkanoid/resources_and_consts.hpp"
+#include "arkanoid/input_name.hpp"
 #include <cmath>
 #include <iostream>
 #include <algorithm>
 
-#include "arkanoid/game_scene.hpp"
-#include "arkanoid/input_controller.hpp"
-#include "arkanoid/collision_detector.hpp"
-#include "arkanoid/brick.hpp"
-#include "arkanoid/heart_shape.hpp"
-
 namespace arkanoid {
 namespace scene {
 
-GameScene::GameScene(GameBoard* board, Player* player, const std::string& font_path)
-: board_(board)
-, player_(player)
+GameScene::GameScene(HighScoreTable* high_scores, int num_level, const std::string& font_path)
+: board_(consts::ArkanoidBoxSize)//(sf::Vector2f{760.f, 560.f})// adjust as needed for your board size
+, player_("Player1", 3)
+, num_level_{num_level}
 , font_([&font_path]() {
-    sf::Font f{};
-    if (!f.openFromFile(font_path)) {
-        throw std::runtime_error("Failed to load font from " + font_path);
-    }
-    return f;
-    }())
-, score_text_{font_, "Score: 0", 24}
-, lives_text_{font_, "Lives: 3", 20}
+      sf::Font f{};
+      if (!f.openFromFile(font_path)) {
+          throw std::runtime_error("Failed to load font from " + font_path);
+      }
+      return f;
+  }())
+, input_controller_{}
+, ui_(consts::FontArial)
+, logic_(&player_, &board_, num_level)
+, overlay_()
+, name_input_{}
+, high_scores_{high_scores}
 {
-    score_text_.setFillColor(sf::Color::White);
-    score_text_.setPosition({12.f, 12.f});
     setup_input_bindings();
+    reset_level();
 }
 
 void GameScene::setup_input_bindings() {
-    input_controller::clear();
+    input_controller_.clear();
 
-    input_controller::bind_key(sf::Keyboard::Key::Escape, [this]() {
-        next_scene_ = SceneID::Opening;
+    input_controller_.bind_key(sf::Keyboard::Key::Escape, [this]() {
+        // Instead of instant quit, show confirmation overlay
+        overlay_.show(OverlayType::QuitConfirm);
     });
 
-    input_controller::bind_key(sf::Keyboard::Key::Space, [this]() {
-        if (!game_started_) {
-            board_->launch_ball();  // Centralized launch
-            game_started_ = true;
+    input_controller_.bind_key(sf::Keyboard::Key::Space, [this]() {
+        if (!started_) {
+            board_.launch_ball();
+            started_ = true;
             paused_ = false;
             ball_fell_down_ = false;
         } else {
             paused_ = !paused_;
         }
     });
-    
-    input_controller::bind_key(sf::Keyboard::Key::Left, [this]() {
-        if (game_started_ && !paused_) {
-            board_->move_paddle_left();
+
+    input_controller_.bind_key(sf::Keyboard::Key::Left, [this]() {
+        if (started_ && !paused_) {
+            board_.move_paddle_left();
         }
     });
 
-    input_controller::bind_key(sf::Keyboard::Key::Right, [this]() {
-        if (game_started_ && !paused_) {
-            board_->move_paddle_right();
+    input_controller_.bind_key(sf::Keyboard::Key::Right, [this]() {
+        if (started_ && !paused_) {
+            board_.move_paddle_right();
         }
     });
 }
 
-SceneEvent GameScene::handle_events(sf::RenderWindow& window, std::optional<sf::Event> const& event) {
-    (void)window; // Unused parameter
-    
-    if (!event.has_value()) {
+SceneEvent GameScene::handle_events(sf::RenderWindow& window, std::optional<sf::Event> const& event)
+{
+    (void)window;
+
+    if (name_input_.is_active() && event.has_value()) {
+        if (event->is<sf::Event::TextEntered>()) {
+            name_input_.handle_text(event->getIf<sf::Event::TextEntered>()->unicode);
+        } else if (event->is<sf::Event::KeyPressed>()) {
+            name_input_.handle_key(event->getIf<sf::Event::KeyPressed>()->code);
+        }
         return SceneEvent::None;
     }
-    
-    if (event->is<sf::Event::Closed>()) {
-        return SceneEvent::QuitScene;
-    }
-    
-    // Handle key press events through the input controller
-    if (event->is<sf::Event::KeyPressed>()) {
-        input_controller::handle_event(*event);
-        
-        // Special handling for Space and Escape keys
-        auto key = event->getIf<sf::Event::KeyPressed>();
-        switch (key->code) {
-            // case sf::Keyboard::Key::Space:
-            //     if (paused_){//} && !ball_fell_down_) {
-            //         return SceneEvent::PauseToggle;
-            //     }
-            //     return SceneEvent::None;
-                
-            case sf::Keyboard::Key::Escape:
-                return SceneEvent::QuitScene;
-                
-            default:
-                return SceneEvent::None;
+
+    // Overlay gets priority (e.g., confirmation needs Y/N input)
+    if (overlay_.is_active()) {
+        if (overlay_.is_confirmation() && event && event->is<sf::Event::KeyPressed>()) {
+            auto key = event->getIf<sf::Event::KeyPressed>()->code;
+            if (key == sf::Keyboard::Key::Y) {
+                overlay_.confirm();
+                num_level_ = 1;  // Reset to level 1 if quitting
+                reset_level();
+                notify_scene_change(SceneID::Opening);
+            } else if (key == sf::Keyboard::Key::N) {
+                overlay_.cancel();
+            }
         }
+        return SceneEvent::None;
     }
-    
-    // Handle key release events
-    if (event->is<sf::Event::KeyReleased>()) {
-        input_controller::handle_key_released(*event);
-    }
-    
+
+    if (!event.has_value())
+        return SceneEvent::None;
+
+    if (event->is<sf::Event::Closed>())
+        return SceneEvent::QuitScene;
+
+    if (event->is<sf::Event::KeyPressed>())
+        input_controller_.handle_event(*event);
+
+    if (event->is<sf::Event::KeyReleased>())
+        input_controller_.handle_key_released(*event);
+
     return SceneEvent::None;
 }
 
-void GameScene::update(float dt) {
-    if (show_game_over_text_) {
-        game_over_timer_ += dt;
-        if (game_over_timer_ > 20.f) std::exit(0);
+void GameScene::update(float dt)
+{
+    // input_controller_.poll();
+    if (name_input_.is_active()) {
+        name_input_.update(dt);
         return;
     }
 
-    if (show_win_text_) {
-        win_timer_ += dt;
-        if (win_timer_ > 15.f) {
-            player_->reset();
-            board_->reset();
-            score_text_.setString("Score: " + std::to_string(player_->get_score()));
-            game_started_ = false;
-            paused_ = false;
-            ball_fell_down_ = false;
-            show_game_over_text_ = false;
-            game_over_timer_ = 0.f;
-            show_win_text_ = false;
-            win_timer_ = 0.f;
+    // If overlay is active, only update overlay and handle completion
+    if (overlay_.is_active()) {
+        overlay_.update(dt);
+
+        if (overlay_.finished()) {
+            if (overlay_.type() == OverlayType::GameOver) {
+
+                player_.update_max_score();
+                //std::cout << "max score reached: " << player_.max_score() << '\n';
+                size_t score = player_.max_score();
+                if (high_scores_ && high_scores_->qualifies(score, logic_.elapsed_time())) {
+                    name_input_.show("New High Score! Enter your name:", [this, score](const std::string& name) {
+                        high_scores_->add_score(name, score, logic_.elapsed_time());
+                        finish_scene(); // return to opening
+                    });
+                    return; // Delay finish until name entered
+                }
+
+                // num_level_ = 1;
+                // reset_level();
+                // notify_scene_change(SceneID::Opening);
+                finish_scene();
+
+            } else if (overlay_.type() == OverlayType::Win) {
+                if (num_level_ < consts::MaxLevels) {
+                    ++num_level_;
+                    reset_level();
+
+                } else {
+
+                    player_.update_max_score();
+                    //std::cout << "max score reached: " << player_.max_score() << '\n';
+
+                    size_t score = player_.max_score();
+                    if (high_scores_ && high_scores_->qualifies(score, logic_.elapsed_time())) {
+                        name_input_.show("New High Score! Enter your name:", [this, score](const std::string& name) {
+                            high_scores_->add_score(name, score, logic_.elapsed_time());
+                            finish_scene(); // return to opening
+                        });
+                        return; // Delay finish until name entered
+                    }
+
+                    reset_level();
+                    notify_scene_change(SceneID::Opening);
+                }
+            }
         }
         return;
     }
 
-       // NEW: poll keyboard input for continuous keys (e.g. arrows)
-    input_controller::poll();
+    input_controller_.poll();
 
-    if (!game_started_ || paused_) return;
+    if (!started_ || paused_) {
+        return;
+    }
 
+    GameStatus status = logic_.update(dt);
 
-
-    board_->update(dt);
-    auto result = board_->handle_collision();
-    switch (result) {
-        case collision_detector::CollisionResult::NoChange:
-            break;
-        case collision_detector::CollisionResult::BallFell: {
-            player_->decrease_life();
-            game_started_ = false;
+    switch (status) {
+        case GameStatus::BallFell:
+            started_ = false;
             ball_fell_down_ = true;
-            if (player_->get_lives() == 0) {
-                show_game_over_text_ = true;
-                game_over_timer_ = 0.f;
+            if (player_.get_lives() == 0) {
+                overlay_.show(OverlayType::GameOver);
             }
             break;
-        }
-            
-        case collision_detector::CollisionResult::BrickHit: {
-            player_->add_score(40);
-            score_text_.setString("Score: " + std::to_string(player_->get_score()));
+        case GameStatus::BrickHit:
             break;
-        }
-            
-        case collision_detector::CollisionResult::LevelComplete: {
-            show_win_text_ = true;
-            win_timer_ = 0.f;
+        case GameStatus::LevelComplete:
+            overlay_.show(OverlayType::Win);
             break;
-        }
-    }       
-}
-
-void GameScene::render(sf::RenderWindow& window) const {
-    board_->draw(window);
-
-    sf::RectangleShape bg{{160.f, 40.f}};
-    bg.setPosition( {8.f, 8.f} );
-    bg.setFillColor(sf::Color::Black);
-    window.draw(bg);
-    window.draw(score_text_);
-    draw_lives(window);
-
-    if (show_game_over_text_) {
-        sf::Text game_over(font_, "Game Over");
-        game_over.setCharacterSize(48);
-        game_over.setFillColor(sf::Color::Red);
-        game_over.setPosition( {200.f, 300.f} );
-        window.draw(game_over);
-    }
-
-    if (show_win_text_) {
-        board_->reset_ball_paddle();
-        sf::Text win(font_, "You Win");
-        
-        win.setCharacterSize(48);
-        win.setFillColor(sf::Color::Green);
-        win.setPosition( {220.f, 300.f} );
-        window.draw(win);
+        default:
+            break;
     }
 }
 
-SceneID GameScene::get_next_scene() const {
+void GameScene::render(sf::RenderWindow& window) const
+{
+    board_.draw(window);
+    ui_.draw_score(window, player_.get_score());
+    ui_.draw_lives(window, player_.get_lives());
+    ui_.draw_level(window, num_level_);
+
+    if (overlay_.is_active()) {
+        overlay_.render(window, ui_);
+    }
+    if (name_input_.is_active()) {
+        ui_.draw_name_input(window, name_input_.prompt(), name_input_.input());
+    }
+
+}
+
+SceneID GameScene::get_next_scene() const
+{
     return next_scene_;
 }
 
-void GameScene::draw_lives(sf::RenderWindow& window) const
+void GameScene::reset_level()
 {
-    // === HEART CONFIGURATION ===
-        // Constants
-    // ❤️ Draw Hearts at {window_width - 12 - total_heart_width, 12}
-    if(player_->get_lives() == 0) return;
-    const float heart_size = 24.f;
-    const float padding = 4.f;
-    std::size_t lives = player_->get_lives();
-    float total_width = heart_size * lives + padding * (lives - 1);
+    player_.reset();
+    board_.reset(num_level_);
+    started_ = false;
+    paused_ = false;
+    ball_fell_down_ = false;
+}
 
-    float x_right = static_cast<float>(window.getSize().x) - 12.f;
-    float x_start = x_right - total_width;
-    float y_start = 24.f;
+int GameScene::get_level() const
+{
+    return num_level_;
+}
 
-    sf::Vector2f bg_size{total_width + 8.f, heart_size + 8.f};
-    sf::Vector2f bg_position{x_start - 4.f, y_start - (bg_size.y - heart_size) / 2.f};
-
-    sf::RectangleShape heart_bg(bg_size);
-    heart_bg.setPosition(bg_position);
-    heart_bg.setFillColor(sf::Color::Black);
-    window.draw(heart_bg);
-
-    HeartShape::draw(window, {x_start + 18.f, y_start}, lives, heart_size);
+void GameScene::set_name_input_callback(NameInputCallback cb)
+{
+    on_name_input_requested_ = std::move(cb);
+}
+void GameScene::finish_scene()
+{
+    num_level_ = 1;
+    reset_level();
+    notify_scene_change(SceneID::Opening);
 }
 
 } // namespace scene

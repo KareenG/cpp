@@ -8,7 +8,7 @@ namespace arkanoid
 class Box : public Entity {
 public:
     Box(const sf::Vector2f& position,
-        const sf::Vector2f& size,
+        const sf::Vector2u& size,
         sf::Color border_color = sf::Color::White,
         sf::Color fill_color = sf::Color::Transparent,
         float thickness = 2.f);

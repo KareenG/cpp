@@ -5,9 +5,6 @@
 namespace arkanoid
 {
 
-namespace scene
-{
-
 Heart::Heart(float size, const sf::Color& color)
 {
     create(size, color);
@@ -80,14 +77,15 @@ void Heart::draw(sf::RenderTarget& target, sf::RenderStates states) const
     target.draw(shape_, states);
 }
 
-void HeartShape::draw(sf::RenderTarget& target, sf::Vector2f start_position, size_t num_hearts, float size)
+void heart_shape::draw(sf::RenderTarget& target, sf::Vector2f start_position, size_t num_hearts, float size)
 {
     if (num_hearts == 0 || size <= 0.f) return;
 
     const float padding = 2.f;
 
     for (size_t i = 0; i < num_hearts; ++i) {
-        scene::Heart heart(size, sf::Color::Red);
+        // scene::Heart heart(size, sf::Color::Red);
+        Heart heart(size, sf::Color::Red);
 
         float x = start_position.x + i * (size + padding);
         float y = start_position.y;
@@ -96,8 +94,5 @@ void HeartShape::draw(sf::RenderTarget& target, sf::Vector2f start_position, siz
         target.draw(heart);
     }
 }
-
-      
-} // namespace scene
 
 } // namespace arkanoid

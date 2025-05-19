@@ -1,4 +1,5 @@
 #pragma once
+
 #include "arkanoid/entity.hpp"
 
 namespace arkanoid {

@@ -1,94 +1,66 @@
 #include "arkanoid/input_controller.hpp"
-#include <unordered_map>
-#include <vector>
 
 namespace arkanoid {
-namespace input_controller {
 
-// Maps keys to their callback functions
-static std::unordered_map<sf::Keyboard::Key, std::vector<std::function<void()>>> key_bindings;
-
-// Tracks which keys should have continuous behavior (like movement keys)
-static std::unordered_map<sf::Keyboard::Key, bool> continuous_keys = {
-    {sf::Keyboard::Key::Left, false},
-    {sf::Keyboard::Key::Right, false}
-};
-
-// Keys that have been pressed and not yet released
-static std::unordered_map<sf::Keyboard::Key, bool> key_pressed_status;
-
-void bind_key(sf::Keyboard::Key key, std::function<void()> callback) {
-    key_bindings[key].emplace_back(std::move(callback));
-    
-    // If it's a movement key, add it to continuous keys if not already there
+void InputController::bind_key(sf::Keyboard::Key key, std::function<void()> callback) {
+    key_bindings_[key].emplace_back(std::move(callback));
+    // Add to continuous keys if it's left/right
     if (key == sf::Keyboard::Key::Left || key == sf::Keyboard::Key::Right) {
-        continuous_keys[key] = false;
+        continuous_keys_[key] = false;
     }
 }
 
-void unbind_key(sf::Keyboard::Key key) {
-    key_bindings.erase(key);
-    continuous_keys.erase(key);
-    key_pressed_status.erase(key);
+void InputController::unbind_key(sf::Keyboard::Key key) {
+    key_bindings_.erase(key);
+    continuous_keys_.erase(key);
+    key_pressed_status_.erase(key);
 }
 
-void clear() {
-    key_bindings.clear();
-    continuous_keys.clear();
-    key_pressed_status.clear();
+void InputController::clear() {
+    key_bindings_.clear();
+    continuous_keys_.clear();
+    key_pressed_status_.clear();
 }
 
-void handle_event(const sf::Event& event) {
+void InputController::handle_event(const sf::Event& event) {
     if (event.is<sf::Event::KeyPressed>()) {
         sf::Keyboard::Key pressed_key = event.getIf<sf::Event::KeyPressed>()->code;
-        
-        // Only trigger callbacks if the key wasn't already being held down
-        if (!key_pressed_status[pressed_key]) {
-            auto it = key_bindings.find(pressed_key);
-            if (it != key_bindings.end()) {
+        if (!key_pressed_status_[pressed_key]) {
+            auto it = key_bindings_.find(pressed_key);
+            if (it != key_bindings_.end()) {
                 for (auto& callback : it->second) {
-                    callback(); // Execute the callback
+                    callback();
                 }
             }
         }
-        
-        // Mark key as pressed
-        key_pressed_status[pressed_key] = true;
-        
-        // If this is a continuous key, set its flag
-        if (continuous_keys.find(pressed_key) != continuous_keys.end()) {
-            continuous_keys[pressed_key] = true;
+        key_pressed_status_[pressed_key] = true;
+        if (continuous_keys_.find(pressed_key) != continuous_keys_.end()) {
+            continuous_keys_[pressed_key] = true;
         }
     }
 }
 
-void handle_key_released(const sf::Event& event) {
+void InputController::handle_key_released(const sf::Event& event) {
     if (event.is<sf::Event::KeyReleased>()) {
         sf::Keyboard::Key released_key = event.getIf<sf::Event::KeyReleased>()->code;
-        
-        // Mark key as released
-        key_pressed_status[released_key] = false;
-        
-        // If this is a continuous key, reset its flag
-        if (continuous_keys.find(released_key) != continuous_keys.end()) {
-            continuous_keys[released_key] = false;
+        key_pressed_status_[released_key] = false;
+        if (continuous_keys_.find(released_key) != continuous_keys_.end()) {
+            continuous_keys_[released_key] = false;
         }
     }
 }
 
-void poll() {
-    // Check all continuous keys and execute their callbacks if pressed
-    for (const auto& [key, is_active] : continuous_keys) {
+void InputController::poll() {
+    for (const auto& [key, is_active] : continuous_keys_) {
         if (is_active && sf::Keyboard::isKeyPressed(key)) {
-            auto it = key_bindings.find(key);
-            if (it != key_bindings.end()) {
+            auto it = key_bindings_.find(key);
+            if (it != key_bindings_.end()) {
                 for (auto& callback : it->second) {
-                    callback(); // Execute the callback continuously
+                    callback();
                 }
             }
         }
     }
 }
 
-} // namespace input_controller
 } // namespace arkanoid

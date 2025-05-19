@@ -1,9 +1,10 @@
 #include "arkanoid/box.hpp"
+#include "arkanoid/resources_and_consts.hpp"
 
 namespace arkanoid
 {
 
-Box::Box(const sf::Vector2f& position, const sf::Vector2f& size, sf::Color fill_color, sf::Color border_color, float thickness)
+Box::Box(const sf::Vector2f& position, const sf::Vector2u& size, sf::Color fill_color, sf::Color border_color, float thickness)
 : size_(size)
 , thickness_(thickness)
 {
@@ -13,7 +14,9 @@ Box::Box(const sf::Vector2f& position, const sf::Vector2f& size, sf::Color fill_
 
     background_.setPosition(position);
     background_.setSize(size_);
-    background_.setFillColor(fill_color);
+    //background_.setFillColor(fill_color);
+    (void)fill_color;
+    background_.setTexture(&resources::get_texture(consts::TextureGame));
     background_.setOutlineThickness(0);
 
     top_.setSize({ size_.x, thickness_ });

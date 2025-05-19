@@ -3,56 +3,28 @@
 #include "arkanoid/game_board.hpp"
 #include "arkanoid/level.hpp"
 #include "arkanoid/collision_detector.hpp"
+#include "arkanoid/resources_and_consts.hpp"
 
 namespace arkanoid {
 
-// ─── Static Layout Constants ─────────────────────────────
-static constexpr float kOffsetLeft   = 40.f;
-static constexpr float kOffsetRight  = 40.f;
-static constexpr float kOffsetTop    = 70.f;
-static constexpr float kOffsetBottom = 60.f;
-static constexpr float kBrickSpacing = 5.f;
-static constexpr int kBrickCols      = 5;
-static constexpr int kBrickRows      = 3;
-static constexpr float kBrickHeight  = 30.f;
-static constexpr float kPaddleHeight = 20.f;
-static constexpr float kBallRadius   = 10.f;
-static constexpr sf::Color gray{128, 128, 128}; // Medium gray
-
-GameBoard::GameBoard(sf::Vector2f const& box_size, int level_num)
+GameBoard::GameBoard(sf::Vector2u const& box_size, int level_num)
 : box_({20.f, 20.f}, box_size, sf::Color::Black, sf::Color::White)
 , paddle_(
-    {100.f, kPaddleHeight},
+    {100.f, consts::PaddleHeight},
     {box_.get_position().x + box_.get_size().x / 2.f,
-    box_.get_position().y + box_.get_size().y - kOffsetBottom - kPaddleHeight / 2.f},
-    gray,
+    box_.get_position().y + box_.get_size().y - consts::OffsetBottom - consts::PaddleHeight / 2.f},
+    consts::gray,
     350.f)
 , ball_(
     {box_.get_position().x + box_.get_size().x / 2.f,
-    paddle_.get_position().y - kPaddleHeight / 2.f - kBallRadius - 1.f},
-    kBallRadius,
+    paddle_.get_position().y - consts::PaddleHeight / 2.f - consts::BallRadius - 1.f},
+    consts::BallRadius,
     {0.f, 0.f},
     sf::Color::White)
 {
     load_level(level_num);
 }
 
-// void GameBoard::load_level(int level_num) {
-//     const float usable_width = box_.get_size().x - kOffsetLeft - kOffsetRight;
-//     const float brick_width = usable_width / kBrickCols;
-//     bricks_ = level::load_grid(
-//         kBrickRows,
-//         kBrickCols,
-//         sf::Vector2f{
-//             //box_.get_position().x + kOffsetLeft,
-//             130.f,
-//             box_.get_position().y + kOffsetTop
-//         },
-//         {brick_width, kBrickHeight},
-//         0.f, // no spacing between bricks
-//         level_num
-//     );
-// }
 void GameBoard::load_level(int level_num) {
     // Use the simplified load_level_pattern function
     bricks_ = level::load(
@@ -60,10 +32,10 @@ void GameBoard::load_level(int level_num) {
         //box_.get_position(),  // Box position
         {box_.left(), box_.top()},  // Box position
         box_.get_size(),      // Box size
-        kOffsetLeft,          // Left padding
-        kOffsetRight,         // Right padding
-        kOffsetTop,           // Top padding
-        kBrickHeight          // Brick height
+        consts::OffsetLeft,          // Left padding
+        consts::OffsetRight,         // Right padding
+        consts::OffsetTop,           // Top padding
+        consts::BrickHeight          // Brick height
     );
 }
 
@@ -105,30 +77,12 @@ void GameBoard::draw(sf::RenderWindow& window) const {
         brick->draw(window);
 }
 
-void GameBoard::reset()
+void GameBoard::reset(int level)
 {
     paddle_.reset();
     ball_.reset();
-
-    // const float usable_width = box_.get_size().x - kOffsetLeft - kOffsetRight;
-    // const float brick_width = usable_width / kBrickCols;
-    //  bricks_ = level::load(
-    //     kBrickRows,
-    //     kBrickCols,
-    //     sf::Vector2f{
-    //         //box_.get_position().x + kOffsetLeft,
-    //         130.f,
-    //         box_.get_position().y + kOffsetTop
-    //     },
-    //     {brick_width, kBrickHeight},
-    //     0.f, // no spacing between bricks
-    //     1
-    // );
-    load_level(1);
-
+    load_level(level);
 }
-
-
 
 collision_detector::CollisionResult GameBoard::handle_collision() {
     // ─── Paddle Collision ─────────────────────────────────────

@@ -1,3 +1,10 @@
+# Ignore specific file - Arkanoid
+top10.dat
+
+# Ignore directories - Arkanoid
+SFML/
+inc/SFML/
+
 # Prerequisites
 *.d
 

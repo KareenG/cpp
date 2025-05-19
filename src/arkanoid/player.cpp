@@ -36,8 +36,18 @@ std::size_t Player::get_score() const
 }
 void Player::Player::reset()
 {
-    score_ = 0;
+    //score_ = 0;
     lives_left_ = 3;
+}
+
+void Player::update_max_score()
+{
+    max_score_ = std::max(score_, max_score_);
+}
+
+size_t Player::max_score() const
+{
+    return max_score_;
 }
 
 } // namespace arkanoid

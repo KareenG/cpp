@@ -10,7 +10,6 @@ namespace arkanoid
 
 namespace collision_detector
 {
-
     
 enum class CollisionResult {
     NoChange,
@@ -28,6 +27,7 @@ namespace util {
     sf::Vector2f normalize(const sf::Vector2f& v);
     float dot(const sf::Vector2f& a, const sf::Vector2f& b);
     float length(const sf::Vector2f& v);
+    float clamp_ball_angle(float angle_deg);
 }
 
 } // namespace collision_detector

@@ -1,0 +1,132 @@
+
+#pragma once
+
+#include <SFML/Graphics.hpp>
+
+#include <string>
+#include <unordered_map>
+
+namespace arkanoid {
+    
+enum class OverlayType {
+    None,
+    GameOver,
+    Win,
+    //pending_input,
+    QuitConfirm
+};
+} // namespace arkanoid
+
+namespace arkanoid::consts {
+
+// Asset file paths
+inline const std::string FontArial = "assets/arial.ttf";
+inline const std::string TextureBackground = "assets/back_bg.png";
+inline const std::string TextureBall = "assets/ball.png";
+inline const std::string TextureGame = "assets/back1.png";
+
+inline constexpr int MaxLevels = 2;
+inline constexpr float OverlayDuration = 2.0f;
+
+inline constexpr sf::Vector2u ArkanoidWindowSize = {800, 740};
+inline constexpr sf::Vector2u ArkanoidBoxSize = {760, 700};
+
+inline constexpr int MaxNameLength = 16;
+inline constexpr int MaxScores = 10;
+
+inline constexpr int NumOfLevels = 4;
+
+inline constexpr sf::Color Orange = sf::Color(255, 165, 0);
+
+inline const std::unordered_map<char, sf::Color> ColorMap = {
+    {'R', sf::Color::Red},
+    {'G', sf::Color::Green},
+    {'B', sf::Color::Blue},
+    {'Y', sf::Color::Yellow},
+    {'C', sf::Color::Cyan},
+    {'M', sf::Color::Magenta},
+    {'W', sf::Color::White},
+    {'O', sf::Color(255, 165, 0)} // Orange
+};
+
+// Pre-defined patterns for each level
+inline const std::array<std::string, NumOfLevels> LevelPatterns = {
+    // Level 1 - Simple 3 rows with different colors
+    "MMMMM\n"
+    "CCCCC\n"
+    "YYYYY\n",
+
+    // Level 2 - Pattern from Image 1
+    "C C C C C C\n"
+    "M M M M M M\n"
+    "Y Y Y Y Y Y\n"
+    "B B B B B B",
+
+    // Level 3 - Pattern from Image 2 (3 columns of colors)
+    "YYY WWW YYY\n"
+    "MMM OOO MMM\n"
+    "BBB CCC BBB\n"
+    "GGG RRR GGG\n"
+    "WWW YYY WWW",
+
+    // Level 4 - Space Invader Pattern from Image 3
+    " BBB BBB \n"
+    "BBBBBBBBB\n"
+    "BBWWWWWBB\n"
+    " BWWWWWB \n"
+    "  WWWWW  \n"
+    "   WWW   \n"
+    "   YYY   \n"
+    "    Y    \n"
+};
+
+inline const std::string GameTitle{"Arkanoid"};
+inline const sf::Color GameTitleColor{sf::Color::White};
+inline const size_t GameTitleSize{75};
+inline const float GameTitleYOffset{100.f};
+
+inline const std::string PlayText{"Play"};
+inline const size_t PlayTextSize{36};
+
+inline const std::string QuitText{"Quit"};
+inline const size_t QuitTextSize{36};
+
+//static constexpr size_t MaxScorePossible = 127 * 40;
+
+// Box Layout Constants
+static constexpr float OffsetLeft   = 40.f;
+static constexpr float OffsetRight  = 40.f;
+static constexpr float OffsetTop    = 70.f;
+static constexpr float OffsetBottom = 60.f;
+static constexpr float BrickSpacing = 5.f;
+static constexpr int BrickCols      = 5;
+static constexpr int BrickRows      = 3;
+static constexpr float BrickHeight  = 30.f;
+static constexpr float PaddleHeight = 20.f;
+static constexpr float BallRadius   = 10.f;
+static constexpr sf::Color gray{128, 128, 128}; // Medium gray
+
+} // namespace arkanoid::consts
+
+namespace arkanoid::resources {
+
+/**
+ * Get a font resource from the cache or load it if not available
+ * @param path Filename of the font (without directory)
+ * @return Reference to the loaded font
+ */
+const sf::Font& get_font(const std::string& path);
+
+/**
+ * Get a texture resource from the cache or load it if not available
+ * @param path Filename of the texture (without directory)
+ * @return Reference to the loaded texture
+ */
+const sf::Texture& get_texture(const std::string& path);
+
+/**
+ * Clear all cached resources
+ */
+void clear();
+
+} // namespace arkanoid::resources

@@ -1,22 +1,13 @@
 #include "arkanoid/level.hpp"
+#include "arkanoid/resources_and_consts.hpp"
+
 #include <sstream>
 
 namespace arkanoid::level {
 
-static const std::unordered_map<char, sf::Color> color_map = {
-    {'R', sf::Color::Red},
-    {'G', sf::Color::Green},
-    {'B', sf::Color::Blue},
-    {'Y', sf::Color::Yellow},
-    {'C', sf::Color::Cyan},
-    {'M', sf::Color::Magenta},
-    {'W', sf::Color::White},
-    {'O', sf::Color(255, 165, 0)} // Orange
-};
-
 sf::Color get_color(char c, int row = 0) {
-    auto it = color_map.find(c);
-    if (it != color_map.end()) return it->second;
+    auto it = consts::ColorMap.find(c);
+    if (it != consts::ColorMap.end()) return it->second;
     // fallback: color by row if c is not mapped
     static const std::vector<sf::Color> row_colors = {
         sf::Color::Red, sf::Color::Green, sf::Color::Blue,
@@ -24,37 +15,6 @@ sf::Color get_color(char c, int row = 0) {
     };
     return row_colors[row % row_colors.size()];
 }
-
-// Pre-defined patterns for each level
-static const std::array<std::string, 4> level_patterns = {
-    // Level 1 - Simple 3 rows with different colors
-    "MMMMM\n"
-    "CCCCC\n"
-    "YYYYY\n",
-
-    // Level 2 - Pattern from Image 1
-    "C C C C C C\n"
-    "M M M M M M\n"
-    "Y Y Y Y Y Y\n"
-    "B B B B B B",
-
-    // Level 3 - Pattern from Image 2 (3 columns of colors)
-    "YYY WWW YYY\n"
-    "MMM OOO MMM\n"
-    "BBB CCC BBB\n"
-    "GGG RRR GGG\n"
-    "WWW YYY WWW",
-
-    // Level 4 - Space Invader Pattern from Image 3
-    " BBB BBB \n"
-    "BBBBBBBBB\n"
-    "BBWWWWWBB\n"
-    " BWWWWWB \n"
-    "  WWWWW  \n"
-    "   WWW   \n"
-    "   YYY   \n"
-    "    Y    \n"
-};
 
 std::vector<std::unique_ptr<Brick>> load(
     int level_num,
@@ -86,12 +46,12 @@ std::vector<std::unique_ptr<Brick>> util::load_grid(
     --level_num;
     
     // Check if level_num is valid
-    if (level_num < 0 || level_num >= static_cast<int>(level_patterns.size())) {
+    if (level_num < 0 || level_num >= static_cast<int>(consts::LevelPatterns.size())) {
         return bricks; // Return empty bricks if invalid level
     }
     
     // Get the pattern for the specified level
-    std::string pattern = level_patterns[level_num];
+    std::string pattern = consts::LevelPatterns[level_num];
     
     // Calculate pattern dimensions
     std::istringstream ss(pattern);
@@ -158,11 +118,11 @@ std::vector<std::unique_ptr<Brick>> util::load_level_pattern_with_spaces(
     std::vector<std::unique_ptr<Brick>> bricks;
 
     --level_num;
-    if (level_num < 0 || level_num >= static_cast<int>(level_patterns.size())) {
+    if (level_num < 0 || level_num >= static_cast<int>(consts::LevelPatterns.size())) {
         return bricks;
     }
 
-    std::string pattern = level_patterns[level_num];
+    std::string pattern = consts::LevelPatterns[level_num];
 
     std::istringstream ss(pattern);
     std::vector<std::string> lines;

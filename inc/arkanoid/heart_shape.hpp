@@ -5,9 +5,6 @@
 namespace arkanoid
 {
 
-namespace scene
-{
-
 class Heart : public sf::Drawable, public sf::Transformable {
 public:
     Heart(float size = 100.f, const sf::Color& color = sf::Color::Red);
@@ -26,14 +23,12 @@ private:
     sf::ConvexShape shape_;
 };
     
-namespace HeartShape
+namespace heart_shape
 {
 
 // Draw multiple hearts in a row
 void draw(sf::RenderTarget& target, sf::Vector2f start_position, size_t num_hearts, float size); 
 
-} // namespace HeartShape
-
-} // namespace scene
+} // namespace heart_shape
     
 } // namespace arkanoid
