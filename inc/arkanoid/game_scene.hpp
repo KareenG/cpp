@@ -29,7 +29,7 @@ class GameScene : public Scene {
     using NameInputCallback = std::function<void(int score, float time, std::function<void(const std::string&)>)>;
 
 public:
-    GameScene(HighScoreTable* high_scores, int num_level = 1, const std::string& font_path = consts::FontArial);
+    GameScene(HighScoreTable* high_scores, const UI& ui);//, int num_level = 1, const std::string& font_path = consts::FontArial);
 
     SceneEvent handle_events(sf::RenderWindow& window, std::optional<sf::Event> const& event) override;
     void update(float dt) override;
@@ -50,10 +50,10 @@ private:
     GameBoard board_;
     Player player_;
     int num_level_;
-
-    sf::Font font_;
+    const UI& ui_;
+    //sf::Font font_;
     InputController input_controller_;
-    UI ui_;
+    // UI ui_;
     GameLogic logic_;
     OverlayLayer overlay_;
     NameEntryDialog name_input_;

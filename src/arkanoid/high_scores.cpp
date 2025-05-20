@@ -68,6 +68,11 @@ std::string HighScoreTable::display() const
 {
     std::ostringstream oss;
 
+    if (top_k_.empty()) {
+        oss << "No high scores yet.\n";
+        return oss.str();
+    }
+
     // Define column widths
     constexpr int col_rank  = 10;
     constexpr int col_name  = 16;
@@ -88,19 +93,82 @@ std::string HighScoreTable::display() const
     for (const auto& entry : top_k_) {
         oss << std::left << std::setw(col_rank)  << rank
             << std::setw(col_name)  << entry.name
-            << std::setw(col_score) << entry.score
-            << std::setw(col_time - 1) << std::fixed << std::setprecision(2) << entry.time_seconds << "s"
-            << '\n';
+            << std::setw(col_score) << entry.score;
+
+        std::ostringstream time_stream;
+        time_stream << std::fixed << std::setprecision(2) << entry.time_seconds << "s";
+
+        oss << std::setw(col_time) << time_stream.str() << '\n';
+
         if (++rank > consts::MaxScores) {
             break;
         }
     }
 
+    return oss.str();
+}
+
+void HighScoreTable::render(sf::RenderWindow& window, const UI& ui, unsigned font_size, float start_y) const
+{
+    // Column relative offsets (from table left)
+    float name_offset  = 120.f;
+    float score_offset = 380.f;
+    float time_offset  = 500.f;
+
+    // Total width for centering (add extra at end for "Time" col and padding)
+    float table_width = time_offset + 130.f;
+
+    // Center horizontally
+    float center_x = (window.getSize().x - table_width) / 2.f;
+
+    // Column absolute positions
+    float col_rank_x  = center_x;
+    float col_name_x  = center_x + name_offset;
+    float col_score_x = center_x + score_offset;
+    float col_time_x  = center_x + time_offset;
+    float y_step = font_size + 8.f;
+
+    // Center background rectangle
+    float bg_x = center_x - 32.f;
+    float bg_y = start_y - 50.f;
+    float bg_width = table_width + 64.f;
+    float bg_height = 420.f + 50.f;
+    sf::RectangleShape bg({bg_width, bg_height});
+    bg.setPosition( {bg_x, bg_y} );
+    bg.setFillColor(sf::Color(30, 30, 30, 200));
+    window.draw(bg);
+
     if (top_k_.empty()) {
-        oss << "No high scores yet.\n";
+        ui.draw_centered_text(window, consts::NoHighScoresYetText, sf::Color::White, font_size, start_y);
+        return;
     }
 
-    return oss.str();
+    // Header
+    ui.draw_simple_text(window, "Rank",  col_rank_x,  start_y, font_size, sf::Color::White);
+    ui.draw_simple_text(window, "Name",  col_name_x,  start_y, font_size, sf::Color::White);
+    ui.draw_simple_text(window, "Score", col_score_x, start_y, font_size, sf::Color::White);
+    ui.draw_simple_text(window, "Time",  col_time_x,  start_y, font_size, sf::Color::White);
+
+    // Underline
+    sf::RectangleShape line;
+    line.setPosition( {col_rank_x, start_y + font_size + 2.f} );
+    line.setSize({col_time_x + 90.f - col_rank_x, 2.f});
+    line.setFillColor(sf::Color::White);
+    window.draw(line);
+
+    float y = start_y + y_step + 6.f;
+    int rank = 1;
+    for (const auto& entry : top_k_) {
+        ui.draw_simple_text(window, std::to_string(rank), col_rank_x, y, font_size, consts::TableTextColor);
+        ui.draw_simple_text(window, entry.name, col_name_x, y, font_size, consts::TableTextColor);
+        ui.draw_simple_text(window, std::to_string(entry.score), col_score_x, y, font_size, consts::TableTextColor);
+        std::ostringstream time_ss;
+        time_ss << std::fixed << std::setprecision(2) << entry.time_seconds << "s";
+        ui.draw_simple_text(window, time_ss.str(), col_time_x, y, font_size, consts::TableTextColor);
+        y += y_step;
+        if (++rank > consts::MaxScores) break;
+    }
+
 }
 
 } // namespace arkanoid

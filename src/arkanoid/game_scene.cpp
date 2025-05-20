@@ -9,20 +9,21 @@
 namespace arkanoid {
 namespace scene {
 
-GameScene::GameScene(HighScoreTable* high_scores, int num_level, const std::string& font_path)
+GameScene::GameScene(HighScoreTable* high_scores, const UI& ui)//, int num_level, const std::string& font_path)
 : board_(consts::ArkanoidBoxSize)//(sf::Vector2f{760.f, 560.f})// adjust as needed for your board size
-, player_("Player1", 3)
-, num_level_{num_level}
-, font_([&font_path]() {
-      sf::Font f{};
-      if (!f.openFromFile(font_path)) {
-          throw std::runtime_error("Failed to load font from " + font_path);
-      }
-      return f;
-  }())
+, player_{}//("Player1", 3)
+, num_level_{1}
+, ui_(ui)
+// , font_([&font_path]() {
+//       sf::Font f{};
+//       if (!f.openFromFile(font_path)) {
+//           throw std::runtime_error("Failed to load font from " + font_path);
+//       }
+//       return f;
+//   }())
 , input_controller_{}
-, ui_(consts::FontArial)
-, logic_(&player_, &board_, num_level)
+//, ui_(consts::FontArial)
+, logic_(&player_, &board_, num_level_)
 , overlay_()
 , name_input_{}
 , high_scores_{high_scores}

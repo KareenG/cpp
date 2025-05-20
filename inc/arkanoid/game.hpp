@@ -7,6 +7,7 @@
 #include "arkanoid/game_scene.hpp"
 #include "arkanoid/high_scores.hpp"
 #include "arkanoid/ui.hpp"
+#include "arkanoid/top10_scene.hpp"
 
 namespace arkanoid {
 
@@ -24,7 +25,7 @@ private:
     sf::RenderWindow window_;
     std::unique_ptr<scene::Scene> scene_;
     HighScoreTable top_scores_;
-    //UI ui_; // For overlays or UI outside of scenes if needed
+    UI ui_; // For overlays or UI outside of scenes if needed
 };
 
 } // namespace arkanoid

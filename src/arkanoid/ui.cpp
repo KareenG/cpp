@@ -2,6 +2,7 @@
 
 #include "arkanoid/ui.hpp"
 #include "arkanoid/heart_shape.hpp"
+#include "arkanoid/resources_and_consts.hpp"
 
 namespace arkanoid {
 
@@ -62,7 +63,7 @@ void UI::draw_win(sf::RenderWindow& window) const
 void UI::draw_level(sf::RenderWindow& window, int level) const
 {
     sf::Text text{font_};
-    text.setString("Round " + std::to_string(level));
+    text.setString("Round " + std::to_string(level) + '/' + std::to_string(consts::MaxLevels));
     text.setCharacterSize(24);
     text.setFillColor(sf::Color::Yellow);
     text.setStyle(sf::Text::Bold);
@@ -70,8 +71,8 @@ void UI::draw_level(sf::RenderWindow& window, int level) const
     text.setOrigin( {text.getLocalBounds().size.x/2, text.getLocalBounds().size.y/2} );
     text.setPosition( {window.getSize().x/2.f, 12.f} );
 
-    sf::RectangleShape bg({120.f, 20.f});
-    bg.setPosition( {window.getSize().x/2.f - 60, 12.f} );
+    sf::RectangleShape bg({130.f, 20.f});
+    bg.setPosition( {window.getSize().x/2.f - 65, 12.f} );
     bg.setFillColor(sf::Color::Black);
     window.draw(bg);
     window.draw(text);
@@ -133,6 +134,14 @@ void UI::draw_name_input(sf::RenderWindow& window, const std::string& prompt, co
 const sf::Font& UI::font() const
 { 
     return font_; 
+}
+
+void UI::draw_simple_text(sf::RenderWindow& window, const std::string& text, float x, float y, unsigned size, sf::Color color) const 
+{
+    sf::Text t(font_, text, size);
+    t.setFillColor(color);
+    t.setPosition( {x, y} );
+    window.draw(t);
 }
 
 } // namespace arkanoid

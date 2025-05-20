@@ -13,7 +13,7 @@ GameBoard::GameBoard(sf::Vector2u const& box_size, int level_num)
     {100.f, consts::PaddleHeight},
     {box_.get_position().x + box_.get_size().x / 2.f,
     box_.get_position().y + box_.get_size().y - consts::OffsetBottom - consts::PaddleHeight / 2.f},
-    consts::gray,
+    consts::PaddleColor, //consts::gray,
     350.f)
 , ball_(
     {box_.get_position().x + box_.get_size().x / 2.f,

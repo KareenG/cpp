@@ -23,9 +23,10 @@ namespace arkanoid::consts {
 inline const std::string FontArial = "assets/arial.ttf";
 inline const std::string TextureBackground = "assets/back_bg.png";
 inline const std::string TextureBall = "assets/ball.png";
-inline const std::string TextureGame = "assets/back1.png";
+inline const std::string TextureGame = "assets/scene_bg2.jpg";//back1.png
+inline const std::string TextureTopTen = "assets/top10bg.jpg";//background2
 
-inline constexpr int MaxLevels = 2;
+inline constexpr int MaxLevels = 4;
 inline constexpr float OverlayDuration = 2.0f;
 
 inline constexpr sf::Vector2u ArkanoidWindowSize = {800, 740};
@@ -88,23 +89,40 @@ inline const float GameTitleYOffset{100.f};
 inline const std::string PlayText{"Play"};
 inline const size_t PlayTextSize{36};
 
+inline const std::string Top10Text{"Top 10"};
+inline const size_t Top10TextSize{36};
+
 inline const std::string QuitText{"Quit"};
 inline const size_t QuitTextSize{36};
+
+
+inline const std::string Top10Title{"Top 10 players"};
+inline const sf::Color Top10TitleColor{sf::Color::White};
+inline const size_t Top10TitleSize{75};
+inline const float Top10TitleYOffset{100.f};
 
 //static constexpr size_t MaxScorePossible = 127 * 40;
 
 // Box Layout Constants
-static constexpr float OffsetLeft   = 40.f;
-static constexpr float OffsetRight  = 40.f;
-static constexpr float OffsetTop    = 70.f;
-static constexpr float OffsetBottom = 60.f;
-static constexpr float BrickSpacing = 5.f;
-static constexpr int BrickCols      = 5;
-static constexpr int BrickRows      = 3;
-static constexpr float BrickHeight  = 30.f;
-static constexpr float PaddleHeight = 20.f;
-static constexpr float BallRadius   = 10.f;
+inline constexpr float OffsetLeft   = 40.f;
+inline constexpr float OffsetRight  = 40.f;
+inline constexpr float OffsetTop    = 70.f;
+inline constexpr float OffsetBottom = 60.f;
+inline constexpr float BrickSpacing = 5.f;
+inline constexpr int BrickCols      = 5;
+inline constexpr int BrickRows      = 3;
+inline constexpr float BrickHeight  = 30.f;
+inline constexpr float PaddleHeight = 20.f;
+inline constexpr float BallRadius   = 10.f;
+
+
 static constexpr sf::Color gray{128, 128, 128}; // Medium gray
+inline const sf::Color PaddleColor(255, 140, 0);
+
+inline const size_t TableTextSize{24};
+inline constexpr float OffsetYTopScoresTable = 250.f;
+inline const sf::Color TableTextColor{sf::Color(220, 220, 220)};
+inline const std::string NoHighScoresYetText{"No high scores yet."};
 
 } // namespace arkanoid::consts
 

@@ -25,6 +25,8 @@ public:
 
     void draw_name_input(sf::RenderWindow& window, const std::string& prompt, const std::string& input, bool cursor_blink = true) const;
 
+    void draw_simple_text(sf::RenderWindow& window, const std::string& text, float x, float y, unsigned size, sf::Color color) const;
+
 private:
     sf::Font font_;
 };

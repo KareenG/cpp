@@ -106,9 +106,10 @@ bool handle_box_collision(Ball& ball, const Box& box) {
 
 void handle_brick_collision(Ball& ball, Brick& brick)
 {
-    if (brick.was_hit())
+    if (brick.was_hit()) {
         return;
-
+    }
+        
     const sf::Vector2f ball_pos = ball.get_position();
     const float r = ball.get_radius();
 

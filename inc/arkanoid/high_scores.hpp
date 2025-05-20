@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 
+#include "arkanoid/ui.hpp"
+
 namespace arkanoid {
 
 struct HighScoreEntry {
@@ -35,6 +37,8 @@ public:
     void clear();
 
     std::string display() const;
+
+    void render(sf::RenderWindow& window, const UI& ui, unsigned font_size = consts::TableTextSize, float start_y = consts::OffsetYTopScoresTable) const;
 
 private:
     std::vector<HighScoreEntry> top_k_;

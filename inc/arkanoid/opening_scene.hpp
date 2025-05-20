@@ -10,7 +10,7 @@ namespace arkanoid::scene {
 
 class OpeningScene : public Scene {
 public:
-    OpeningScene(sf::RenderWindow& window);
+    OpeningScene(sf::RenderWindow& window, const UI& ui);
 
     SceneEvent handle_events(sf::RenderWindow& window, std::optional<sf::Event> const& event) override;
     void update(float dt) override;//SceneResult
@@ -21,10 +21,11 @@ private:
     const sf::Texture& background_texture_;
     sf::Sprite background_sprite_;
 
-    const UI ui_;
-    const sf::Font& font_;
+    const UI& ui_;
+    //const sf::Font& font_;
 
     Button play_button_;
+    Button top10_button_;
     Button quit_button_;
 
     SceneID next_scene_ = SceneID::None;
