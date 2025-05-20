@@ -13,6 +13,7 @@ HighScoreTable::HighScoreTable(std::unique_ptr<IHighScoreStorage> storage)
 {
     if (storage_) {
         top_k_ = storage_->load();
+        std::sort(top_k_.begin(), top_k_.end(), high_score_comparator);
     }
 }
 
