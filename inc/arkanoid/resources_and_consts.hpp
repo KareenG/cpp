@@ -7,14 +7,10 @@
 #include <unordered_map>
 
 namespace arkanoid {
+
+using TimeType = uint64_t;        //uint64_t 8 bytes
+using ScoreType = unsigned int;   // 4 bytes
     
-enum class OverlayType {
-    None,
-    GameOver,
-    Win,
-    //pending_input,
-    QuitConfirm
-};
 } // namespace arkanoid
 
 namespace arkanoid::consts {
@@ -25,6 +21,7 @@ inline const std::string TextureBackground = "assets/back_bg.png";
 inline const std::string TextureBall = "assets/ball.png";
 inline const std::string TextureGame = "assets/scene_bg2.jpg";//back1.png
 inline const std::string TextureTopTen = "assets/top10bg.jpg";//background2
+inline const std::string BackgroundMusic = "assets/intro_theme2.ogg";//intro_theme2.flac
 
 inline constexpr int MaxLevels = 4;
 inline constexpr float OverlayDuration = 2.0f;
@@ -101,8 +98,6 @@ inline const sf::Color Top10TitleColor{sf::Color::White};
 inline const size_t Top10TitleSize{75};
 inline const float Top10TitleYOffset{100.f};
 
-//static constexpr size_t MaxScorePossible = 127 * 40;
-
 // Box Layout Constants
 inline constexpr float OffsetLeft   = 40.f;
 inline constexpr float OffsetRight  = 40.f;
@@ -123,6 +118,13 @@ inline const size_t TableTextSize{24};
 inline constexpr float OffsetYTopScoresTable = 250.f;
 inline const sf::Color TableTextColor{sf::Color(220, 220, 220)};
 inline const std::string NoHighScoresYetText{"No high scores yet."};
+inline const std::string Top10FileName{"top10.dat"};
+inline const std::string NewTop10PromptText{"Congratulations! You've made it to the Top 10!\n\nEnter your name:"};
+
+inline constexpr int NameWidth = 32;      // ≤ 32 characters
+inline constexpr int ScoreWidth = 4;
+inline constexpr int TimeWidth = 8;
+inline constexpr int RowWidth = NameWidth + ScoreWidth + TimeWidth;
 
 } // namespace arkanoid::consts
 

@@ -2,16 +2,23 @@
 #include <iostream>
 
 #include "arkanoid/game.hpp"
+#include "arkanoid/binary_file_high_score_storage.hpp"
+#include "arkanoid/high_score_entry.hpp"
 
 namespace arkanoid {
 
 Game::Game(sf::Vector2u window_size, const std::string& title)
 : window_(sf::VideoMode(window_size), title)
 , scene_{}
-, top_scores_{}
 , ui_{}
+, music_muted_{false}
 {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
+
+    load_and_play_music();
+
+    auto storage = std::make_unique<BinaryFileHighScoreStorage>(consts::Top10FileName);
+    top_scores_ = std::make_unique<HighScoreTable>(std::move(storage));
 
     // Start at the Opening Scene
     scene_ = std::make_unique<scene::OpeningScene>(window_, ui_);
@@ -48,6 +55,16 @@ void Game::process_events()
             window_.close();
             break;
         }
+
+        // M key: toggle mute
+        if (event->is<sf::Event::KeyPressed>()) {
+            auto key_code = event->getIf<sf::Event::KeyPressed>()->code;
+            if (key_code == sf::Keyboard::Key::M) {
+                music_muted_ = !music_muted_;
+                background_music_.setVolume(music_muted_ ? 0.f : 50.f);
+                std::cout << (music_muted_ ? "Music muted\n" : "Music unmuted\n");
+            }
+        }
     }
 }
 
@@ -66,13 +83,13 @@ void Game::render()
 void Game::switch_scene(scene::SceneID id) {
     switch (id) {
         case scene::SceneID::Game:
-            scene_ = std::make_unique<scene::GameScene>(&top_scores_, ui_);
+            scene_ = std::make_unique<scene::GameScene>(top_scores_.get(), ui_);
             break;
         case scene::SceneID::Top10:
-            scene_ = std::make_unique<scene::Top10Scene>(window_, top_scores_, ui_);
+            scene_ = std::make_unique<scene::Top10Scene>(window_, top_scores_.get(), ui_);
             break;
         case scene::SceneID::Opening:
-            std::cout << '\n' << top_scores_.display();
+            std::cout << '\n' << top_scores_->display();
             scene_ = std::make_unique<scene::OpeningScene>(window_, ui_);
             break;
         default:
@@ -85,6 +102,17 @@ void Game::switch_scene(scene::SceneID id) {
             switch_scene(next_id);
         });
     }
+}
+
+void Game::load_and_play_music()
+{
+    if (!background_music_.openFromFile(consts::BackgroundMusic)) {
+        throw std::runtime_error("Failed to load music.");
+    }
+
+    background_music_.setLooping(true);
+    background_music_.setVolume(50.f); // 0 to 100
+    background_music_.play();
 }
 
 } // namespace arkanoid

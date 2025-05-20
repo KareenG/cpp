@@ -4,6 +4,7 @@
 #include <string>
 
 #include "arkanoid/resources_and_consts.hpp"
+#include "arkanoid/overlay_type.hpp"
 
 namespace arkanoid {
 class OverlayLayer;

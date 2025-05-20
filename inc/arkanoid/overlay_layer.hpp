@@ -5,6 +5,7 @@
 
 #include "arkanoid/resources_and_consts.hpp"
 #include "arkanoid/i_io_overly.hpp"
+#include "arkanoid/overlay_type.hpp"
 
 namespace arkanoid {
 

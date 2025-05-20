@@ -7,6 +7,7 @@
 #include <algorithm>
 
 namespace arkanoid {
+
 namespace scene {
 
 GameScene::GameScene(HighScoreTable* high_scores, const UI& ui)//, int num_level, const std::string& font_path)
@@ -14,15 +15,7 @@ GameScene::GameScene(HighScoreTable* high_scores, const UI& ui)//, int num_level
 , player_{}//("Player1", 3)
 , num_level_{1}
 , ui_(ui)
-// , font_([&font_path]() {
-//       sf::Font f{};
-//       if (!f.openFromFile(font_path)) {
-//           throw std::runtime_error("Failed to load font from " + font_path);
-//       }
-//       return f;
-//   }())
 , input_controller_{}
-//, ui_(consts::FontArial)
 , logic_(&player_, &board_, num_level_)
 , overlay_()
 , name_input_{}
@@ -122,42 +115,31 @@ void GameScene::update(float dt)
 
         if (overlay_.finished()) {
             if (overlay_.type() == OverlayType::GameOver) {
-
                 player_.update_max_score();
-                //std::cout << "max score reached: " << player_.max_score() << '\n';
                 size_t score = player_.max_score();
                 if (high_scores_ && high_scores_->qualifies(score, logic_.elapsed_time())) {
-                    name_input_.show("New High Score! Enter your name:", [this, score](const std::string& name) {
+                    name_input_.show(consts::NewTop10PromptText, [this, score](const std::string& name) {
                         high_scores_->add_score(name, score, logic_.elapsed_time());
                         finish_scene(); // return to opening
                     });
                     return; // Delay finish until name entered
                 }
-
-                // num_level_ = 1;
-                // reset_level();
-                // notify_scene_change(SceneID::Opening);
                 finish_scene();
 
             } else if (overlay_.type() == OverlayType::Win) {
                 if (num_level_ < consts::MaxLevels) {
                     ++num_level_;
                     reset_level();
-
                 } else {
-
                     player_.update_max_score();
-                    //std::cout << "max score reached: " << player_.max_score() << '\n';
-
                     size_t score = player_.max_score();
                     if (high_scores_ && high_scores_->qualifies(score, logic_.elapsed_time())) {
-                        name_input_.show("New High Score! Enter your name:", [this, score](const std::string& name) {
+                        name_input_.show(consts::NewTop10PromptText, [this, score](const std::string& name) {
                             high_scores_->add_score(name, score, logic_.elapsed_time());
                             finish_scene(); // return to opening
                         });
                         return; // Delay finish until name entered
                     }
-
                     reset_level();
                     notify_scene_change(SceneID::Opening);
                 }
@@ -239,4 +221,5 @@ void GameScene::finish_scene()
 }
 
 } // namespace scene
+
 } // namespace arkanoid

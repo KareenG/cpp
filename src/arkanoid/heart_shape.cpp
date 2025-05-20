@@ -50,8 +50,6 @@ void Heart::create(float size, const sf::Color& color)
         float t = i * 2.f * M_PI / numPoints;
         
         // Heart parametric equation
-        // x = 16 * sin(t)^3
-        // y = 13 * cos(t) - 5 * cos(2*t) - 2 * cos(3*t) - cos(4*t)
         float x = 16.f * std::pow(std::sin(t), 3);
         float y = 13.f * std::cos(t) - 5.f * std::cos(2.f * t) - 2.f * std::cos(3.f * t) - std::cos(4.f * t);
         
@@ -68,7 +66,7 @@ void Heart::create(float size, const sf::Color& color)
     }
 
     shape_.setFillColor(color);
-    shape_.setOrigin( {0, 0} ); // You might want to adjust this to center the heart
+    shape_.setOrigin( {0, 0} );
 }
 
 void Heart::draw(sf::RenderTarget& target, sf::RenderStates states) const

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 
 #include "arkanoid/scene.hpp"
 #include "arkanoid/opening_scene.hpp"
@@ -8,6 +9,7 @@
 #include "arkanoid/high_scores.hpp"
 #include "arkanoid/ui.hpp"
 #include "arkanoid/top10_scene.hpp"
+#include "arkanoid/high_scores.hpp"
 
 namespace arkanoid {
 
@@ -21,11 +23,15 @@ private:
     void update(sf::Time dt);
     void render();
     void switch_scene(scene::SceneID id);
+    void load_and_play_music();
 
     sf::RenderWindow window_;
     std::unique_ptr<scene::Scene> scene_;
-    HighScoreTable top_scores_;
-    UI ui_; // For overlays or UI outside of scenes if needed
+    UI ui_;
+    bool music_muted_;
+    std::unique_ptr<HighScoreTable> top_scores_;
+    sf::Music background_music_;
+    
 };
 
 } // namespace arkanoid

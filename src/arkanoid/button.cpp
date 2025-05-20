@@ -47,18 +47,10 @@ void Button::handle_event(const sf::RenderWindow& window, const std::optional<sf
     }
 }
 
-// void Button::render(sf::RenderWindow& window) const {
-//     window.draw(text_);
-// }
-
 void Button::render(sf::RenderWindow& window) const {
     // Get text bounds
     auto bounds = text_.getLocalBounds();
 
-    // Rectangle size (with padding)
-    //float padding_x = 18.f;
-    //float padding_y = 10.f;
-    // sf::Vector2f rect_size(bounds.size.x + padding_x * 2, bounds.size.y + padding_y * 2);
     sf::Vector2f rect_size(bounds.size.x * 2, bounds.size.y * 2);
 
     // Rectangle origin & position

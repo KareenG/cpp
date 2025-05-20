@@ -36,11 +36,8 @@ Ball::Ball(const sf::Vector2f& position, float radius, const sf::Vector2f& veloc
     shape_.setPosition(position_);
     //shape_.setFillColor(color);
     shape_.setTexture(&resources::get_texture(consts::TextureBall));
-    // Load and assign texture (assumed to be 20x20 for radius 10)
-
-
-    shape_.setOutlineColor(sf::Color::Blue);//White Black
-    shape_.setOutlineThickness(1.f);
+    // shape_.setOutlineColor(sf::Color::White);//White Black
+    // shape_.setOutlineThickness(1.f);
 }
 
 void Ball::update(float dt)

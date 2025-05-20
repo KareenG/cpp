@@ -1,17 +1,28 @@
-#include "arkanoid/high_scores.hpp"
-#include "arkanoid/resources_and_consts.hpp"
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
 
+#include "arkanoid/high_scores.hpp"
+#include "arkanoid/resources_and_consts.hpp"
+#include "arkanoid/binary_file_high_score_storage.hpp"
+
 namespace arkanoid {
+
+HighScoreTable::HighScoreTable(std::unique_ptr<IHighScoreStorage> storage)
+: storage_(std::move(storage))
+{
+    if (storage_) {
+        top_k_ = storage_->load();
+    }
+}
 
 std::string HighScoreEntry::display() const
 {
     std::ostringstream oss;
     oss << std::setw(consts::MaxNameLength) << std::left << name
         << "  " << std::setw(6) << score
-        << "  " << std::fixed << std::setprecision(2) << time_seconds << "s";
+        << "  " << std::fixed << std::setprecision(2)
+        << std::fixed << std::setprecision(2) << time_s << "s";
     return oss.str();
 }
 
@@ -20,26 +31,29 @@ bool high_score_comparator(const HighScoreEntry& a, const HighScoreEntry& b)
     if (a.score != b.score) {
         return a.score > b.score;
     }
-    return a.time_seconds < b.time_seconds;
+    return a.time_s < b.time_s;
 }
 
-bool HighScoreTable::add_score(const std::string& name, int score, float time_seconds)
-{
+bool HighScoreTable::add_score(const std::string& name, ScoreType score, float time_s) {
     std::string n = name.substr(0, consts::MaxNameLength);
-    top_k_.push_back({n, score, time_seconds});
+    top_k_.push_back({n, score, time_s});
     std::sort(top_k_.begin(), top_k_.end(), high_score_comparator);
     if (top_k_.size() > consts::MaxScores) {
         top_k_.resize(consts::MaxScores);
     }
-    for (const auto& entry : top_k_) {
-        if (entry.name == n && entry.score == score && entry.time_seconds == time_seconds) {
-            return true;
-        }
+
+    if (storage_) {
+        storage_->append_entry({n, score, time_s});
     }
-    return false;
+
+    return std::any_of(top_k_.begin(), top_k_.end(), [&](const auto& e) {
+        return e.name == n && e.score == score && e.time_s == time_s;
+    });
 }
 
-bool HighScoreTable::qualifies(int score, float time_seconds) const
+
+//bool HighScoreTable::qualifies(int score, float time_seconds) const
+bool HighScoreTable::qualifies(ScoreType score, float time_s) const
 {
     if (top_k_.size() < consts::MaxScores) {
         return true;
@@ -48,7 +62,7 @@ bool HighScoreTable::qualifies(int score, float time_seconds) const
     if (score > worst.score) {
         return true;
     }
-    if (score == worst.score && time_seconds < worst.time_seconds) {
+    if (score == worst.score && time_s < worst.time_s) {
         return true;
     }
     return false;
@@ -96,7 +110,7 @@ std::string HighScoreTable::display() const
             << std::setw(col_score) << entry.score;
 
         std::ostringstream time_stream;
-        time_stream << std::fixed << std::setprecision(2) << entry.time_seconds << "s";
+        time_stream << std::fixed << std::setprecision(2) << entry.time_s << "s";
 
         oss << std::setw(col_time) << time_stream.str() << '\n';
 
@@ -163,7 +177,7 @@ void HighScoreTable::render(sf::RenderWindow& window, const UI& ui, unsigned fon
         ui.draw_simple_text(window, entry.name, col_name_x, y, font_size, consts::TableTextColor);
         ui.draw_simple_text(window, std::to_string(entry.score), col_score_x, y, font_size, consts::TableTextColor);
         std::ostringstream time_ss;
-        time_ss << std::fixed << std::setprecision(2) << entry.time_seconds << "s";
+        time_ss << std::fixed << std::setprecision(2) << entry.time_s << "s";
         ui.draw_simple_text(window, time_ss.str(), col_time_x, y, font_size, consts::TableTextColor);
         y += y_step;
         if (++rank > consts::MaxScores) break;

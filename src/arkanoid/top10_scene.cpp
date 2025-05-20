@@ -2,7 +2,7 @@
 
 namespace arkanoid::scene {
 
-Top10Scene::Top10Scene(sf::RenderWindow& window, const HighScoreTable& high_scores, const UI& ui)
+Top10Scene::Top10Scene(sf::RenderWindow& window, const HighScoreTable* high_scores, const UI& ui)
 : window_(window)
 , high_scores_(high_scores)
 , ui_(ui)
@@ -39,7 +39,7 @@ void Top10Scene::render(sf::RenderWindow& window) const
     // Title
     ui_.draw_centered_text(window, consts::Top10Title, consts::Top10TitleColor, consts::Top10TitleSize, consts::Top10TitleYOffset);
 
-    high_scores_.render(window, ui_);
+    high_scores_->render(window, ui_);
 }
 
 } // namespace arkanoid::scene

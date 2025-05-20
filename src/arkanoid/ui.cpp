@@ -128,7 +128,7 @@ void UI::draw_name_input(sf::RenderWindow& window, const std::string& prompt, co
         
     float center_y = window.getSize().y / 2.f;
     draw_centered_text(window, prompt, sf::Color::Cyan, 30, center_y - 40.f);
-    draw_centered_text(window, display_input, sf::Color::Yellow, 28, center_y + 20.f);
+    draw_centered_text(window, display_input, sf::Color::Yellow, 28, center_y + 60.f);
 }
 
 const sf::Font& UI::font() const
