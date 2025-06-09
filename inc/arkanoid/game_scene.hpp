@@ -13,6 +13,7 @@
 #include "arkanoid/overlay_layer.hpp"
 #include "arkanoid/input_name.hpp"
 #include "arkanoid/high_scores.hpp"
+#include "arkanoid/level_loader.hpp"
 
 namespace arkanoid {
     
@@ -42,14 +43,15 @@ public:
     void set_name_input_callback(NameInputCallback cb);
 
 private:
-    void finish_scene();
+    void finish_scene(SceneID next);
     void setup_input_bindings();
     void reset_level();
 
 private:
+    LevelLoader level_loader_;
     GameBoard board_;
     Player player_;
-    int num_level_;
+    size_t num_level_;
     const UI& ui_;
     //sf::Font font_;
     InputController input_controller_;

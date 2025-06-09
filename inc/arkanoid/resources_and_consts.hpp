@@ -5,6 +5,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <functional>
 
 namespace arkanoid {
 
@@ -23,60 +24,48 @@ inline const std::string TextureGame = "assets/scene_bg2.jpg";//back1.png
 inline const std::string TextureTopTen = "assets/top10bg.jpg";//background2
 inline const std::string BackgroundMusic = "assets/intro_theme2.ogg";//intro_theme2.flac
 
-inline constexpr int MaxLevels = 4;
+//inline constexpr int MaxLevels = 10;
 inline constexpr float OverlayDuration = 2.0f;
 
-inline constexpr sf::Vector2u ArkanoidWindowSize = {800, 740};
+inline constexpr sf::Vector2u ArkanoidWindowSize = {800, 760}; // 740
 inline constexpr sf::Vector2u ArkanoidBoxSize = {760, 700};
+inline constexpr sf::Vector2f ArkanoidBoxPosition = {20.f, 40.f};
 
 inline constexpr int MaxNameLength = 16;
 inline constexpr int MaxScores = 10;
 
-inline constexpr int NumOfLevels = 4;
+inline const std::string LevelsFile{"levels.dat"};
 
 inline constexpr sf::Color Orange = sf::Color(255, 165, 0);
 
 inline const std::unordered_map<char, sf::Color> ColorMap = {
-    {'R', sf::Color::Red},
-    {'G', sf::Color::Green},
-    {'B', sf::Color::Blue},
-    {'Y', sf::Color::Yellow},
-    {'C', sf::Color::Cyan},
-    {'M', sf::Color::Magenta},
-    {'W', sf::Color::White},
-    {'O', sf::Color(255, 165, 0)} // Orange
+    {'R', sf::Color(200, 0, 0)},          // Red
+    {'B', sf::Color(  0,   60, 230)},      // Blue
+    {'P', sf::Color(255, 192, 203)},      // Pink
+    {'G', sf::Color(  0, 220,   0)},      // Green
+    {'O', sf::Color(255, 165,   0)},      // Orange
+    {'U', sf::Color(255, 127,  80)},      // Orange-red
+    {'S', sf::Color(  0, 191, 255)},      // Sky Blue
+    {'W', sf::Color(255, 255, 255)},      // White
+    {'D', sf::Color(192, 192, 192)},      // Gray (dynamic score)
+    {'Y', sf::Color(255, 215,   0)}       // Gold/Yellow (indestructible)
 };
 
-// Pre-defined patterns for each level
-inline const std::array<std::string, NumOfLevels> LevelPatterns = {
-    // Level 1 - Simple 3 rows with different colors
-    "MMMMM\n"
-    "CCCCC\n"
-    "YYYYY\n",
-
-    // Level 2 - Pattern from Image 1
-    "C C C C C C\n"
-    "M M M M M M\n"
-    "Y Y Y Y Y Y\n"
-    "B B B B B B",
-
-    // Level 3 - Pattern from Image 2 (3 columns of colors)
-    "YYY WWW YYY\n"
-    "MMM OOO MMM\n"
-    "BBB CCC BBB\n"
-    "GGG RRR GGG\n"
-    "WWW YYY WWW",
-
-    // Level 4 - Space Invader Pattern from Image 3
-    " BBB BBB \n"
-    "BBBBBBBBB\n"
-    "BBWWWWWBB\n"
-    " BWWWWWB \n"
-    "  WWWWW  \n"
-    "   WWW   \n"
-    "   YYY   \n"
-    "    Y    \n"
+inline const std::unordered_map<char, int> BrickCharToScore = {
+    {'R',  90},
+    {'B', 100},
+    {'P', 110},
+    {'G',  80},
+    {'O', 120},
+    {'U',  60},
+    {'S',  70},
+    {'W',  50},
+    {'D', -1},   // dynamic score (e.g., 50*level)
+    {'Y',  0}    // indestructible
 };
+
+// Note: -1 means "special" score (like 50 * level).
+inline constexpr int GrayBrickBaseScore = 50;
 
 inline const std::string GameTitle{"Arkanoid"};
 inline const sf::Color GameTitleColor{sf::Color::White};
@@ -101,11 +90,11 @@ inline const float Top10TitleYOffset{100.f};
 // Box Layout Constants
 inline constexpr float OffsetLeft   = 40.f;
 inline constexpr float OffsetRight  = 40.f;
-inline constexpr float OffsetTop    = 70.f;
+inline constexpr float OffsetTop    = 100.f;
 inline constexpr float OffsetBottom = 60.f;
 inline constexpr float BrickSpacing = 5.f;
-inline constexpr int BrickCols      = 5;
-inline constexpr int BrickRows      = 3;
+inline constexpr int   BrickCols    = 5;
+inline constexpr int   BrickRows    = 3;
 inline constexpr float BrickHeight  = 30.f;
 inline constexpr float PaddleHeight = 20.f;
 inline constexpr float BallRadius   = 10.f;

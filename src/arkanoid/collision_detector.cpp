@@ -104,10 +104,13 @@ bool handle_box_collision(Ball& ball, const Box& box) {
 }
 
 
-void handle_brick_collision(Ball& ball, Brick& brick)
+bool handle_brick_collision(Ball& ball, Brick& brick)
 {
-    if (brick.was_hit()) {
-        return;
+    // if (brick.is_destroyed()) {//brick.was_hit()
+    //     return;
+    // }
+    if (brick.is_destroyed()) {
+        return false;
     }
         
     const sf::Vector2f ball_pos = ball.get_position();
@@ -122,7 +125,8 @@ void handle_brick_collision(Ball& ball, Brick& brick)
 
     // Check for overlap
     if (abs_delta.x > half.x + r || abs_delta.y > half.y + r)
-        return; // no collision
+        //return; // no collision
+        return false;
 
     // Collision occurred: decide axis of resolution
     const float overlap_x = (half.x + r) - abs_delta.x;
@@ -143,7 +147,8 @@ void handle_brick_collision(Ball& ball, Brick& brick)
 
     ball.set_velocity(new_velocity);
     ball.set_position(new_position);
-    brick.mark_hit();
+    brick.on_hit();//brick.mark_hit();
+    return true;
 }
 
 void handle_paddle_collision(Ball& ball, const Paddle& paddle)

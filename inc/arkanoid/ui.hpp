@@ -17,7 +17,7 @@ public:
     void draw_lives(sf::RenderWindow& window, int lives) const;
     void draw_game_over(sf::RenderWindow& window) const;
     void draw_win(sf::RenderWindow& window) const;
-    void draw_level(sf::RenderWindow& window, int level) const;
+    void draw_level(sf::RenderWindow& window, size_t level, size_t tot_levels) const;
     void draw_centered_text(sf::RenderWindow& window, const std::string& text, sf::Color color, unsigned size = 32) const;
     
     void draw_centered_text(sf::RenderWindow& window, const std::string& text, sf::Color color, unsigned size, float center_y) const;

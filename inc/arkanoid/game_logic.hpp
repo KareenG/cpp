@@ -10,12 +10,13 @@ enum class GameStatus {
     NoChange,
     BallFell,
     BrickHit,
-    LevelComplete,
+    LevelWin,
+    LevelLoss,
 };
 
 class GameLogic {
 public:
-    GameLogic(Player* player, GameBoard* board, int num_level = 1);
+    GameLogic(Player* player, GameBoard* board, size_t total_levels, size_t num_level = 1);
 
     GameStatus update(float dt); //void
 
@@ -34,8 +35,9 @@ public:
 private:
     Player* player_;
     GameBoard* board_;
-    int current_level_;
+    size_t current_level_;
     float elapsed_time_;
+    size_t total_levels_;
 };
 
 } // namespace arkanoid

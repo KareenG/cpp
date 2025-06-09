@@ -7,12 +7,13 @@
 #include "arkanoid/box.hpp"
 #include "arkanoid/brick.hpp"
 #include "arkanoid/collision_detector.hpp"
+#include "arkanoid/level_data.hpp"
 
 namespace arkanoid {
 
 class GameBoard {
 public:
-    GameBoard(sf::Vector2u const& box_size, int level_num = 1);
+    GameBoard(sf::Vector2u const& box_size);//, int level_num = 1);
 
     void update(float dt);
     void reset_ball_paddle();
@@ -24,17 +25,21 @@ public:
 
     bool is_all_bricks_cleared() const;
     void reset(int level_num = 1);
+    void reset(const LevelData& level_data);
 
-    collision_detector::CollisionResult handle_collision();
+    collision_detector::CollisionInfo handle_collision(int level_num);//collision_detector::CollisionResult
 
 private:
-    void load_level(int level_num = 1);
+    //void load_level(int level_num = 1);
+    void load_level(const LevelData& level_data);
 
 private:
     Box box_;
     Paddle paddle_;
     Ball ball_;
+    bool is_ball_attached_to_paddle_;
     std::vector<std::unique_ptr<Brick>> bricks_;
+    //int level_num_;
 };
 
 } // namespace arkanoid

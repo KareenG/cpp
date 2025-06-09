@@ -47,7 +47,7 @@ void Ball::update(float dt)
 }
 
 void Ball::launch() {
-    position_ = start_position_;
+    //position_ = start_position_;
     if (!is_launched_) {
         is_launched_ = true;
         velocity_ = velocity_gen_(); // Ensure it's set before launch

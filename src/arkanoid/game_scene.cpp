@@ -10,13 +10,14 @@ namespace arkanoid {
 
 namespace scene {
 
-GameScene::GameScene(HighScoreTable* high_scores, const UI& ui)//, int num_level, const std::string& font_path)
-: board_(consts::ArkanoidBoxSize)//(sf::Vector2f{760.f, 560.f})// adjust as needed for your board size
-, player_{}//("Player1", 3)
+GameScene::GameScene(HighScoreTable* high_scores, const UI& ui)
+: level_loader_{}
+, board_(consts::ArkanoidBoxSize)
+, player_{}
 , num_level_{1}
 , ui_(ui)
 , input_controller_{}
-, logic_(&player_, &board_, num_level_)
+, logic_(&player_, &board_, level_loader_.num_levels(), num_level_)
 , overlay_()
 , name_input_{}
 , high_scores_{high_scores}
@@ -45,13 +46,13 @@ void GameScene::setup_input_bindings() {
     });
 
     input_controller_.bind_key(sf::Keyboard::Key::Left, [this]() {
-        if (started_ && !paused_) {
+        if (!paused_) {
             board_.move_paddle_left();
         }
     });
 
     input_controller_.bind_key(sf::Keyboard::Key::Right, [this]() {
-        if (started_ && !paused_) {
+        if (!paused_) {
             board_.move_paddle_right();
         }
     });
@@ -73,17 +74,15 @@ SceneEvent GameScene::handle_events(sf::RenderWindow& window, std::optional<sf::
     // Overlay gets priority (e.g., confirmation needs Y/N input)
     if (overlay_.is_active()) {
         if (overlay_.is_confirmation() && event && event->is<sf::Event::KeyPressed>()) {
-            auto key = event->getIf<sf::Event::KeyPressed>()->code;
-            if (key == sf::Keyboard::Key::Y) {
-                overlay_.confirm();
-                num_level_ = 1;  // Reset to level 1 if quitting
-                reset_level();
-                notify_scene_change(SceneID::Opening);
-            } else if (key == sf::Keyboard::Key::N) {
-                overlay_.cancel();
-            }
+        auto key = event->getIf<sf::Event::KeyPressed>()->code;
+        if (key == sf::Keyboard::Key::Y) {
+            overlay_.confirm();
+            finish_scene(SceneID::Opening);
+        } else if (key == sf::Keyboard::Key::N) {
+            overlay_.cancel();
         }
         return SceneEvent::None;
+}
     }
 
     if (!event.has_value())
@@ -112,7 +111,6 @@ void GameScene::update(float dt)
     // If overlay is active, only update overlay and handle completion
     if (overlay_.is_active()) {
         overlay_.update(dt);
-
         if (overlay_.finished()) {
             if (overlay_.type() == OverlayType::GameOver) {
                 player_.update_max_score();
@@ -120,14 +118,14 @@ void GameScene::update(float dt)
                 if (high_scores_ && high_scores_->qualifies(score, logic_.elapsed_time())) {
                     name_input_.show(consts::NewTop10PromptText, [this, score](const std::string& name) {
                         high_scores_->add_score(name, score, logic_.elapsed_time());
-                        finish_scene(); // return to opening
+                        finish_scene(SceneID::Top10); // return to opening
                     });
                     return; // Delay finish until name entered
                 }
-                finish_scene();
+                finish_scene(SceneID::Top10);
 
             } else if (overlay_.type() == OverlayType::Win) {
-                if (num_level_ < consts::MaxLevels) {
+                if (num_level_ < level_loader_.num_levels()) {
                     ++num_level_;
                     reset_level();
                 } else {
@@ -136,12 +134,12 @@ void GameScene::update(float dt)
                     if (high_scores_ && high_scores_->qualifies(score, logic_.elapsed_time())) {
                         name_input_.show(consts::NewTop10PromptText, [this, score](const std::string& name) {
                             high_scores_->add_score(name, score, logic_.elapsed_time());
-                            finish_scene(); // return to opening
+                            finish_scene(SceneID::Top10); // return to opening
                         });
                         return; // Delay finish until name entered
                     }
                     reset_level();
-                    notify_scene_change(SceneID::Opening);
+                    notify_scene_change(SceneID::Top10);
                 }
             }
         }
@@ -150,7 +148,7 @@ void GameScene::update(float dt)
 
     input_controller_.poll();
 
-    if (!started_ || paused_) {
+    if (paused_) { // !started_ || 
         return;
     }
 
@@ -160,13 +158,14 @@ void GameScene::update(float dt)
         case GameStatus::BallFell:
             started_ = false;
             ball_fell_down_ = true;
-            if (player_.get_lives() == 0) {
-                overlay_.show(OverlayType::GameOver);
-            }
+            board_.reset_ball_paddle();
+            break;
+        case GameStatus::LevelLoss:
+            overlay_.show(OverlayType::GameOver);
             break;
         case GameStatus::BrickHit:
             break;
-        case GameStatus::LevelComplete:
+        case GameStatus::LevelWin:
             overlay_.show(OverlayType::Win);
             break;
         default:
@@ -179,7 +178,7 @@ void GameScene::render(sf::RenderWindow& window) const
     board_.draw(window);
     ui_.draw_score(window, player_.get_score());
     ui_.draw_lives(window, player_.get_lives());
-    ui_.draw_level(window, num_level_);
+    ui_.draw_level(window, num_level_, level_loader_.num_levels());
 
     if (overlay_.is_active()) {
         overlay_.render(window, ui_);
@@ -198,11 +197,19 @@ SceneID GameScene::get_next_scene() const
 void GameScene::reset_level()
 {
     player_.reset();
-    board_.reset(num_level_);
+
+    // Get the current level data (adjust if your levels are 1-based)
+    const auto& level_data = level_loader_.get_level(num_level_ - 1);
+
+    // Reset the board with the new level data
+    board_.reset(level_data);
+
+    // Reset scene state
     started_ = false;
     paused_ = false;
     ball_fell_down_ = false;
 }
+
 
 int GameScene::get_level() const
 {
@@ -213,11 +220,12 @@ void GameScene::set_name_input_callback(NameInputCallback cb)
 {
     on_name_input_requested_ = std::move(cb);
 }
-void GameScene::finish_scene()
-{
+
+void GameScene::finish_scene(SceneID next)
+{ 
     num_level_ = 1;
     reset_level();
-    notify_scene_change(SceneID::Opening);
+    notify_scene_change(next);
 }
 
 } // namespace scene

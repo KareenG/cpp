@@ -83,13 +83,16 @@ void Game::render()
 void Game::switch_scene(scene::SceneID id) {
     switch (id) {
         case scene::SceneID::Game:
+            //std::cout << "GameScene" << '\n';
             scene_ = std::make_unique<scene::GameScene>(top_scores_.get(), ui_);
             break;
         case scene::SceneID::Top10:
+            //std::cout << "Top10Scene" << '\n';
             scene_ = std::make_unique<scene::Top10Scene>(window_, top_scores_.get(), ui_);
             break;
         case scene::SceneID::Opening:
-            std::cout << '\n' << top_scores_->display();
+            //std::cout << '\n' << top_scores_->display();
+            //std::cout << "OpeningScene" << '\n';
             scene_ = std::make_unique<scene::OpeningScene>(window_, ui_);
             break;
         default:
@@ -102,6 +105,9 @@ void Game::switch_scene(scene::SceneID id) {
             switch_scene(next_id);
         });
     }
+
+    // --- Flush lingering SFML events to prevent accidental scene double-jump ---
+    while (window_.pollEvent()) { /* discard all */ }
 }
 
 void Game::load_and_play_music()

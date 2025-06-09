@@ -34,6 +34,8 @@ OBJS = $(SOURCES_DIR)/arkanoid/box.o $(SOURCES_DIR)/arkanoid/ball.o\
 	   $(SOURCES_DIR)/arkanoid/game_logic.o $(SOURCES_DIR)/arkanoid/overlay_layer.o\
 	   $(SOURCES_DIR)/arkanoid/high_scores.o $(SOURCES_DIR)/arkanoid/input_name.o\
 	   $(SOURCES_DIR)/arkanoid/top10_scene.o $(SOURCES_DIR)/arkanoid/binary_file_high_score_storage.o\
+	   $(SOURCES_DIR)/arkanoid/standard_brick.o $(SOURCES_DIR)/arkanoid/indestructible_brick.o\
+	   $(SOURCES_DIR)/arkanoid/level_loader.o\
 	   utest.o
 
 # === Build Targets ===

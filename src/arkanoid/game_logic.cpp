@@ -3,11 +3,12 @@
 
 namespace arkanoid {
 
-GameLogic::GameLogic(Player* player, GameBoard* board, int num_level)
+GameLogic::GameLogic(Player* player, GameBoard* board, size_t total_levels, size_t num_level)
 : player_(player)
 , board_(board)
 , current_level_(num_level)
 , elapsed_time_{0.f}
+, total_levels_{total_levels}
 {
 }
 
@@ -15,7 +16,8 @@ GameStatus GameLogic::update(float dt)
 {
     elapsed_time_ += dt;
     board_->update(dt);
-    auto result = board_->handle_collision();
+    auto result_info = board_->handle_collision(current_level_);
+    auto result = result_info.result;
 
     switch (result) {
         case collision_detector::CollisionResult::NoChange:
@@ -23,14 +25,15 @@ GameStatus GameLogic::update(float dt)
         case collision_detector::CollisionResult::BallFell:
             player_->decrease_life();
             if (player_->get_lives() == 0) {
-                return GameStatus::BallFell;
+                return GameStatus::LevelLoss;
             }
             return GameStatus::BallFell;
         case collision_detector::CollisionResult::BrickHit:
-            player_->add_score(40);
+            //player_->add_score(40);
+            player_->add_score(result_info.score_gained);
             return GameStatus::BrickHit;
         case collision_detector::CollisionResult::LevelComplete:
-            return GameStatus::LevelComplete;
+            return GameStatus::LevelWin;
         default:
             return GameStatus::NoChange;
     }
@@ -38,7 +41,7 @@ GameStatus GameLogic::update(float dt)
 
 void GameLogic::level_complete()
 {
-    if (current_level_ < 4) {
+    if (current_level_ < total_levels_) {
         current_level_++;
     }
 }
@@ -49,15 +52,28 @@ int GameLogic::get_current_level() const
     return current_level_;
 }
 
+// scene::SceneID GameLogic::get_next_scene(GameStatus status)
+// {
+//     if (status == GameStatus::LevelWin) {
+//         if (current_level_ == total_levels_) {
+//             return scene::SceneID::Top10;  // All levels complete, return to opening
+//         }
+//         return scene::SceneID::Game; // Proceed to next level
+//     }
+//     return scene::SceneID::Top10;  // Return to OpeningScene if the player loses
+// }
 scene::SceneID GameLogic::get_next_scene(GameStatus status)
 {
-    if (status == GameStatus::LevelComplete) {
-        if (current_level_ == consts::MaxLevels) {
-            return scene::SceneID::Opening;  // All levels complete, return to opening
+    if (status == GameStatus::LevelWin) {
+        if (current_level_ == total_levels_) {
+            return scene::SceneID::Top10;  // All levels complete, return to opening
         }
         return scene::SceneID::Game; // Proceed to next level
     }
-    return scene::SceneID::Opening;  // Return to OpeningScene if the player loses
+    //if (status == GameStatus::LevelLoss) {
+        return scene::SceneID::Top10;  // Return to OpeningScene if the player loses
+    //}
+    //return scene::SceneID::None;
 }
 
 float GameLogic::elapsed_time() const

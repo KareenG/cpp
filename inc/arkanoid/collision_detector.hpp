@@ -18,9 +18,14 @@ enum class CollisionResult {
     LevelComplete
 };
 
+struct CollisionInfo {
+    collision_detector::CollisionResult result;
+    int score_gained = 0;
+};    
+
 void handle_particle_collision(Ball& a, Ball& b);
 bool handle_box_collision(Ball& particle, const Box& box);
-void handle_brick_collision(Ball& ball, Brick& brick);
+bool handle_brick_collision(Ball& ball, Brick& brick);
 void handle_paddle_collision(Ball& ball, const Paddle& paddle);
 
 namespace util {

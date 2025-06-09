@@ -11,10 +11,18 @@ namespace arkanoid {
 HighScoreTable::HighScoreTable(std::unique_ptr<IHighScoreStorage> storage)
 : storage_(std::move(storage))
 {
+    // if (storage_) {
+    //     top_k_ = storage_->load();
+    //     std::sort(top_k_.begin(), top_k_.end(), high_score_comparator);
+    // }
     if (storage_) {
-        top_k_ = storage_->load();
-        std::sort(top_k_.begin(), top_k_.end(), high_score_comparator);
+    top_k_ = storage_->load();
+    std::sort(top_k_.begin(), top_k_.end(), high_score_comparator);
+    if (top_k_.size() > consts::MaxScores) {
+        top_k_.resize(consts::MaxScores);  // Keep only the top 10
     }
+}
+
 }
 
 std::string HighScoreEntry::display() const

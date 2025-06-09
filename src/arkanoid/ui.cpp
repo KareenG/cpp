@@ -60,10 +60,10 @@ void UI::draw_win(sf::RenderWindow& window) const
     draw_centered_text(window, "You Win", sf::Color::Green, 48);
 }
 
-void UI::draw_level(sf::RenderWindow& window, int level) const
+void UI::draw_level(sf::RenderWindow& window, size_t level, size_t tot_levels) const
 {
     sf::Text text{font_};
-    text.setString("Round " + std::to_string(level) + '/' + std::to_string(consts::MaxLevels));
+    text.setString("Round " + std::to_string(level) + '/' + std::to_string(tot_levels));
     text.setCharacterSize(24);
     text.setFillColor(sf::Color::Yellow);
     text.setStyle(sf::Text::Bold);
