@@ -120,3 +120,6 @@ inc/SFML/
 utest
 main
 *.log.vscode/settings.json
+
+# Ignore interviews prep questions
+interviews/
