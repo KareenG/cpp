@@ -87,7 +87,6 @@ dkms.conf
 
 ### VisualStudioCode ###
 .vscode/*
-!.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
@@ -104,6 +103,13 @@ dkms.conf
 .history
 .ionide
 
+# Vendor / third-party
+SFML/
+inc/SFML/
+
+# VS Code (ignore settings too)
+.vscode/settings.json
+
 # Support for Project snippet scope
 .vscode/*.code-snippets
 
@@ -113,4 +119,4 @@ dkms.conf
 .gdb_history
 utest
 main
-*.log
+*.log.vscode/settings.json
