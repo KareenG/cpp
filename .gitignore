@@ -123,3 +123,57 @@ main
 
 # Ignore interviews prep questions
 interviews/
+
+
+# Build outputs
+build/
+out/
+bin/
+lib/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# Compiled artifacts
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Debug/profiling
+*.pdb
+*.ilk
+*.dSYM/
+gmon.out
+perf.data*
+
+# Test/coverage output
+Testing/
+CTestTestfile.cmake
+*.gcda
+*.gcno
+*.gcov
+coverage/
+lcov.info
+
+# IDE/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local junk
+run_out_file
+*.log
+*.tmp
+
+# WIP (not ready for portfolio)
+inc/bitset/
+tests/ground_station/
