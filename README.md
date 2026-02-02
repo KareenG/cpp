@@ -1,4 +1,4 @@
-# C++ Projects (Portfolio)
+# C++ Projects
 
 This repository contains C++ modules and mini-projects that focus on core software topics: concurrency, emulation/VM concepts, networking, and basic design patterns (C++17).
 
@@ -16,10 +16,11 @@ This repository contains C++ modules and mini-projects that focus on core softwa
 Most projects are executed from the `tests/` folder:
 1. Go to `tests/`
 2. Enter the relevant project’s test folder
-3. Run `check` (or `recheck`) from the terminal
+3. Run `make check` (or `make recheck`) from the terminal
 
 ## Arkanoid project
 The Arkanoid-style game is in the `arkanoid` branch:
 1. Switch to the branch: `git checkout arkanoid`
 2. Follow the run instructions inside that branch (README / tests)
+
 Reference game: [Arkanoid](https://www.classicgame.com/game/Arkanoid)
