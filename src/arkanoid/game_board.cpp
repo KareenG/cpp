@@ -86,9 +86,8 @@ void GameBoard::move_paddle_right() {
 }
 
 bool GameBoard::is_all_bricks_cleared() const {
-    return std::all_of(bricks_.begin(), bricks_.end(), [](const auto& brick) {
-        return brick->is_indestructible() || brick->is_destroyed();
-    });
+    return std::all_of(bricks_.begin(), bricks_.end(),
+        [](const auto& brick) { return brick->is_indestructible(); });
 }
 
 void GameBoard::draw(sf::RenderWindow& window) const {
@@ -164,15 +163,18 @@ collision_detector::CollisionInfo GameBoard::handle_collision(int level_num) {//
         //         }
         //     }
         // }
-        for (auto& brick : bricks_) {
+        for (auto it = bricks_.begin(); it != bricks_.end(); ++it) {
+            if (collision_detector::handle_brick_collision(ball_, **it)) {
 
-                if (collision_detector::handle_brick_collision(ball_, *brick)) {
-                    //return collision_detector::CollisionResult::BrickHit;
-                    return {collision_detector::CollisionResult::BrickHit, brick->score(level_num)};
+                const int gained = (*it)->score(level_num);
+
+                if (!(*it)->is_indestructible()) {
+                    it = bricks_.erase(it); // actually destroys the brick
                 }
-            
-        }
 
+                return { collision_detector::CollisionResult::BrickHit, gained };
+            }
+        }
     }
 
     if (is_all_bricks_cleared()) {
