@@ -121,3 +121,13 @@ dkms.conf
 utest
 main
 *.log
+
+# Not part of repo (local-only)
+.vscode/
+assets/books/
+.gdbinit
+run_out_file
+.gitignore.bak
+interviews/
+inc/bitset/
+tests/ground_station/
