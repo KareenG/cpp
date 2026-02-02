@@ -88,3 +88,8 @@ interviews/
 inc/bitset/
 tests/ground_station/
 .gitignore.bak
+
+# Not part of portfolio
+assets/books/
+.gdbinit
+run_out_file
