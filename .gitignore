@@ -1,160 +1,47 @@
-# Prerequisites
-*.d
-
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
-
-# Linker output
-*.ilk
-*.map
-*.exp
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
-
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
-
-### C++ ###
-# Prerequisites
-
-# Compiled Object files
-*.slo
-
-# Precompiled Headers
-
-# Compiled Dynamic libraries
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-
-# Executables
-
-### Linux ###
-*~
-
-# temporary files which can be created if a process still has a handle open of a deleted file
-.fuse_hidden*
-
-# KDE directory preferences
-.directory
-
-# Linux trash folder which might appear on any partition or disk
-.Trash-*
-
-# .nfs files are created when an open file is removed but is still being accessed
-.nfs*
-
-### VisualStudioCode ###
-.vscode/*
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
-
-# Local History for Visual Studio Code
-.history/
-
-# Built Visual Studio Code Extensions
-*.vsix
-
-### VisualStudioCode Patch ###
-# Ignore all local history of files
-.history
-.ionide
-
-# Vendor / third-party
-SFML/
-inc/SFML/
-
-# VS Code (ignore settings too)
-.vscode/settings.json
-
-# Support for Project snippet scope
-.vscode/*.code-snippets
-
-# Ignore code-workspaces
-*.code-workspace
-
-.gdb_history
-utest
-main
-*.log.vscode/settings.json
-
-# Ignore interviews prep questions
-interviews/
-
-
-# Build outputs
+# --- Build / tool outputs ---
 build/
+cmake-build-*/
 out/
 bin/
 lib/
-cmake-build-*/
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
 Makefile
 compile_commands.json
 
-# Compiled artifacts
+# --- Compiled artifacts ---
+*.d
 *.o
 *.obj
 *.a
 *.lib
 *.so
+*.so.*
 *.dylib
 *.dll
 *.exe
+*.out
+*.elf
+*.hex
+*.map
+*.exp
 
-# Debug/profiling
+# --- Precompiled headers ---
+*.gch
+*.pch
+
+# --- Debug / profiling ---
 *.pdb
 *.ilk
+*.idb
 *.dSYM/
+*.su
 gmon.out
 perf.data*
+.gdb_history
 
-# Test/coverage output
+# --- Tests / coverage ---
 Testing/
 CTestTestfile.cmake
 *.gcda
@@ -163,17 +50,41 @@ CTestTestfile.cmake
 coverage/
 lcov.info
 
-# IDE/OS
-.vscode/
-.idea/
+# --- OS / editor ---
 .DS_Store
 Thumbs.db
+*~
+*.swp
+.idea/
+*.code-workspace
 
-# Local junk
-run_out_file
+# VS Code: choose ONE style
+
+# Style A (recommended for portfolio): ignore all VS Code settings
+.vscode/
+
+# Style B (if you REALLY want to include tasks/launch):
+# .vscode/*
+# !.vscode/tasks.json
+# !.vscode/launch.json
+# !.vscode/extensions.json
+# !.vscode/*.code-snippets
+
+# --- Local junk ---
 *.log
 *.tmp
+run_out_file
+utest
+main
 
-# WIP (not ready for portfolio)
+# --- Vendor / third-party ---
+SFML/
+inc/SFML/
+
+# --- Personal notes / prep ---
+interviews/
+
+# --- WIP not ready for portfolio ---
 inc/bitset/
 tests/ground_station/
+.gitignore.bak
